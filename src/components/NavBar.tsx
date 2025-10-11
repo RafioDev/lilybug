@@ -1,9 +1,9 @@
-import React from 'react';
-import { Baby, Heart, Smile, Shield } from 'lucide-react';
+import React from 'react'
+import { Baby, Heart, Smile, Shield } from 'lucide-react'
 
 interface NavBarProps {
-  currentPage: string;
-  onNavigate: (page: string) => void;
+  currentPage: string
+  onNavigate: (page: string) => void
 }
 
 export const NavBar: React.FC<NavBarProps> = ({ currentPage, onNavigate }) => {
@@ -12,14 +12,14 @@ export const NavBar: React.FC<NavBarProps> = ({ currentPage, onNavigate }) => {
     { id: 'tips', label: 'Tips', icon: Smile },
     { id: 'dashboard', label: 'You', icon: Heart },
     { id: 'calm', label: 'Calm', icon: Shield },
-  ];
+  ]
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-40 safe-area-bottom">
-      <div className="flex justify-around items-center px-2 py-2">
+    <nav className='fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-40 safe-area-bottom lg:hidden'>
+      <div className='flex justify-around items-center px-2 py-2'>
         {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = currentPage === item.id;
+          const Icon = item.icon
+          const isActive = currentPage === item.id
 
           return (
             <button
@@ -32,13 +32,17 @@ export const NavBar: React.FC<NavBarProps> = ({ currentPage, onNavigate }) => {
               }`}
             >
               <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
-              <span className={`text-xs font-medium ${isActive ? 'font-semibold' : ''}`}>
+              <span
+                className={`text-xs font-medium ${
+                  isActive ? 'font-semibold' : ''
+                }`}
+              >
                 {item.label}
               </span>
             </button>
-          );
+          )
         })}
       </div>
     </nav>
-  );
-};
+  )
+}
