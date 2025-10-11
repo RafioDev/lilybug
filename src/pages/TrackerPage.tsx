@@ -38,6 +38,10 @@ export const TrackerPage: React.FC = () => {
   const [feedingTypeOrder, setFeedingTypeOrder] = useState<FeedingType[]>([])
   const [tempFeedingOrder, setTempFeedingOrder] = useState<FeedingType[]>([])
 
+  // Entry details modal states
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
+  const [selectedEntry, setSelectedEntry] = useState<TrackerEntry | null>(null)
+
   const [formData, setFormData] = useState({
     startTime: new Date().toISOString().slice(0, 16),
     endTime: '',
@@ -132,6 +136,51 @@ export const TrackerPage: React.FC = () => {
         return 'Bottle'
       default:
         return type.replace('_', ' ')
+    }
+  }
+
+  const openDetailsModal = (entry: TrackerEntry) => {
+    setSelectedEntry(entry)
+    setIsDetailsModalOpen(true)
+  }
+
+  const getDetailedEntryInfo = (entry: TrackerEntry) => {
+    const startTime = new Date(entry.start_time)
+    const endTime = entry.end_time ? new Date(entry.end_time) : null
+
+    let duration = ''
+    if (endTime) {
+      const durationMs = endTime.getTime() - startTime.getTime()
+      const minutes = Math.floor(durationMs / 1000 / 60)
+      const hours = Math.floor(minutes / 60)
+
+      if (hours > 0) {
+        duration = `${hours}h ${minutes % 60}m`
+      } else {
+        duration = `${minutes}m`
+      }
+    }
+
+    return {
+      startTime: startTime.toLocaleString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+      }),
+      endTime: endTime
+        ? endTime.toLocaleString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+          })
+        : null,
+      duration,
     }
   }
 
@@ -343,8 +392,15 @@ export const TrackerPage: React.FC = () => {
               {entries.map((entry) => {
                 const Icon = getEntryIcon(entry.entry_type)
                 return (
-                  <Card key={entry.id} padding='sm' className='lg:h-fit'>
-                    <div className='flex items-start gap-3'>
+                  <Card
+                    key={entry.id}
+                    padding='none'
+                    className='lg:h-fit overflow-hidden'
+                  >
+                    <button
+                      onClick={() => openDetailsModal(entry)}
+                      className='w-full p-4 flex items-start gap-3 hover:bg-gray-50 transition-colors text-left'
+                    >
                       <div className='p-2 bg-gray-100 rounded-lg flex-shrink-0'>
                         <Icon size={20} className='text-gray-600' />
                       </div>
@@ -373,7 +429,7 @@ export const TrackerPage: React.FC = () => {
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </button>
                   </Card>
                 )
               })}
@@ -551,16 +607,18 @@ export const TrackerPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <Input
-                    label='Amount (oz)'
-                    type='number'
-                    step='0.5'
-                    value={formData.quantity}
-                    onChange={(val) =>
-                      setFormData({ ...formData, quantity: val })
-                    }
-                    placeholder='e.g., 4'
-                  />
+                  {formData.feedingType === 'bottle' && (
+                    <Input
+                      label='Amount (oz)'
+                      type='number'
+                      step='0.5'
+                      value={formData.quantity}
+                      onChange={(val) =>
+                        setFormData({ ...formData, quantity: val })
+                      }
+                      placeholder='e.g., 4'
+                    />
+                  )}
                 </>
               )}
 
@@ -711,6 +769,128 @@ export const TrackerPage: React.FC = () => {
             </Button>
           </div>
         </div>
+      </Modal>
+
+      {/* Entry Details Modal */}
+      <Modal
+        isOpen={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
+        title={
+          selectedEntry
+            ? `${
+                selectedEntry.entry_type.charAt(0).toUpperCase() +
+                selectedEntry.entry_type.slice(1)
+              } Details`
+            : 'Entry Details'
+        }
+      >
+        {selectedEntry && (
+          <div className='space-y-4'>
+            <div className='flex items-center gap-3 pb-4 border-b border-gray-200'>
+              {(() => {
+                const Icon = getEntryIcon(selectedEntry.entry_type)
+                return (
+                  <div className='p-3 bg-gray-100 rounded-lg'>
+                    <Icon size={24} className='text-gray-600' />
+                  </div>
+                )
+              })()}
+              <div>
+                <h3 className='text-lg font-semibold text-gray-800 capitalize'>
+                  {selectedEntry.entry_type}
+                </h3>
+                <p className='text-sm text-gray-500'>
+                  {formatDate(selectedEntry.start_time)}
+                </p>
+              </div>
+            </div>
+
+            <div className='space-y-3'>
+              <div>
+                <label className='text-sm font-medium text-gray-700 block mb-1'>
+                  Start Time
+                </label>
+                <p className='text-gray-800'>
+                  {getDetailedEntryInfo(selectedEntry).startTime}
+                </p>
+              </div>
+
+              {selectedEntry.end_time && (
+                <div>
+                  <label className='text-sm font-medium text-gray-700 block mb-1'>
+                    End Time
+                  </label>
+                  <p className='text-gray-800'>
+                    {getDetailedEntryInfo(selectedEntry).endTime}
+                  </p>
+                </div>
+              )}
+
+              {getDetailedEntryInfo(selectedEntry).duration && (
+                <div>
+                  <label className='text-sm font-medium text-gray-700 block mb-1'>
+                    Duration
+                  </label>
+                  <p className='text-gray-800'>
+                    {getDetailedEntryInfo(selectedEntry).duration}
+                  </p>
+                </div>
+              )}
+
+              {selectedEntry.entry_type === 'feeding' &&
+                selectedEntry.feeding_type && (
+                  <div>
+                    <label className='text-sm font-medium text-gray-700 block mb-1'>
+                      Feeding Type
+                    </label>
+                    <p className='text-gray-800'>
+                      {getFeedingTypeLabel(selectedEntry.feeding_type)}
+                    </p>
+                  </div>
+                )}
+
+              {selectedEntry.entry_type === 'diaper' &&
+                selectedEntry.diaper_type && (
+                  <div>
+                    <label className='text-sm font-medium text-gray-700 block mb-1'>
+                      Diaper Type
+                    </label>
+                    <p className='text-gray-800 capitalize'>
+                      {selectedEntry.diaper_type}
+                    </p>
+                  </div>
+                )}
+
+              {selectedEntry.quantity && (
+                <div>
+                  <label className='text-sm font-medium text-gray-700 block mb-1'>
+                    Amount
+                  </label>
+                  <p className='text-gray-800'>{selectedEntry.quantity} oz</p>
+                </div>
+              )}
+
+              {selectedEntry.notes && (
+                <div>
+                  <label className='text-sm font-medium text-gray-700 block mb-1'>
+                    Notes
+                  </label>
+                  <p className='text-gray-800 whitespace-pre-wrap'>
+                    {selectedEntry.notes}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <Button
+              onClick={() => setIsDetailsModalOpen(false)}
+              fullWidth
+              variant='outline'
+            >
+              Close
+            </Button>
+          </div>
+        )}
       </Modal>
     </Layout>
   )
