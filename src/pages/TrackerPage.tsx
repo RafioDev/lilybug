@@ -21,13 +21,11 @@ import { Input } from '../components/Input'
 
 import { trackerService } from '../services/trackerService'
 import { configService } from '../services/configService'
-import type { TrackerEntry, EntryType, FeedingType, DiaperType } from '../types'
+import type { EntryType, FeedingType, DiaperType } from '../types'
 
 export const TrackerPage: React.FC = () => {
-  const [entries, setEntries] = useState<TrackerEntry[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedType, setSelectedType] = useState<EntryType | null>(null)
-  const [loading, setLoading] = useState(true)
 
   // Timer states for feeding
   const [isTimerRunning, setIsTimerRunning] = useState(false)
@@ -40,10 +38,6 @@ export const TrackerPage: React.FC = () => {
   const [feedingTypeOrder, setFeedingTypeOrder] = useState<FeedingType[]>([])
   const [tempFeedingOrder, setTempFeedingOrder] = useState<FeedingType[]>([])
 
-  // Entry details modal states
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
-  const [selectedEntry, setSelectedEntry] = useState<TrackerEntry | null>(null)
-
   const [formData, setFormData] = useState({
     startTime: new Date().toISOString().slice(0, 16),
     endTime: '',
@@ -54,7 +48,6 @@ export const TrackerPage: React.FC = () => {
   })
 
   useEffect(() => {
-    loadEntries()
     loadConfig()
   }, [])
 
@@ -73,17 +66,6 @@ export const TrackerPage: React.FC = () => {
     }
     return () => clearInterval(interval)
   }, [isTimerRunning, timerStartTime])
-
-  const loadEntries = async () => {
-    try {
-      const entriesData = await trackerService.getEntries()
-      setEntries(entriesData)
-    } catch (error) {
-      console.error('Error loading entries:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const openModal = (type: EntryType) => {
     setSelectedType(type)
@@ -136,51 +118,6 @@ export const TrackerPage: React.FC = () => {
         return 'Breast Right'
       case 'bottle':
         return 'Bottle'
-    }
-  }
-
-  const openDetailsModal = (entry: TrackerEntry) => {
-    setSelectedEntry(entry)
-    setIsDetailsModalOpen(true)
-  }
-
-  const getDetailedEntryInfo = (entry: TrackerEntry) => {
-    const startTime = new Date(entry.start_time)
-    const endTime = entry.end_time ? new Date(entry.end_time) : null
-
-    let duration = ''
-    if (endTime) {
-      const durationMs = endTime.getTime() - startTime.getTime()
-      const minutes = Math.floor(durationMs / 1000 / 60)
-      const hours = Math.floor(minutes / 60)
-
-      if (hours > 0) {
-        duration = `${hours}h ${minutes % 60}m`
-      } else {
-        duration = `${minutes}m`
-      }
-    }
-
-    return {
-      startTime: startTime.toLocaleString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-      }),
-      endTime: endTime
-        ? endTime.toLocaleString('en-US', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: '2-digit',
-          })
-        : null,
-      duration,
     }
   }
 
@@ -247,7 +184,6 @@ export const TrackerPage: React.FC = () => {
       }
 
       await trackerService.createEntry(entry)
-      await loadEntries()
 
       // Reset timer state if this was a feeding entry
       if (selectedType === 'feeding') {
@@ -287,53 +223,8 @@ export const TrackerPage: React.FC = () => {
     },
   ]
 
-  const formatTime = (timestamp: string) => {
-    const date = new Date(timestamp)
-    return date.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-    })
-  }
-
-  const formatDate = (timestamp: string) => {
-    const date = new Date(timestamp)
-    const today = new Date()
-    const yesterday = new Date(today)
-    yesterday.setDate(yesterday.getDate() - 1)
-
-    if (date.toDateString() === today.toDateString()) return 'Today'
-    if (date.toDateString() === yesterday.toDateString()) return 'Yesterday'
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-  }
-
-  const getEntryIcon = (type: EntryType) => {
-    const item = trackerTypes.find((t) => t.type === type)
-    return item ? item.icon : Baby
-  }
-
-  const getEntryDetails = (entry: TrackerEntry) => {
-    if (entry.entry_type === 'feeding' && entry.quantity) {
-      return `${entry.quantity} oz • ${entry.feeding_type}`
-    }
-    if (entry.entry_type === 'diaper') {
-      return entry.diaper_type
-    }
-    if (entry.entry_type === 'sleep' && entry.end_time) {
-      const duration =
-        (new Date(entry.end_time).getTime() -
-          new Date(entry.start_time).getTime()) /
-        1000 /
-        60
-      return `${Math.round(duration)} min`
-    }
-    if (entry.entry_type === 'pumping' && entry.quantity) {
-      return `${entry.quantity} oz`
-    }
-    return ''
-  }
-
   return (
-    <Layout title='Baby Tracker' onDataRefresh={loadEntries}>
+    <Layout title='Baby Tracker'>
       {/* AI-First Welcome Banner */}
       <div className='mb-6 p-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg'>
         <div className='flex items-center gap-3'>
@@ -354,13 +245,13 @@ export const TrackerPage: React.FC = () => {
         </div>
       </div>
 
-      <div className='lg:grid lg:grid-cols-3 lg:gap-8 space-y-6 lg:space-y-0'>
-        {/* Quick Actions - Full width on mobile, left column on desktop */}
-        <div className='lg:col-span-1'>
+      <div className='space-y-6'>
+        {/* Quick Actions */}
+        <div>
           <h2 className='text-lg font-semibold text-gray-800 mb-4 px-1 lg:text-xl'>
             Quick Actions
           </h2>
-          <div className='grid grid-cols-2 lg:grid-cols-1 gap-3'>
+          <div className='grid grid-cols-2 lg:grid-cols-4 gap-3'>
             {trackerTypes.map((item) => {
               const Icon = item.icon
               return (
@@ -390,71 +281,6 @@ export const TrackerPage: React.FC = () => {
               )
             })}
           </div>
-        </div>
-
-        {/* Recent Activity - Full width on mobile, right columns on desktop */}
-        <div className='lg:col-span-2'>
-          <h2 className='text-lg lg:text-xl font-semibold text-gray-800 mb-4 px-1'>
-            Recent Activity
-          </h2>
-          {loading ? (
-            <Card>
-              <p className='text-center text-gray-500'>Loading entries...</p>
-            </Card>
-          ) : entries.length === 0 ? (
-            <Card>
-              <p className='text-center text-gray-500'>
-                No entries yet. Use the quick actions to start tracking!
-              </p>
-            </Card>
-          ) : (
-            <div className='space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0'>
-              {entries.map((entry) => {
-                const Icon = getEntryIcon(entry.entry_type)
-                return (
-                  <Card
-                    key={entry.id}
-                    padding='none'
-                    className='lg:h-fit overflow-hidden'
-                  >
-                    <button
-                      onClick={() => openDetailsModal(entry)}
-                      className='w-full p-4 flex items-start gap-3 hover:bg-gray-50 transition-colors text-left'
-                    >
-                      <div className='p-2 bg-gray-100 rounded-lg flex-shrink-0'>
-                        <Icon size={20} className='text-gray-600' />
-                      </div>
-                      <div className='flex-1 min-w-0'>
-                        <div className='flex items-start justify-between gap-2'>
-                          <div className='flex-1'>
-                            <p className='font-medium text-gray-800 capitalize'>
-                              {entry.entry_type}
-                            </p>
-                            <p className='text-sm text-gray-500'>
-                              {getEntryDetails(entry)}
-                            </p>
-                            {entry.notes && (
-                              <p className='text-sm text-gray-600 mt-1 line-clamp-2'>
-                                {entry.notes}
-                              </p>
-                            )}
-                          </div>
-                          <div className='text-right flex-shrink-0'>
-                            <p className='text-sm font-medium text-gray-700'>
-                              {formatTime(entry.start_time)}
-                            </p>
-                            <p className='text-xs text-gray-500'>
-                              {formatDate(entry.start_time)}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </button>
-                  </Card>
-                )
-              })}
-            </div>
-          )}
         </div>
       </div>
 
@@ -789,128 +615,6 @@ export const TrackerPage: React.FC = () => {
             </Button>
           </div>
         </div>
-      </Modal>
-
-      {/* Entry Details Modal */}
-      <Modal
-        isOpen={isDetailsModalOpen}
-        onClose={() => setIsDetailsModalOpen(false)}
-        title={
-          selectedEntry
-            ? `${
-                selectedEntry.entry_type.charAt(0).toUpperCase() +
-                selectedEntry.entry_type.slice(1)
-              } Details`
-            : 'Entry Details'
-        }
-      >
-        {selectedEntry && (
-          <div className='space-y-4'>
-            <div className='flex items-center gap-3 pb-4 border-b border-gray-200'>
-              {(() => {
-                const Icon = getEntryIcon(selectedEntry.entry_type)
-                return (
-                  <div className='p-3 bg-gray-100 rounded-lg'>
-                    <Icon size={24} className='text-gray-600' />
-                  </div>
-                )
-              })()}
-              <div>
-                <h3 className='text-lg font-semibold text-gray-800 capitalize'>
-                  {selectedEntry.entry_type}
-                </h3>
-                <p className='text-sm text-gray-500'>
-                  {formatDate(selectedEntry.start_time)}
-                </p>
-              </div>
-            </div>
-
-            <div className='space-y-3'>
-              <div>
-                <label className='text-sm font-medium text-gray-700 block mb-1'>
-                  Start Time
-                </label>
-                <p className='text-gray-800'>
-                  {getDetailedEntryInfo(selectedEntry).startTime}
-                </p>
-              </div>
-
-              {selectedEntry.end_time && (
-                <div>
-                  <label className='text-sm font-medium text-gray-700 block mb-1'>
-                    End Time
-                  </label>
-                  <p className='text-gray-800'>
-                    {getDetailedEntryInfo(selectedEntry).endTime}
-                  </p>
-                </div>
-              )}
-
-              {getDetailedEntryInfo(selectedEntry).duration && (
-                <div>
-                  <label className='text-sm font-medium text-gray-700 block mb-1'>
-                    Duration
-                  </label>
-                  <p className='text-gray-800'>
-                    {getDetailedEntryInfo(selectedEntry).duration}
-                  </p>
-                </div>
-              )}
-
-              {selectedEntry.entry_type === 'feeding' &&
-                selectedEntry.feeding_type && (
-                  <div>
-                    <label className='text-sm font-medium text-gray-700 block mb-1'>
-                      Feeding Type
-                    </label>
-                    <p className='text-gray-800'>
-                      {getFeedingTypeLabel(selectedEntry.feeding_type)}
-                    </p>
-                  </div>
-                )}
-
-              {selectedEntry.entry_type === 'diaper' &&
-                selectedEntry.diaper_type && (
-                  <div>
-                    <label className='text-sm font-medium text-gray-700 block mb-1'>
-                      Diaper Type
-                    </label>
-                    <p className='text-gray-800 capitalize'>
-                      {selectedEntry.diaper_type}
-                    </p>
-                  </div>
-                )}
-
-              {selectedEntry.quantity && (
-                <div>
-                  <label className='text-sm font-medium text-gray-700 block mb-1'>
-                    Amount
-                  </label>
-                  <p className='text-gray-800'>{selectedEntry.quantity} oz</p>
-                </div>
-              )}
-
-              {selectedEntry.notes && (
-                <div>
-                  <label className='text-sm font-medium text-gray-700 block mb-1'>
-                    Notes
-                  </label>
-                  <p className='text-gray-800 whitespace-pre-wrap'>
-                    {selectedEntry.notes}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <Button
-              onClick={() => setIsDetailsModalOpen(false)}
-              fullWidth
-              variant='outline'
-            >
-              Close
-            </Button>
-          </div>
-        )}
       </Modal>
     </Layout>
   )

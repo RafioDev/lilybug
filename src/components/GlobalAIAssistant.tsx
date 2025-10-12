@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import {
   MessageCircle,
   Mic,
@@ -15,6 +15,44 @@ import { smartSearchService } from '../services/smartSearchService'
 import { trackerService } from '../services/trackerService'
 import { profileService } from '../services/profileService'
 import type { TrackerEntry, Profile } from '../types'
+
+// Speech Recognition types
+interface SpeechRecognitionResult {
+  transcript: string
+  confidence: number
+}
+
+interface SpeechRecognitionResultList {
+  [index: number]: SpeechRecognitionResult[]
+  length: number
+}
+
+interface SpeechRecognitionEvent {
+  results: SpeechRecognitionResultList
+}
+
+interface SpeechRecognitionErrorEvent {
+  error: string
+}
+
+interface SpeechRecognitionInterface {
+  continuous: boolean
+  interimResults: boolean
+  lang: string
+  onstart: (() => void) | null
+  onresult: ((event: SpeechRecognitionEvent) => void) | null
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null
+  onend: (() => void) | null
+  start(): void
+  stop(): void
+}
+
+declare global {
+  interface Window {
+    webkitSpeechRecognition?: new () => SpeechRecognitionInterface
+    SpeechRecognition?: new () => SpeechRecognitionInterface
+  }
+}
 
 interface AIMessage {
   id: string
@@ -40,19 +78,102 @@ export const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
   const [profile, setProfile] = useState<Profile | null>(null)
   const [entries, setEntries] = useState<TrackerEntry[]>([])
 
-  const recognitionRef = useRef<any>(null)
+  const recognitionRef = useRef<SpeechRecognitionInterface | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    loadData()
-    initializeSpeechRecognition()
-  }, [])
+  const processMessage = useCallback(
+    async (message: string) => {
+      setIsProcessing(true)
 
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
+      try {
+        const babyName = profile?.baby_name || 'your baby'
 
-  const loadData = async () => {
+        // Parse the action
+        const action = chatActionService.parseActionFromMessage(message)
+
+        let responseContent = ''
+
+        if (action.type === 'create_entry') {
+          // Execute the action
+          const actionResult = await chatActionService.executeAction(
+            action,
+            babyName
+          )
+          responseContent = actionResult
+
+          // Refresh data
+          const updatedEntries = await trackerService.getEntries(100)
+          setEntries(updatedEntries)
+
+          // Notify parent component
+          if (onEntryCreated) {
+            onEntryCreated()
+          }
+        } else if (action.type === 'start_timer') {
+          const feedingTypeText =
+            action.feedingType === 'breast_left'
+              ? 'left breast'
+              : action.feedingType === 'breast_right'
+              ? 'right breast'
+              : action.feedingType === 'both'
+              ? 'both breasts'
+              : 'bottle'
+
+          responseContent = `I can't start live timers, but I can log completed feedings! Try saying "Log a ${feedingTypeText} feeding of 120ml" or just "Log ${feedingTypeText} feeding".`
+        } else {
+          // Handle as search query
+          try {
+            const parsedQuery = smartSearchService.parseNaturalLanguageQuery(
+              message,
+              profile || undefined
+            )
+            const searchResult = smartSearchService.executeSearch(
+              entries,
+              parsedQuery,
+              profile || undefined
+            )
+
+            if (searchResult.totalCount === 0) {
+              responseContent = `I couldn't find any ${
+                parsedQuery.type === 'all' ? 'activities' : parsedQuery.type
+              } matching "${message}". ${babyName} might not have had any activities matching those criteria yet.`
+            } else {
+              responseContent = `Looking at ${babyName}'s data: ${searchResult.summary}`
+            }
+          } catch (error) {
+            console.error('Error generating response:', error)
+            responseContent = `I can help you track ${babyName}'s activities! Try saying things like "Log a bottle feeding of 120ml" or "How did ${babyName.toLowerCase()} sleep last night?"`
+          }
+        }
+
+        const assistantMessage: AIMessage = {
+          id: Date.now().toString() + '_assistant',
+          type: 'assistant',
+          content: responseContent,
+          timestamp: new Date(),
+        }
+
+        setMessages((prev) => [...prev, assistantMessage])
+      } catch (error) {
+        console.error('Error processing message:', error)
+
+        const errorMessage: AIMessage = {
+          id: Date.now().toString() + '_error',
+          type: 'assistant',
+          content:
+            "I'm sorry, I had trouble with that request. Could you try again?",
+          timestamp: new Date(),
+        }
+
+        setMessages((prev) => [...prev, errorMessage])
+      } finally {
+        setIsProcessing(false)
+      }
+    },
+    [profile, entries, onEntryCreated]
+  )
+
+  const loadData = useCallback(async () => {
     try {
       const [profileData, entriesData] = await Promise.all([
         profileService.getProfile(),
@@ -63,38 +184,62 @@ export const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
     } catch (error) {
       console.error('Error loading AI assistant data:', error)
     }
-  }
+  }, [])
 
-  const initializeSpeechRecognition = () => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition =
-        (window as any).webkitSpeechRecognition ||
-        (window as any).SpeechRecognition
-      recognitionRef.current = new SpeechRecognition()
-
-      recognitionRef.current.continuous = false
-      recognitionRef.current.interimResults = false
-      recognitionRef.current.lang = 'en-US'
-
-      recognitionRef.current.onstart = () => {
-        setIsListening(true)
+  const handleVoiceInput = useCallback(
+    async (transcript: string) => {
+      const userMessage: AIMessage = {
+        id: Date.now().toString(),
+        type: 'user',
+        content: transcript,
+        timestamp: new Date(),
+        isVoice: true,
       }
 
-      recognitionRef.current.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript
-        handleVoiceInput(transcript)
-      }
+      setMessages((prev) => [...prev, userMessage])
+      await processMessage(transcript)
+    },
+    [processMessage]
+  )
 
-      recognitionRef.current.onerror = (event: unknown) => {
-        console.error('Speech recognition error:', event.error)
-        setIsListening(false)
-      }
+  useEffect(() => {
+    loadData()
+    if (window.webkitSpeechRecognition || window.SpeechRecognition) {
+      const SpeechRecognitionClass =
+        window.webkitSpeechRecognition || window.SpeechRecognition
+      if (SpeechRecognitionClass) {
+        recognitionRef.current = new SpeechRecognitionClass()
 
-      recognitionRef.current.onend = () => {
-        setIsListening(false)
+        recognitionRef.current.continuous = false
+        recognitionRef.current.interimResults = false
+        recognitionRef.current.lang = 'en-US'
+
+        recognitionRef.current.onstart = () => {
+          setIsListening(true)
+        }
+
+        recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
+          const transcript = event.results[0][0].transcript
+          handleVoiceInput(transcript)
+        }
+
+        recognitionRef.current.onerror = (
+          event: SpeechRecognitionErrorEvent
+        ) => {
+          console.error('Speech recognition error:', event.error)
+          setIsListening(false)
+        }
+
+        recognitionRef.current.onend = () => {
+          setIsListening(false)
+        }
       }
     }
-  }
+  }, [handleVoiceInput, loadData])
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
 
   const startListening = () => {
     if (recognitionRef.current && !isListening) {
@@ -112,19 +257,6 @@ export const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  const handleVoiceInput = async (transcript: string) => {
-    const userMessage: AIMessage = {
-      id: Date.now().toString(),
-      type: 'user',
-      content: transcript,
-      timestamp: new Date(),
-      isVoice: true,
-    }
-
-    setMessages((prev) => [...prev, userMessage])
-    await processMessage(transcript)
-  }
-
   const handleTextInput = async () => {
     if (!inputText.trim()) return
 
@@ -140,94 +272,6 @@ export const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
     const message = inputText
     setInputText('')
     await processMessage(message)
-  }
-
-  const processMessage = async (message: string) => {
-    setIsProcessing(true)
-
-    try {
-      const babyName = profile?.baby_name || 'your baby'
-
-      // Parse the action
-      const action = chatActionService.parseActionFromMessage(message)
-
-      let responseContent = ''
-
-      if (action.type === 'create_entry') {
-        // Execute the action
-        const actionResult = await chatActionService.executeAction(
-          action,
-          babyName
-        )
-        responseContent = actionResult
-
-        // Refresh data
-        const updatedEntries = await trackerService.getEntries(100)
-        setEntries(updatedEntries)
-
-        // Notify parent component
-        if (onEntryCreated) {
-          onEntryCreated()
-        }
-      } else if (action.type === 'start_timer') {
-        const feedingTypeText =
-          action.feedingType === 'breast_left'
-            ? 'left breast'
-            : action.feedingType === 'breast_right'
-            ? 'right breast'
-            : action.feedingType === 'both'
-            ? 'both breasts'
-            : 'bottle'
-
-        responseContent = `I can't start live timers, but I can log completed feedings! Try saying "Log a ${feedingTypeText} feeding of 120ml" or just "Log ${feedingTypeText} feeding".`
-      } else {
-        // Handle as search query
-        try {
-          const parsedQuery = smartSearchService.parseNaturalLanguageQuery(
-            message,
-            profile || undefined
-          )
-          const searchResult = smartSearchService.executeSearch(
-            entries,
-            parsedQuery,
-            profile || undefined
-          )
-
-          if (searchResult.totalCount === 0) {
-            responseContent = `I couldn't find any ${
-              parsedQuery.type === 'all' ? 'activities' : parsedQuery.type
-            } matching "${message}". ${babyName} might not have had any activities matching those criteria yet.`
-          } else {
-            responseContent = `Looking at ${babyName}'s data: ${searchResult.summary}`
-          }
-        } catch (error) {
-          responseContent = `I can help you track ${babyName}'s activities! Try saying things like "Log a bottle feeding of 120ml" or "How did ${babyName.toLowerCase()} sleep last night?"`
-        }
-      }
-
-      const assistantMessage: AIMessage = {
-        id: Date.now().toString() + '_assistant',
-        type: 'assistant',
-        content: responseContent,
-        timestamp: new Date(),
-      }
-
-      setMessages((prev) => [...prev, assistantMessage])
-    } catch (error) {
-      console.error('Error processing message:', error)
-
-      const errorMessage: AIMessage = {
-        id: Date.now().toString() + '_error',
-        type: 'assistant',
-        content:
-          "I'm sorry, I had trouble with that request. Could you try again?",
-        timestamp: new Date(),
-      }
-
-      setMessages((prev) => [...prev, errorMessage])
-    } finally {
-      setIsProcessing(false)
-    }
   }
 
   const formatTime = (date: Date) => {
