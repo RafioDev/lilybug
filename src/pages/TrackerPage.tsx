@@ -134,8 +134,6 @@ export const TrackerPage: React.FC = () => {
         return 'Breast Right'
       case 'bottle':
         return 'Bottle'
-      default:
-        return type.replace('_', ' ')
     }
   }
 

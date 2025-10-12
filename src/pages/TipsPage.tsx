@@ -1,13 +1,20 @@
 import React, { useState, useEffect } from 'react'
-import { Calendar, ChevronRight } from 'lucide-react'
+import { Calendar, ChevronRight, Brain, Sparkles } from 'lucide-react'
 import { Layout } from '../components/Layout'
 import { Card } from '../components/Card'
 import { tipsService } from '../services/tipsService'
 import { profileService } from '../services/profileService'
+import { trackerService } from '../services/trackerService'
+import { wellnessService } from '../services/wellnessService'
+import { aiAssistantService } from '../services/aiAssistantService'
 import type { DailyTip, Profile } from '../types'
+import type { PersonalizedTip } from '../services/aiAssistantService'
 
 export const TipsPage: React.FC = () => {
   const [tips, setTips] = useState<DailyTip[]>([])
+  const [personalizedTips, setPersonalizedTips] = useState<PersonalizedTip[]>(
+    []
+  )
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
   const [babyAge, setBabyAge] = useState({ weeks: 0, days: 0, totalDays: 0 })
@@ -33,6 +40,20 @@ export const TipsPage: React.FC = () => {
 
         const tipsData = await tipsService.getTipsForAge(totalDays)
         setTips(tipsData)
+
+        // Load data for AI personalization
+        const trackerEntries = await trackerService.getEntries(100)
+        const recentWellness = await wellnessService.getRecentWellness(14)
+
+        // Generate personalized tips
+        const personalizedTipsData =
+          aiAssistantService.generatePersonalizedTips(
+            profileData,
+            trackerEntries,
+            recentWellness,
+            tipsData
+          )
+        setPersonalizedTips(personalizedTipsData)
       }
     } catch (error) {
       console.error('Error loading tips:', error)
@@ -88,10 +109,80 @@ export const TipsPage: React.FC = () => {
           </div>
         </Card>
 
-        {/* Tips Section */}
+        {/* Personalized AI Tips Section */}
+        {personalizedTips.length > 0 && (
+          <div>
+            <div className='flex items-center gap-2 mb-4 px-1'>
+              <Brain className='w-5 h-5 text-purple-600' />
+              <h2 className='text-lg lg:text-xl font-semibold text-gray-800'>
+                Personalized for You
+              </h2>
+              <Sparkles className='w-4 h-4 text-purple-500' />
+            </div>
+
+            <div className='space-y-4 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0 mb-8'>
+              {personalizedTips
+                .filter((tip) => tip.isPersonalized)
+                .map((tip) => (
+                  <Card
+                    key={tip.id}
+                    padding='md'
+                    className='lg:h-fit border-purple-200 bg-gradient-to-br from-purple-50 to-blue-50'
+                  >
+                    <div className='flex items-start gap-4'>
+                      <div className='text-3xl lg:text-4xl flex-shrink-0'>
+                        🤖
+                      </div>
+                      <div className='flex-1 min-w-0'>
+                        <div className='flex items-start justify-between gap-2'>
+                          <div className='flex-1'>
+                            <div className='flex items-center gap-2 mb-2'>
+                              <h3 className='font-semibold text-gray-800 lg:text-lg'>
+                                {tip.title}
+                              </h3>
+                              <span
+                                className={`text-xs px-2 py-1 rounded-full ${
+                                  tip.priority === 'high'
+                                    ? 'bg-red-100 text-red-700'
+                                    : tip.priority === 'medium'
+                                    ? 'bg-yellow-100 text-yellow-700'
+                                    : 'bg-blue-100 text-blue-700'
+                                }`}
+                              >
+                                {tip.priority}
+                              </span>
+                            </div>
+                            <p className='text-sm lg:text-base text-gray-600 leading-relaxed mb-3'>
+                              {tip.content}
+                            </p>
+                            <div className='flex flex-wrap gap-1'>
+                              {tip.basedOn.map((factor, index) => (
+                                <span
+                                  key={index}
+                                  className='text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded'
+                                >
+                                  {factor.replace('_', ' ')}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                          <ChevronRight
+                            size={20}
+                            className='text-gray-400 flex-shrink-0 lg:hidden'
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+            </div>
+          </div>
+        )}
+
+        {/* General Tips Section */}
         <div>
           <h2 className='text-lg lg:text-xl font-semibold text-gray-800 mb-4 px-1'>
-            Tips for This Stage
+            General Tips for This Stage
           </h2>
 
           {tips.length === 0 ? (
@@ -102,6 +193,36 @@ export const TipsPage: React.FC = () => {
             </Card>
           ) : (
             <div className='space-y-4 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0'>
+              {personalizedTips
+                .filter((tip) => !tip.isPersonalized)
+                .map((tip) => (
+                  <Card key={tip.id} padding='md' className='lg:h-fit'>
+                    <div className='flex items-start gap-4'>
+                      <div className='text-3xl lg:text-4xl flex-shrink-0'>
+                        💡
+                      </div>
+                      <div className='flex-1 min-w-0'>
+                        <div className='flex items-start justify-between gap-2'>
+                          <div className='flex-1'>
+                            <h3 className='font-semibold text-gray-800 mb-2 lg:text-lg'>
+                              {tip.title}
+                            </h3>
+                            <p className='text-sm lg:text-base text-gray-600 leading-relaxed'>
+                              {tip.content}
+                            </p>
+                            <span className='inline-block mt-3 px-3 py-1 bg-blue-50 text-blue-700 text-xs lg:text-sm font-medium rounded-lg'>
+                              {tip.category}
+                            </span>
+                          </div>
+                          <ChevronRight
+                            size={20}
+                            className='text-gray-400 flex-shrink-0 lg:hidden'
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
               {tips.map((tip) => (
                 <Card key={tip.id} padding='md' className='lg:h-fit'>
                   <div className='flex items-start gap-4'>

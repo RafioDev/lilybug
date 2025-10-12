@@ -4,13 +4,36 @@ import { Layout } from '../components/Layout'
 import { Card } from '../components/Card'
 import { Button } from '../components/Button'
 import { Input } from '../components/Input'
+import { AIInsights } from '../components/AIInsights'
+import { DemoAIButton } from '../components/DemoAIButton'
 import { wellnessService } from '../services/wellnessService'
 import { profileService } from '../services/profileService'
+import { trackerService } from '../services/trackerService'
+import { tipsService } from '../services/tipsService'
+import { aiPatternService } from '../services/aiPatternService'
+import { aiAssistantService } from '../services/aiAssistantService'
 import type { Profile, ParentWellness } from '../types'
+import type { PatternInsights } from '../services/aiPatternService'
+import type {
+  PersonalizedTip,
+  ContextualGuidance,
+} from '../services/aiAssistantService'
 
 export const DashboardPage: React.FC = () => {
   const [profile, setProfile] = useState<Profile | null>(null)
-  const [todayWellness, setTodayWellness] = useState<ParentWellness[]>([])
+
+  const [aiInsights, setAiInsights] = useState<PatternInsights | null>(null)
+  const [personalizedTips, setPersonalizedTips] = useState<PersonalizedTip[]>(
+    []
+  )
+  const [contextualGuidance, setContextualGuidance] = useState<
+    ContextualGuidance[]
+  >([])
+  const [nextActivityPrediction, setNextActivityPrediction] = useState<{
+    activity: 'feeding' | 'sleep' | 'diaper'
+    estimatedTime: Date
+    confidence: number
+  } | null>(null)
   const [loading, setLoading] = useState(true)
 
   const [parent1Data, setParent1Data] = useState({
@@ -37,8 +60,49 @@ export const DashboardPage: React.FC = () => {
       setProfile(profileData)
 
       const today = new Date().toISOString().split('T')[0]
-      const wellnessData = await wellnessService.getWellnessForDate(today)
-      setTodayWellness(wellnessData)
+      const wellnessData: ParentWellness[] =
+        await wellnessService.getWellnessForDate(today)
+
+      // Load tracker data for AI analysis
+      const entries = await trackerService.getEntries(100)
+
+      // Load recent wellness data for AI analysis
+      const recentWellness = await wellnessService.getRecentWellness(14)
+
+      // Generate AI insights
+      const insights = aiPatternService.generateInsights(
+        entries,
+        recentWellness
+      )
+      setAiInsights(insights)
+
+      // Load static tips for personalization
+      if (profileData) {
+        const babyAge = Math.floor(
+          (Date.now() - new Date(profileData.baby_birthdate).getTime()) /
+            (1000 * 60 * 60 * 24)
+        )
+        const tips = await tipsService.getTipsForAge(babyAge)
+
+        // Generate personalized tips and guidance
+        const personalizedTipsData =
+          aiAssistantService.generatePersonalizedTips(
+            profileData,
+            entries,
+            recentWellness,
+            tips
+          )
+        setPersonalizedTips(personalizedTipsData)
+
+        const guidance = aiAssistantService.generateContextualGuidance(
+          entries,
+          profileData
+        )
+        setContextualGuidance(guidance)
+
+        const prediction = aiAssistantService.predictNextActivity(entries)
+        setNextActivityPrediction(prediction)
+      }
 
       const parent1Entry = wellnessData.find((w) => w.parent_name === 'parent1')
       const parent2Entry = wellnessData.find((w) => w.parent_name === 'parent2')
@@ -97,18 +161,33 @@ export const DashboardPage: React.FC = () => {
   return (
     <Layout title='Your Wellness'>
       <div className='space-y-6'>
+        {/* AI Insights Section */}
+        {aiInsights && (
+          <Card className='lg:p-8'>
+            <AIInsights
+              insights={aiInsights}
+              personalizedTips={personalizedTips}
+              contextualGuidance={contextualGuidance}
+              nextActivityPrediction={nextActivityPrediction}
+            />
+          </Card>
+        )}
+
         {/* Header Card */}
         <Card className='bg-gradient-to-r from-pink-500 to-rose-500 text-white border-0 lg:p-8'>
-          <div className='flex items-center gap-4'>
-            <Heart size={40} className='flex-shrink-0' />
-            <div>
-              <p className='text-xl lg:text-2xl font-semibold'>
-                Take Care of Yourself
-              </p>
-              <p className='text-sm lg:text-base opacity-90'>
-                Your wellness matters too
-              </p>
+          <div className='flex items-center justify-between'>
+            <div className='flex items-center gap-4'>
+              <Heart size={40} className='flex-shrink-0' />
+              <div>
+                <p className='text-xl lg:text-2xl font-semibold'>
+                  Take Care of Yourself
+                </p>
+                <p className='text-sm lg:text-base opacity-90'>
+                  Your wellness matters too
+                </p>
+              </div>
             </div>
+            <DemoAIButton />
           </div>
         </Card>
 
