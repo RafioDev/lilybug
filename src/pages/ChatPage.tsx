@@ -7,6 +7,7 @@ import { Input } from '../components/Input'
 import { trackerService } from '../services/trackerService'
 import { profileService } from '../services/profileService'
 import { smartSearchService } from '../services/smartSearchService'
+import { chatActionService } from '../services/chatActionService'
 import type { TrackerEntry, Profile } from '../types'
 
 interface ChatMessage {
@@ -19,6 +20,10 @@ interface ChatMessage {
     summary: string
     totalCount: number
   }
+  quickActions?: Array<{
+    label: string
+    command: string
+  }>
 }
 
 export const ChatPage: React.FC = () => {
@@ -108,6 +113,66 @@ export const ChatPage: React.FC = () => {
   const generateResponse = async (query: string): Promise<ChatMessage> => {
     const babyName = profile?.baby_name || 'your baby'
 
+    // First, check if this is an action command (create entry, start timer, etc.)
+    const action = chatActionService.parseActionFromMessage(query)
+
+    if (action.type === 'create_entry') {
+      try {
+        const actionResult = await chatActionService.executeAction(
+          action,
+          babyName
+        )
+
+        // Reload entries if we created a new one
+        const updatedEntries = await trackerService.getEntries(500)
+        setEntries(updatedEntries)
+
+        return {
+          id: Date.now().toString(),
+          type: 'assistant',
+          content: actionResult,
+          timestamp: new Date(),
+        }
+      } catch (error) {
+        console.error('Error generating response:', error)
+        return {
+          id: Date.now().toString(),
+          type: 'assistant',
+          content: `I had trouble creating that entry. Please try again or use the tracker page directly.`,
+          timestamp: new Date(),
+        }
+      }
+    }
+
+    // Special handling for timer requests to provide quick actions
+    if (action.type === 'start_timer') {
+      const feedingTypeText =
+        action.feedingType === 'breast_left'
+          ? 'left breast'
+          : action.feedingType === 'breast_right'
+          ? 'right breast'
+          : action.feedingType === 'both'
+          ? 'both breasts'
+          : 'bottle'
+
+      return {
+        id: Date.now().toString(),
+        type: 'assistant',
+        content: `I can't start live timers from chat, but I can help you log feeding entries! Try one of these quick options:`,
+        timestamp: new Date(),
+        quickActions: [
+          {
+            label: `Log ${feedingTypeText} feeding`,
+            command: `Log a ${feedingTypeText} feeding`,
+          },
+          {
+            label: `Log ${feedingTypeText} feeding with quantity`,
+            command: `Log a ${feedingTypeText} feeding of 120ml`,
+          },
+        ],
+      }
+    }
+
     // Check for greeting patterns
     const greetings = [
       'hi',
@@ -134,15 +199,20 @@ export const ChatPage: React.FC = () => {
       return {
         id: Date.now().toString(),
         type: 'assistant',
-        content: `I can help you analyze ${babyName}'s patterns! Here are some things you can ask me:
+        content: `I can help you analyze ${babyName}'s patterns and create new entries! Here are some things you can ask me:
 
+**Ask about patterns:**
 • "How many times did ${babyName.toLowerCase()} wake up last night?"
 • "Show me all feedings over 100ml this week"
 • "What's ${babyName.toLowerCase()}'s longest sleep session?"
-• "How many dirty diapers yesterday?"
-• "Compare this week's sleep to last week"
 
-Just ask me anything about ${babyName.toLowerCase()}'s sleep, feeding, or diaper patterns!`,
+**Create new entries:**
+• "Log a bottle feeding of 120ml"
+• "Record a dirty diaper change"
+• "Add a 2 hour nap from 2pm to 4pm"
+• "Start a timer for left breast feeding"
+
+Just ask me anything about ${babyName.toLowerCase()}'s patterns or tell me what to log!`,
         timestamp: new Date(),
       }
     }
@@ -260,11 +330,12 @@ Just ask me anything about ${babyName.toLowerCase()}'s sleep, feeding, or diaper
 
   const babyName = profile?.baby_name || 'Baby'
   const suggestions = [
+    `Log a bottle feeding of 120ml`,
+    `Record a wet diaper change`,
+    `Add a 2 hour nap`,
+    `Track left breast feeding`,
     `How did ${babyName.toLowerCase()} sleep last night?`,
     `Show me today's feedings`,
-    `How many dirty diapers yesterday?`,
-    `What's the longest sleep this week?`,
-    `Compare feeding amounts this week vs last week`,
   ]
 
   return (
@@ -347,6 +418,21 @@ Just ask me anything about ${babyName.toLowerCase()}'s sleep, feeding, or diaper
                         </div>
                       </div>
                     )}
+
+                  {/* Quick Actions */}
+                  {message.quickActions && message.quickActions.length > 0 && (
+                    <div className='mt-3 flex flex-wrap gap-2'>
+                      {message.quickActions.map((action, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleSuggestionClick(action.command)}
+                          className='text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded-lg transition-colors border border-blue-200'
+                        >
+                          {action.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
 
                   <div className='text-xs text-gray-500 mt-1'>
                     {formatTime(message.timestamp)}
