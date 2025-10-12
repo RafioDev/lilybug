@@ -1,11 +1,17 @@
 import React from 'react'
+import { GlobalAIAssistant } from './GlobalAIAssistant'
 
 interface LayoutProps {
   children: React.ReactNode
   title?: string
+  onDataRefresh?: () => void
 }
 
-export const Layout: React.FC<LayoutProps> = ({ children, title }) => {
+export const Layout: React.FC<LayoutProps> = ({
+  children,
+  title,
+  onDataRefresh,
+}) => {
   return (
     <div className='min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 pb-24 lg:pb-0'>
       {title && (
@@ -23,6 +29,9 @@ export const Layout: React.FC<LayoutProps> = ({ children, title }) => {
         )}
         {children}
       </main>
+
+      {/* Global AI Assistant - Available on every page */}
+      <GlobalAIAssistant onEntryCreated={onDataRefresh} />
     </div>
   )
 }

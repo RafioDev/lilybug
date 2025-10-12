@@ -11,6 +11,7 @@ import {
   Settings,
   ArrowUp,
   ArrowDown,
+  MessageCircle,
 } from 'lucide-react'
 import { Layout } from '../components/Layout'
 import { Card } from '../components/Card'
@@ -332,7 +333,27 @@ export const TrackerPage: React.FC = () => {
   }
 
   return (
-    <Layout title='Baby Tracker'>
+    <Layout title='Baby Tracker' onDataRefresh={loadEntries}>
+      {/* AI-First Welcome Banner */}
+      <div className='mb-6 p-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg'>
+        <div className='flex items-center gap-3'>
+          <div className='p-2 bg-white/20 rounded-full'>
+            <MessageCircle className='w-6 h-6' />
+          </div>
+          <div className='flex-1'>
+            <h3 className='font-semibold text-lg'>🎤 Just Talk to Track</h3>
+            <p className='text-sm opacity-90'>
+              Click the AI assistant (bottom right) and say things like:
+            </p>
+            <div className='mt-2 text-xs opacity-80 space-y-1'>
+              <div>• "Log a bottle feeding of 120ml"</div>
+              <div>• "Record a wet diaper change"</div>
+              <div>• "Add a 2 hour nap"</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className='lg:grid lg:grid-cols-3 lg:gap-8 space-y-6 lg:space-y-0'>
         {/* Quick Actions - Full width on mobile, left column on desktop */}
         <div className='lg:col-span-1'>

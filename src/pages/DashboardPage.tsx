@@ -159,7 +159,7 @@ export const DashboardPage: React.FC = () => {
   const hasParent2 = profile?.parent2_name
 
   return (
-    <Layout title='Your Wellness'>
+    <Layout title='Your Wellness' onDataRefresh={loadData}>
       <div className='space-y-6'>
         {/* AI Insights Section */}
         {aiInsights && (
