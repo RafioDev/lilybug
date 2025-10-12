@@ -1,5 +1,5 @@
 import React from 'react'
-import { Baby, Heart, Smile, Shield, LogOut } from 'lucide-react'
+import { Baby, Heart, Smile, Shield, MessageCircle, LogOut } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
 interface SidebarProps {
@@ -13,6 +13,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const navItems = [
     { id: 'tracker', label: 'Baby Tracker', icon: Baby },
+    { id: 'chat', label: 'Chat Assistant', icon: MessageCircle },
     { id: 'tips', label: 'Tips & Advice', icon: Smile },
     { id: 'dashboard', label: 'Your Wellness', icon: Heart },
     { id: 'calm', label: 'Calm Space', icon: Shield },

@@ -3,6 +3,7 @@ import { supabase } from './lib/supabase'
 import { AuthPage } from './pages/AuthPage'
 import { OnboardingPage } from './pages/OnboardingPage'
 import { TrackerPage } from './pages/TrackerPage'
+import { ChatPage } from './pages/ChatPage'
 import { TipsPage } from './pages/TipsPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { CalmPage } from './pages/CalmPage'
@@ -81,6 +82,8 @@ function App() {
     switch (currentPage) {
       case 'tracker':
         return <TrackerPage />
+      case 'chat':
+        return <ChatPage />
       case 'tips':
         return <TipsPage />
       case 'dashboard':

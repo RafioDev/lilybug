@@ -17,6 +17,7 @@ import { Card } from '../components/Card'
 import { Button } from '../components/Button'
 import { Modal } from '../components/Modal'
 import { Input } from '../components/Input'
+
 import { trackerService } from '../services/trackerService'
 import { configService } from '../services/configService'
 import type { TrackerEntry, EntryType, FeedingType, DiaperType } from '../types'
@@ -74,8 +75,8 @@ export const TrackerPage: React.FC = () => {
 
   const loadEntries = async () => {
     try {
-      const data = await trackerService.getEntries()
-      setEntries(data)
+      const entriesData = await trackerService.getEntries()
+      setEntries(entriesData)
     } catch (error) {
       console.error('Error loading entries:', error)
     } finally {
