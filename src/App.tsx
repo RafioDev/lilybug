@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from './lib/supabase'
 import { AuthPage } from './pages/AuthPage'
 import { OnboardingPage } from './pages/OnboardingPage'
@@ -7,9 +7,11 @@ import { ActivitiesPage } from './pages/ActivitiesPage'
 import { TipsPage } from './pages/TipsPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { CalmPage } from './pages/CalmPage'
+import { BabyManagementPage } from './pages/BabyManagementPage'
 import { NavBar } from './components/NavBar'
 import { Sidebar } from './components/Sidebar'
 import { profileService } from './services/profileService'
+import { migrateBabyData } from './utils/migrateBabyData'
 import type { User } from '@supabase/supabase-js'
 
 function App() {
@@ -49,6 +51,11 @@ function App() {
     try {
       const profile = await profileService.getProfile()
       setHasProfile(!!profile)
+
+      // Run baby data migration if needed
+      if (profile) {
+        await migrateBabyData.runMigrationIfNeeded()
+      }
     } catch (error) {
       console.error('Error checking profile:', error)
       setHasProfile(false)
@@ -90,6 +97,8 @@ function App() {
         return <DashboardPage />
       case 'calm':
         return <CalmPage />
+      case 'babies':
+        return <BabyManagementPage />
       default:
         return <TrackerPage />
     }

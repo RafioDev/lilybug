@@ -13,8 +13,8 @@ import { Input } from './Input'
 import { chatActionService } from '../services/chatActionService'
 import { smartSearchService } from '../services/smartSearchService'
 import { trackerService } from '../services/trackerService'
-import { profileService } from '../services/profileService'
-import type { TrackerEntry, Profile } from '../types'
+import { babyService } from '../services/babyService'
+import type { TrackerEntry, Baby } from '../types'
 
 // Speech Recognition types
 interface SpeechRecognitionResult {
@@ -75,7 +75,7 @@ export const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
   const [messages, setMessages] = useState<AIMessage[]>([])
   const [inputText, setInputText] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
-  const [profile, setProfile] = useState<Profile | null>(null)
+  const [activeBaby, setActiveBaby] = useState<Baby | null>(null)
   const [entries, setEntries] = useState<TrackerEntry[]>([])
 
   const recognitionRef = useRef<SpeechRecognitionInterface | null>(null)
@@ -86,7 +86,7 @@ export const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
       setIsProcessing(true)
 
       try {
-        const babyName = profile?.baby_name || 'your baby'
+        const babyName = activeBaby?.name || 'your baby'
 
         // Parse the action
         const action = chatActionService.parseActionFromMessage(message)
@@ -94,20 +94,29 @@ export const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
         let responseContent = ''
 
         if (action.type === 'create_entry') {
-          // Execute the action
-          const actionResult = await chatActionService.executeAction(
-            action,
-            babyName
-          )
-          responseContent = actionResult
+          if (!activeBaby) {
+            responseContent =
+              'Please add a baby first before tracking activities.'
+          } else {
+            // Execute the action
+            const actionResult = await chatActionService.executeAction(
+              action,
+              babyName,
+              activeBaby.id
+            )
+            responseContent = actionResult
 
-          // Refresh data
-          const updatedEntries = await trackerService.getEntries(100)
-          setEntries(updatedEntries)
+            // Refresh data
+            const updatedEntries = await trackerService.getEntries(
+              100,
+              activeBaby.id
+            )
+            setEntries(updatedEntries)
 
-          // Notify parent component
-          if (onEntryCreated) {
-            onEntryCreated()
+            // Notify parent component
+            if (onEntryCreated) {
+              onEntryCreated()
+            }
           }
         } else if (action.type === 'start_timer') {
           const feedingTypeText =
@@ -123,14 +132,11 @@ export const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
         } else {
           // Handle as search query
           try {
-            const parsedQuery = smartSearchService.parseNaturalLanguageQuery(
-              message,
-              profile || undefined
-            )
+            const parsedQuery =
+              smartSearchService.parseNaturalLanguageQuery(message)
             const searchResult = smartSearchService.executeSearch(
               entries,
-              parsedQuery,
-              profile || undefined
+              parsedQuery
             )
 
             if (searchResult.totalCount === 0) {
@@ -170,16 +176,18 @@ export const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
         setIsProcessing(false)
       }
     },
-    [profile, entries, onEntryCreated]
+    [activeBaby, entries, onEntryCreated]
   )
 
   const loadData = useCallback(async () => {
     try {
-      const [profileData, entriesData] = await Promise.all([
-        profileService.getProfile(),
-        trackerService.getEntries(100),
-      ])
-      setProfile(profileData)
+      const activeBabyData = await babyService.getActiveBaby()
+      const entriesData = await trackerService.getEntries(
+        100,
+        activeBabyData?.id
+      )
+
+      setActiveBaby(activeBabyData)
       setEntries(entriesData)
     } catch (error) {
       console.error('Error loading AI assistant data:', error)

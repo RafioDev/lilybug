@@ -1,5 +1,5 @@
 import React from 'react'
-import { Baby, Heart, Smile, Shield, Clock } from 'lucide-react'
+import { Baby, Heart, Smile, Shield, Clock, Users } from 'lucide-react'
 
 interface NavBarProps {
   currentPage: string
@@ -12,7 +12,7 @@ export const NavBar: React.FC<NavBarProps> = ({ currentPage, onNavigate }) => {
     { id: 'activities', label: 'Activity', icon: Clock },
     { id: 'dashboard', label: 'Insights', icon: Heart },
     { id: 'tips', label: 'Tips', icon: Smile },
-    { id: 'calm', label: 'Calm', icon: Shield },
+    { id: 'babies', label: 'Babies', icon: Users },
   ]
 
   return (

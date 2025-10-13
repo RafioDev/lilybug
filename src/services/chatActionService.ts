@@ -292,11 +292,15 @@ export const chatActionService = {
     return undefined
   },
 
-  async executeAction(action: ChatAction, babyName: string): Promise<string> {
+  async executeAction(
+    action: ChatAction,
+    babyName: string,
+    babyId: string
+  ): Promise<string> {
     try {
       switch (action.type) {
         case 'create_entry':
-          return await this.createEntry(action, babyName)
+          return await this.createEntry(action, babyName, babyId)
         case 'start_timer':
           return this.startTimer(action, babyName)
         case 'stop_timer':
@@ -314,13 +318,18 @@ export const chatActionService = {
     }
   },
 
-  async createEntry(action: ChatAction, babyName: string): Promise<string> {
+  async createEntry(
+    action: ChatAction,
+    babyName: string,
+    babyId: string
+  ): Promise<string> {
     if (!action.entryType) {
       return "I couldn't determine what type of entry to create. Please be more specific."
     }
 
     const now = new Date()
     const entry: NewTrackerEntry = {
+      baby_id: babyId,
       entry_type: action.entryType,
       start_time: action.startTime?.toISOString() || now.toISOString(),
       end_time: action.endTime?.toISOString() || null,
@@ -382,11 +391,12 @@ For live timers with real-time tracking, visit the tracker page where you can st
         const quantityText = action.quantity ? ` (${action.quantity}ml)` : ''
         return `✅ Logged ${feedingTypeText} feeding for ${babyName}${quantityText}${timeText}!`
 
-      case 'sleep':
+      case 'sleep': {
         const durationText = action.duration
           ? ` for ${Math.floor(action.duration / 60)}h ${action.duration % 60}m`
           : ''
         return `✅ Logged sleep session for ${babyName}${durationText}${timeText}!`
+      }
 
       case 'diaper': {
         const diaperTypeText =

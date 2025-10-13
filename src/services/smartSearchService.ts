@@ -1,4 +1,4 @@
-import type { TrackerEntry, Profile } from '../types'
+import type { TrackerEntry, Baby } from '../types'
 
 export interface SearchQuery {
   type: 'sleep' | 'feeding' | 'diaper' | 'all'
@@ -31,7 +31,7 @@ export interface SearchResult {
 }
 
 export const smartSearchService = {
-  parseNaturalLanguageQuery(query: string, _profile?: Profile): SearchQuery {
+  parseNaturalLanguageQuery(query: string): SearchQuery {
     const lowerQuery = query.toLowerCase()
 
     // Initialize search query
@@ -192,11 +192,7 @@ export const smartSearchService = {
     return searchQuery
   },
 
-  executeSearch(
-    entries: TrackerEntry[],
-    query: SearchQuery,
-    _profile?: Profile
-  ): SearchResult {
+  executeSearch(entries: TrackerEntry[], query: SearchQuery): SearchResult {
     let filteredEntries = [...entries]
 
     // Filter by type
@@ -371,10 +367,8 @@ export const smartSearchService = {
   },
 
   // Predefined common queries for quick access
-  getCommonQueries(
-    profile?: Profile
-  ): Array<{ text: string; description: string }> {
-    const babyName = profile?.baby_name || 'baby'
+  getCommonQueries(baby?: Baby): Array<{ text: string; description: string }> {
+    const babyName = baby?.name || 'baby'
 
     return [
       {
