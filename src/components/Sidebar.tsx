@@ -1,5 +1,5 @@
 import React from 'react'
-import { Baby, Heart, Smile, Shield, Clock, LogOut, Users } from 'lucide-react'
+import { Baby, Heart, Shield, Clock, LogOut, Users } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
 interface SidebarProps {
@@ -15,7 +15,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'tracker', label: 'Baby Tracker', icon: Baby },
     { id: 'activities', label: 'Activities', icon: Clock },
     { id: 'dashboard', label: 'Insights', icon: Heart },
-    { id: 'tips', label: 'Tips', icon: Smile },
+
     { id: 'calm', label: 'Calm Space', icon: Shield },
     { id: 'babies', label: 'Manage Babies', icon: Users },
   ]

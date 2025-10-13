@@ -302,7 +302,7 @@ export const chatActionService = {
         case 'create_entry':
           return await this.createEntry(action, babyName, babyId)
         case 'start_timer':
-          return this.startTimer(action, babyName)
+          return this.startTimer(action)
         case 'stop_timer':
           return 'Timer functionality would need to be implemented with state management'
         default:
@@ -352,7 +352,7 @@ export const chatActionService = {
     return this.generateSuccessMessage(action, babyName)
   },
 
-  startTimer(action: ChatAction, _babyName: string): string {
+  startTimer(action: ChatAction): string {
     const feedingTypeText =
       action.feedingType === 'breast_left'
         ? 'left breast'
@@ -379,7 +379,7 @@ For live timers with real-time tracking, visit the tracker page where you can st
       : ''
 
     switch (action.entryType) {
-      case 'feeding':
+      case 'feeding': {
         const feedingTypeText =
           action.feedingType === 'breast_left'
             ? 'left breast'
@@ -390,6 +390,7 @@ For live timers with real-time tracking, visit the tracker page where you can st
             : 'bottle'
         const quantityText = action.quantity ? ` (${action.quantity}ml)` : ''
         return `✅ Logged ${feedingTypeText} feeding for ${babyName}${quantityText}${timeText}!`
+      }
 
       case 'sleep': {
         const durationText = action.duration

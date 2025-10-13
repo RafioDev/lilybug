@@ -1,4 +1,4 @@
-import type { TrackerEntry, ParentWellness, Profile, DailyTip } from '../types'
+import type { TrackerEntry, ParentWellness, Profile, Baby } from '../types'
 import { aiPatternService } from './aiPatternService'
 
 export interface PersonalizedTip {
@@ -19,17 +19,16 @@ export interface ContextualGuidance {
 
 export const aiAssistantService = {
   generatePersonalizedTips(
-    profile: Profile,
+    baby: Baby,
     entries: TrackerEntry[],
-    wellness: ParentWellness[],
-    staticTips: DailyTip[]
+    wellness: ParentWellness[]
   ): PersonalizedTip[] {
     const tips: PersonalizedTip[] = []
     const insights = aiPatternService.generateInsights(entries, wellness)
 
     // Calculate baby's age in days
     const babyAge = Math.floor(
-      (Date.now() - new Date(profile.baby_birthdate).getTime()) /
+      (Date.now() - new Date(baby.birthdate + 'T00:00:00').getTime()) /
         (1000 * 60 * 60 * 24)
     )
 
@@ -38,7 +37,7 @@ export const aiAssistantService = {
       tips.push({
         id: 'sleep-decline-' + Date.now(),
         title: 'Sleep Pattern Changes Detected',
-        content: `${profile.baby_name}'s sleep has been shorter lately (avg ${insights.sleepPattern.averageSleepDuration} min). This could be a growth spurt or developmental leap. Try maintaining consistent routines and consider if any environmental factors have changed.`,
+        content: `${baby.name}'s sleep has been shorter lately (avg ${insights.sleepPattern.averageSleepDuration} min). This could be a growth spurt or developmental leap. Try maintaining consistent routines and consider if any environmental factors have changed.`,
         category: 'sleep',
         priority: 'high',
         isPersonalized: true,
@@ -50,7 +49,7 @@ export const aiAssistantService = {
       tips.push({
         id: 'good-sleeper-' + Date.now(),
         title: 'Great Sleep Progress!',
-        content: `${profile.baby_name} is sleeping well with an average of ${
+        content: `${baby.name} is sleeping well with an average of ${
           Math.round((insights.sleepPattern.averageSleepDuration / 60) * 10) /
           10
         } hours per session. Keep up the good bedtime routine!`,
@@ -70,7 +69,7 @@ export const aiAssistantService = {
         id: 'cluster-feeding-' + Date.now(),
         title: 'Cluster Feeding Period',
         content: `${
-          profile.baby_name
+          baby.name
         } has been feeding more frequently (${insights.feedingPattern.feedingFrequency.toFixed(
           1
         )} times/day). This is normal during growth spurts, usually lasting 2-3 days. Stay hydrated and rest when possible.`,
@@ -91,7 +90,7 @@ export const aiAssistantService = {
         tips.push({
           id: 'two-week-growth-' + Date.now(),
           title: '2-Week Growth Spurt Expected',
-          content: `${profile.baby_name} is approaching the 2-week growth spurt. You might notice increased feeding and fussiness. This typically lasts 2-3 days. Your milk supply will adjust naturally.`,
+          content: `${baby.name} is approaching the 2-week growth spurt. You might notice increased feeding and fussiness. This typically lasts 2-3 days. Your milk supply will adjust naturally.`,
           category: 'development',
           priority: 'medium',
           isPersonalized: true,
@@ -126,7 +125,7 @@ export const aiAssistantService = {
         tips.push({
           id: 'parent-sleep-' + Date.now(),
           title: 'Prioritize Your Rest',
-          content: `You've had limited sleep recently. Try to nap when ${profile.baby_name} sleeps, even if just for 20 minutes. Consider asking someone to watch the baby while you rest.`,
+          content: `You've had limited sleep recently. Try to nap when ${baby.name} sleeps, even if just for 20 minutes. Consider asking someone to watch the baby while you rest.`,
           category: 'wellness',
           priority: 'high',
           isPersonalized: true,
@@ -135,23 +134,12 @@ export const aiAssistantService = {
       }
     }
 
-    // Enhance static tips with personalization
-    const relevantStaticTips = staticTips.slice(0, 2).map((tip) => ({
-      id: tip.id,
-      title: tip.title,
-      content: tip.content.replace(/baby/gi, profile.baby_name),
-      category: tip.category as PersonalizedTip['category'],
-      priority: 'medium' as const,
-      isPersonalized: false,
-      basedOn: ['baby_age', 'general_guidance'],
-    }))
-
-    return [...tips, ...relevantStaticTips]
+    return tips
   },
 
   generateContextualGuidance(
     entries: TrackerEntry[],
-    profile: Profile
+    baby: Baby
   ): ContextualGuidance[] {
     const guidance: ContextualGuidance[] = []
     const now = new Date()
@@ -173,9 +161,7 @@ export const aiAssistantService = {
           (1000 * 60 * 60)
         if (hoursSinceLastSleep > 4) {
           guidance.push({
-            message: `${
-              profile.baby_name
-            } hasn't had a recorded sleep in ${Math.round(
+            message: `${baby.name} hasn't had a recorded sleep in ${Math.round(
               hoursSinceLastSleep
             )} hours. Consider checking if they're showing sleepy cues.`,
             type: 'insight',
@@ -191,7 +177,7 @@ export const aiAssistantService = {
     )
     if (recentFeedings.length >= 6) {
       guidance.push({
-        message: `${profile.baby_name} has fed ${recentFeedings.length} times today. This could indicate a growth spurt - completely normal!`,
+        message: `${baby.name} has fed ${recentFeedings.length} times today. This could indicate a growth spurt - completely normal!`,
         type: 'insight',
         timestamp: now,
       })
@@ -199,13 +185,13 @@ export const aiAssistantService = {
 
     // Milestone encouragement based on age
     const babyAge = Math.floor(
-      (Date.now() - new Date(profile.baby_birthdate).getTime()) /
+      (Date.now() - new Date(baby.birthdate + 'T00:00:00').getTime()) /
         (1000 * 60 * 60 * 24)
     )
 
     if (babyAge === 7) {
       guidance.push({
-        message: `🎉 ${profile.baby_name} is one week old today! You're doing an amazing job navigating this first week together.`,
+        message: `🎉 ${baby.name} is one week old today! You're doing an amazing job navigating this first week together.`,
         type: 'milestone',
         timestamp: now,
       })
@@ -213,7 +199,7 @@ export const aiAssistantService = {
 
     if (babyAge === 30) {
       guidance.push({
-        message: `🎉 Happy one month to ${profile.baby_name}! You've both learned so much in these first 30 days.`,
+        message: `🎉 Happy one month to ${baby.name}! You've both learned so much in these first 30 days.`,
         type: 'milestone',
         timestamp: now,
       })
@@ -226,7 +212,7 @@ export const aiAssistantService = {
 
     if (trackingDays >= 7) {
       guidance.push({
-        message: `You've been consistently tracking for ${trackingDays} days! This data is helping you understand ${profile.baby_name}'s patterns better.`,
+        message: `You've been consistently tracking for ${trackingDays} days! This data is helping you understand ${baby.name}'s patterns better.`,
         type: 'encouragement',
         timestamp: now,
       })

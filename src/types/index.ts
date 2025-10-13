@@ -35,17 +35,6 @@ export interface TrackerEntry {
   created_at: string
 }
 
-export interface DailyTip {
-  id: string
-  age_min_days: number
-  age_max_days: number
-  title: string
-  content: string
-  icon?: string | null
-  category: string
-  created_at: string
-}
-
 export interface ParentWellness {
   id: string
   user_id: string

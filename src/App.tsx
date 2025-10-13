@@ -4,7 +4,7 @@ import { AuthPage } from './pages/AuthPage'
 import { OnboardingPage } from './pages/OnboardingPage'
 import { TrackerPage } from './pages/TrackerPage'
 import { ActivitiesPage } from './pages/ActivitiesPage'
-import { TipsPage } from './pages/TipsPage'
+
 import { DashboardPage } from './pages/DashboardPage'
 import { CalmPage } from './pages/CalmPage'
 import { BabyManagementPage } from './pages/BabyManagementPage'
@@ -91,8 +91,7 @@ function App() {
         return <TrackerPage />
       case 'activities':
         return <ActivitiesPage />
-      case 'tips':
-        return <TipsPage />
+
       case 'dashboard':
         return <DashboardPage />
       case 'calm':

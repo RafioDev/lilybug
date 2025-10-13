@@ -8,11 +8,12 @@ import { AIInsights } from '../components/AIInsights'
 import { DemoAIButton } from '../components/DemoAIButton'
 import { wellnessService } from '../services/wellnessService'
 import { profileService } from '../services/profileService'
+import { babyService } from '../services/babyService'
 import { trackerService } from '../services/trackerService'
-import { tipsService } from '../services/tipsService'
+
 import { aiPatternService } from '../services/aiPatternService'
 import { aiAssistantService } from '../services/aiAssistantService'
-import type { Profile, ParentWellness } from '../types'
+import type { Profile, ParentWellness, Baby } from '../types'
 import type { PatternInsights } from '../services/aiPatternService'
 import type {
   PersonalizedTip,
@@ -21,11 +22,9 @@ import type {
 
 export const DashboardPage: React.FC = () => {
   const [profile, setProfile] = useState<Profile | null>(null)
-
+  const [activeBaby, setActiveBaby] = useState<Baby | null>(null)
   const [aiInsights, setAiInsights] = useState<PatternInsights | null>(null)
-  const [personalizedTips, setPersonalizedTips] = useState<PersonalizedTip[]>(
-    []
-  )
+
   const [contextualGuidance, setContextualGuidance] = useState<
     ContextualGuidance[]
   >([])
@@ -56,15 +55,19 @@ export const DashboardPage: React.FC = () => {
 
   const loadData = async () => {
     try {
-      const profileData = await profileService.getProfile()
+      const [profileData, activeBabyData] = await Promise.all([
+        profileService.getProfile(),
+        babyService.getActiveBaby(),
+      ])
       setProfile(profileData)
+      setActiveBaby(activeBabyData)
 
       const today = new Date().toISOString().split('T')[0]
       const wellnessData: ParentWellness[] =
         await wellnessService.getWellnessForDate(today)
 
       // Load tracker data for AI analysis
-      const entries = await trackerService.getEntries(100)
+      const entries = await trackerService.getEntries(100, activeBabyData?.id)
 
       // Load recent wellness data for AI analysis
       const recentWellness = await wellnessService.getRecentWellness(14)
@@ -76,27 +79,10 @@ export const DashboardPage: React.FC = () => {
       )
       setAiInsights(insights)
 
-      // Load static tips for personalization
-      if (profileData) {
-        const babyAge = Math.floor(
-          (Date.now() - new Date(profileData.baby_birthdate).getTime()) /
-            (1000 * 60 * 60 * 24)
-        )
-        const tips = await tipsService.getTipsForAge(babyAge)
-
-        // Generate personalized tips and guidance
-        const personalizedTipsData =
-          aiAssistantService.generatePersonalizedTips(
-            profileData,
-            entries,
-            recentWellness,
-            tips
-          )
-        setPersonalizedTips(personalizedTipsData)
-
+      if (activeBabyData) {
         const guidance = aiAssistantService.generateContextualGuidance(
           entries,
-          profileData
+          activeBabyData
         )
         setContextualGuidance(guidance)
 
@@ -166,7 +152,6 @@ export const DashboardPage: React.FC = () => {
           <Card className='lg:p-8'>
             <AIInsights
               insights={aiInsights}
-              personalizedTips={personalizedTips}
               contextualGuidance={contextualGuidance}
               nextActivityPrediction={nextActivityPrediction}
             />
