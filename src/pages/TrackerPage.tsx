@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import {
+  Baby as BabyIcon,
   Wine,
   Moon,
-  Baby,
   Droplets,
   Plus,
   Play,
@@ -21,11 +21,13 @@ import { Input } from '../components/Input'
 
 import { trackerService } from '../services/trackerService'
 import { configService } from '../services/configService'
-import type { EntryType, FeedingType, DiaperType } from '../types'
+import { babyService } from '../services/babyService'
+import type { EntryType, FeedingType, DiaperType, Baby } from '../types'
 
 export const TrackerPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedType, setSelectedType] = useState<EntryType | null>(null)
+  const [activeBaby, setActiveBaby] = useState<Baby | null>(null)
 
   // Timer states for feeding
   const [isTimerRunning, setIsTimerRunning] = useState(false)
@@ -49,11 +51,21 @@ export const TrackerPage: React.FC = () => {
 
   useEffect(() => {
     loadConfig()
+    loadBabyData()
   }, [])
 
   const loadConfig = () => {
     const config = configService.getConfig()
     setFeedingTypeOrder(config.feedingTypeOrder)
+  }
+
+  const loadBabyData = async () => {
+    try {
+      const activeBabyData = await babyService.getActiveBaby()
+      setActiveBaby(activeBabyData)
+    } catch (error) {
+      console.error('Error loading baby data:', error)
+    }
   }
 
   // Timer effect
@@ -170,7 +182,7 @@ export const TrackerPage: React.FC = () => {
   }
 
   const handleSubmit = async () => {
-    if (!selectedType) return
+    if (!selectedType || !activeBaby) return
 
     try {
       const entry = {
@@ -181,6 +193,7 @@ export const TrackerPage: React.FC = () => {
         feeding_type: selectedType === 'feeding' ? formData.feedingType : null,
         diaper_type: selectedType === 'diaper' ? formData.diaperType : null,
         notes: formData.notes || null,
+        baby_id: activeBaby.id,
       }
 
       await trackerService.createEntry(entry)
@@ -212,7 +225,7 @@ export const TrackerPage: React.FC = () => {
     {
       type: 'diaper' as EntryType,
       label: 'Diaper',
-      icon: Baby,
+      icon: BabyIcon,
       color: 'from-emerald-500 to-emerald-600',
     },
     {

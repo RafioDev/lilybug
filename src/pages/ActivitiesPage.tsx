@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react'
-import { Clock, Trash2, Plus, Edit3 } from 'lucide-react'
+import { Clock, Trash2, Edit3 } from 'lucide-react'
 import { Layout } from '../components/Layout'
 import { Card } from '../components/Card'
 import { Button } from '../components/Button'
 import { Modal } from '../components/Modal'
 import { Input } from '../components/Input'
 import { trackerService } from '../services/trackerService'
-import type { TrackerEntry, EntryType, FeedingType, DiaperType } from '../types'
+import { babyService } from '../services/babyService'
+import type {
+  TrackerEntry,
+  EntryType,
+  FeedingType,
+  DiaperType,
+  Baby,
+} from '../types'
 
 export const ActivitiesPage: React.FC = () => {
   const [entries, setEntries] = useState<TrackerEntry[]>([])
@@ -14,6 +21,7 @@ export const ActivitiesPage: React.FC = () => {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
   const [isManualEntryModalOpen, setIsManualEntryModalOpen] = useState(false)
   const [selectedEntry, setSelectedEntry] = useState<TrackerEntry | null>(null)
+  const [activeBaby, setActiveBaby] = useState<Baby | null>(null)
   const [formData, setFormData] = useState({
     entryType: 'feeding' as EntryType,
     startTime: new Date().toISOString().slice(0, 16),
@@ -30,7 +38,10 @@ export const ActivitiesPage: React.FC = () => {
 
   const loadEntries = async () => {
     try {
-      const data = await trackerService.getEntries()
+      const activeBabyData = await babyService.getActiveBaby()
+      setActiveBaby(activeBabyData)
+
+      const data = await trackerService.getEntries(100, activeBabyData?.id)
       setEntries(data)
     } catch (error) {
       console.error('Error loading entries:', error)
@@ -67,6 +78,11 @@ export const ActivitiesPage: React.FC = () => {
   }
 
   const handleManualSubmit = async () => {
+    if (!activeBaby) {
+      console.error('No active baby selected')
+      return
+    }
+
     try {
       const entry = {
         entry_type: formData.entryType,
@@ -78,6 +94,7 @@ export const ActivitiesPage: React.FC = () => {
         diaper_type:
           formData.entryType === 'diaper' ? formData.diaperType : null,
         notes: formData.notes || null,
+        baby_id: activeBaby.id,
       }
 
       await trackerService.createEntry(entry)
@@ -119,11 +136,13 @@ export const ActivitiesPage: React.FC = () => {
   const getEntryDetails = (entry: TrackerEntry) => {
     const startTime = new Date(entry.start_time)
     const timeStr = startTime.toLocaleString()
+    const feedingType = entry.feeding_type?.replace('_', ' ') || 'feeding'
+    const quantity = entry.quantity ? ` (${entry.quantity}ml)` : ''
+    const diaperType = entry.diaper_type || 'diaper'
+    const pumpQuantity = entry.quantity ? ` (${entry.quantity}oz)` : ''
 
     switch (entry.entry_type) {
       case 'feeding':
-        const feedingType = entry.feeding_type?.replace('_', ' ') || 'feeding'
-        const quantity = entry.quantity ? ` (${entry.quantity}ml)` : ''
         return `${feedingType}${quantity} at ${timeStr}`
 
       case 'sleep':
@@ -141,11 +160,9 @@ export const ActivitiesPage: React.FC = () => {
         return `Sleep started at ${timeStr}`
 
       case 'diaper':
-        const diaperType = entry.diaper_type || 'diaper'
         return `${diaperType} diaper at ${timeStr}`
 
       case 'pumping':
-        const pumpQuantity = entry.quantity ? ` (${entry.quantity}oz)` : ''
         return `Pumping${pumpQuantity} at ${timeStr}`
 
       default:

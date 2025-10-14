@@ -64,7 +64,7 @@ export const setupDatabase = {
       const babiesExists = !babiesError
 
       // Check if tracker_entries has baby_id column
-      const { data: trackerData, error: trackerError } = await supabase
+      const { error: trackerError } = await supabase
         .from('tracker_entries')
         .select('baby_id')
         .limit(1)
