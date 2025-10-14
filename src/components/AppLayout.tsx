@@ -5,6 +5,7 @@ import { profileService } from '../services/profileService'
 import { migrateBabyData } from '../utils/migrateBabyData'
 import { NavBar } from './NavBar'
 import { Sidebar } from './Sidebar'
+import { MobileHeader } from './MobileHeader'
 import { GlobalAIAssistant } from './GlobalAIAssistant'
 import type { User } from '@supabase/supabase-js'
 
@@ -80,6 +81,7 @@ export const AppLayout: React.FC = () => {
     <div className='min-h-screen lg:flex'>
       <Sidebar />
       <div className='flex-1 lg:ml-64'>
+        <MobileHeader />
         <Outlet />
       </div>
       <NavBar />

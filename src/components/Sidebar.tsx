@@ -1,9 +1,12 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
-import { Baby, Heart, Shield, Clock, LogOut, Users } from 'lucide-react'
-import { supabase } from '../lib/supabase'
+import { Baby, Heart, Shield, Clock, Users } from 'lucide-react'
+import { UserDropdown } from './UserDropdown'
+import { useUserProfile } from '../hooks/useUserProfile'
 
 export const Sidebar: React.FC = () => {
+  const { displayName, loading } = useUserProfile()
+
   const navItems = [
     { path: '/tracker', label: 'Baby Tracker', icon: Baby },
     { path: '/activities', label: 'Activities', icon: Clock },
@@ -11,10 +14,6 @@ export const Sidebar: React.FC = () => {
     { path: '/calm', label: 'Calm Space', icon: Shield },
     { path: '/babies', label: 'Manage Babies', icon: Users },
   ]
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut()
-  }
 
   return (
     <aside className='hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:bg-white lg:border-r lg:border-gray-200 lg:shadow-sm'>
@@ -63,15 +62,11 @@ export const Sidebar: React.FC = () => {
           })}
         </nav>
 
-        {/* Sign Out */}
+        {/* User Dropdown */}
         <div className='px-4 pb-6'>
-          <button
-            onClick={handleSignOut}
-            className='w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:text-red-600 hover:bg-red-50 transition-all'
-          >
-            <LogOut size={20} />
-            <span className='font-medium'>Sign Out</span>
-          </button>
+          {!loading && (
+            <UserDropdown userName={displayName} variant='desktop' />
+          )}
         </div>
       </div>
     </aside>
