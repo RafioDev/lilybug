@@ -6,6 +6,7 @@ import { migrateBabyData } from '../utils/migrateBabyData'
 import { NavBar } from './NavBar'
 import { Sidebar } from './Sidebar'
 import { MobileHeader } from './MobileHeader'
+import { FloatingAIAssistant } from './FloatingAIAssistant'
 import type { User } from '@supabase/supabase-js'
 
 export const AppLayout: React.FC = () => {
@@ -84,6 +85,7 @@ export const AppLayout: React.FC = () => {
         <Outlet />
       </div>
       <NavBar />
+      <FloatingAIAssistant />
     </div>
   )
 }
