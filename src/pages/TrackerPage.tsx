@@ -49,11 +49,6 @@ export const TrackerPage: React.FC = () => {
     notes: '',
   })
 
-  useEffect(() => {
-    loadConfig()
-    loadBabyData()
-  }, [])
-
   const loadConfig = () => {
     const config = configService.getConfig()
     setFeedingTypeOrder(config.feedingTypeOrder)
@@ -67,6 +62,14 @@ export const TrackerPage: React.FC = () => {
       console.error('Error loading baby data:', error)
     }
   }
+
+  useEffect(() => {
+    const initializeData = async () => {
+      loadConfig()
+      await loadBabyData()
+    }
+    initializeData()
+  }, [])
 
   // Timer effect
   useEffect(() => {

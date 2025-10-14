@@ -11,9 +11,16 @@ export const CalmPage: React.FC = () => {
   )
   const [scale, setScale] = useState(1)
 
+  // Reset scale when breathing stops - use setTimeout to avoid synchronous setState
   useEffect(() => {
     if (!isBreathing) {
-      setScale(1)
+      const timer = setTimeout(() => setScale(1), 0)
+      return () => clearTimeout(timer)
+    }
+  }, [isBreathing])
+
+  useEffect(() => {
+    if (!isBreathing) {
       return
     }
 
