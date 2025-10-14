@@ -1,7 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { AuthPage } from './pages/AuthPage'
 import { OnboardingPage } from './pages/OnboardingPage'
-import { TrackerPage } from './pages/TrackerPage'
+import { AIHomePage } from './pages/AIHomePage'
 import { ActivitiesPage } from './pages/ActivitiesPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { CalmPage } from './pages/CalmPage'
@@ -23,11 +23,7 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Navigate to='/tracker' replace />,
-      },
-      {
-        path: 'tracker',
-        element: <TrackerPage />,
+        element: <AIHomePage />,
       },
       {
         path: 'activities',

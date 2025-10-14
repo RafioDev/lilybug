@@ -1,17 +1,28 @@
 import React, { useState, useEffect } from 'react'
-import { Clock, Trash2 } from 'lucide-react'
+import { Clock, Trash2, Plus, Edit3 } from 'lucide-react'
 import { Layout } from '../components/Layout'
 import { Card } from '../components/Card'
 import { Button } from '../components/Button'
 import { Modal } from '../components/Modal'
+import { Input } from '../components/Input'
 import { trackerService } from '../services/trackerService'
-import type { TrackerEntry } from '../types'
+import type { TrackerEntry, EntryType, FeedingType, DiaperType } from '../types'
 
 export const ActivitiesPage: React.FC = () => {
   const [entries, setEntries] = useState<TrackerEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
+  const [isManualEntryModalOpen, setIsManualEntryModalOpen] = useState(false)
   const [selectedEntry, setSelectedEntry] = useState<TrackerEntry | null>(null)
+  const [formData, setFormData] = useState({
+    entryType: 'feeding' as EntryType,
+    startTime: new Date().toISOString().slice(0, 16),
+    endTime: '',
+    quantity: '',
+    feedingType: 'bottle' as FeedingType,
+    diaperType: 'wet' as DiaperType,
+    notes: '',
+  })
 
   useEffect(() => {
     loadEntries()
@@ -40,6 +51,54 @@ export const ActivitiesPage: React.FC = () => {
   const openDetailsModal = (entry: TrackerEntry) => {
     setSelectedEntry(entry)
     setIsDetailsModalOpen(true)
+  }
+
+  const openManualEntryModal = () => {
+    setFormData({
+      entryType: 'feeding',
+      startTime: new Date().toISOString().slice(0, 16),
+      endTime: '',
+      quantity: '',
+      feedingType: 'bottle',
+      diaperType: 'wet',
+      notes: '',
+    })
+    setIsManualEntryModalOpen(true)
+  }
+
+  const handleManualSubmit = async () => {
+    try {
+      const entry = {
+        entry_type: formData.entryType,
+        start_time: formData.startTime,
+        end_time: formData.endTime || null,
+        quantity: formData.quantity ? parseFloat(formData.quantity) : null,
+        feeding_type:
+          formData.entryType === 'feeding' ? formData.feedingType : null,
+        diaper_type:
+          formData.entryType === 'diaper' ? formData.diaperType : null,
+        notes: formData.notes || null,
+      }
+
+      await trackerService.createEntry(entry)
+      await loadEntries()
+      setIsManualEntryModalOpen(false)
+    } catch (error) {
+      console.error('Error creating manual entry:', error)
+    }
+  }
+
+  const getFeedingTypeLabel = (type: FeedingType) => {
+    switch (type) {
+      case 'both':
+        return 'Both Breasts'
+      case 'breast_left':
+        return 'Breast Left'
+      case 'breast_right':
+        return 'Breast Right'
+      case 'bottle':
+        return 'Bottle'
+    }
   }
 
   const getEntryIcon = (type: string) => {
@@ -125,16 +184,26 @@ export const ActivitiesPage: React.FC = () => {
       <div className='space-y-4'>
         {/* Header */}
         <Card className='bg-gradient-to-r from-green-500 to-blue-600 text-white border-0 p-6'>
-          <div className='flex items-center gap-3'>
-            <div className='p-2 bg-white/20 rounded-full'>
-              <Clock className='w-6 h-6' />
+          <div className='flex items-center justify-between'>
+            <div className='flex items-center gap-3'>
+              <div className='p-2 bg-white/20 rounded-full'>
+                <Clock className='w-6 h-6' />
+              </div>
+              <div>
+                <h2 className='text-xl font-semibold'>Recent Activities</h2>
+                <p className='text-sm opacity-90'>
+                  View and manage all tracked activities
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className='text-xl font-semibold'>Recent Activities</h2>
-              <p className='text-sm opacity-90'>
-                View and manage all tracked activities
-              </p>
-            </div>
+            <Button
+              onClick={openManualEntryModal}
+              className='bg-white/20 hover:bg-white/30 border-white/30'
+              variant='outline'
+            >
+              <Edit3 className='w-4 h-4 mr-2' />
+              Manual Entry
+            </Button>
           </div>
         </Card>
 
@@ -298,6 +367,170 @@ export const ActivitiesPage: React.FC = () => {
               </div>
             </div>
           )}
+        </Modal>
+
+        {/* Manual Entry Modal */}
+        <Modal
+          isOpen={isManualEntryModalOpen}
+          onClose={() => setIsManualEntryModalOpen(false)}
+          title='Manual Entry'
+        >
+          <div className='space-y-4'>
+            <div className='p-3 bg-blue-50 rounded-lg'>
+              <p className='text-sm text-blue-800'>
+                💡 <strong>Tip:</strong> For faster tracking, try using the AI
+                assistant on the home page! Just say "Log a bottle feeding of 4
+                ounces" or similar.
+              </p>
+            </div>
+
+            {/* Entry Type Selection */}
+            <div>
+              <label className='text-sm font-medium text-gray-700 block mb-2'>
+                Activity Type
+              </label>
+              <div className='grid grid-cols-2 gap-2'>
+                {(['feeding', 'sleep', 'diaper', 'pumping'] as EntryType[]).map(
+                  (type) => (
+                    <button
+                      key={type}
+                      onClick={() =>
+                        setFormData({ ...formData, entryType: type })
+                      }
+                      className={`p-3 rounded-xl border-2 transition-all capitalize ${
+                        formData.entryType === type
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-gray-200 text-gray-600'
+                      }`}
+                    >
+                      {getEntryIcon(type)} {type}
+                    </button>
+                  )
+                )}
+              </div>
+            </div>
+
+            <Input
+              label='Start Time'
+              type='datetime-local'
+              value={formData.startTime}
+              onChange={(val) => setFormData({ ...formData, startTime: val })}
+            />
+
+            {formData.entryType === 'sleep' && (
+              <Input
+                label='End Time (optional)'
+                type='datetime-local'
+                value={formData.endTime}
+                onChange={(val) => setFormData({ ...formData, endTime: val })}
+              />
+            )}
+
+            {formData.entryType === 'feeding' && (
+              <>
+                <div>
+                  <label className='text-sm font-medium text-gray-700 block mb-2'>
+                    Feeding Type
+                  </label>
+                  <div className='grid grid-cols-2 gap-2'>
+                    {(
+                      [
+                        'both',
+                        'breast_left',
+                        'breast_right',
+                        'bottle',
+                      ] as FeedingType[]
+                    ).map((type) => (
+                      <button
+                        key={type}
+                        onClick={() =>
+                          setFormData({ ...formData, feedingType: type })
+                        }
+                        className={`p-3 rounded-xl border-2 transition-all text-sm ${
+                          formData.feedingType === type
+                            ? 'border-blue-500 bg-blue-50 text-blue-700'
+                            : 'border-gray-200 text-gray-600'
+                        }`}
+                      >
+                        {getFeedingTypeLabel(type)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {formData.feedingType === 'bottle' && (
+                  <Input
+                    label='Amount (oz)'
+                    type='number'
+                    step='0.5'
+                    value={formData.quantity}
+                    onChange={(val) =>
+                      setFormData({ ...formData, quantity: val })
+                    }
+                    placeholder='e.g., 4'
+                  />
+                )}
+              </>
+            )}
+
+            {formData.entryType === 'pumping' && (
+              <Input
+                label='Amount (oz)'
+                type='number'
+                step='0.5'
+                value={formData.quantity}
+                onChange={(val) => setFormData({ ...formData, quantity: val })}
+                placeholder='e.g., 4'
+              />
+            )}
+
+            {formData.entryType === 'diaper' && (
+              <div>
+                <label className='text-sm font-medium text-gray-700 block mb-2'>
+                  Diaper Type
+                </label>
+                <div className='grid grid-cols-3 gap-2'>
+                  {(['wet', 'dirty', 'both'] as DiaperType[]).map((type) => (
+                    <button
+                      key={type}
+                      onClick={() =>
+                        setFormData({ ...formData, diaperType: type })
+                      }
+                      className={`p-3 rounded-xl border-2 transition-all capitalize ${
+                        formData.diaperType === type
+                          ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                          : 'border-gray-200 text-gray-600'
+                      }`}
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <Input
+              label='Notes (optional)'
+              type='textarea'
+              value={formData.notes}
+              onChange={(val) => setFormData({ ...formData, notes: val })}
+              placeholder='Any additional details...'
+              rows={2}
+            />
+
+            <div className='flex gap-3'>
+              <Button
+                onClick={() => setIsManualEntryModalOpen(false)}
+                variant='outline'
+                fullWidth
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleManualSubmit} fullWidth>
+                Save Entry
+              </Button>
+            </div>
+          </div>
         </Modal>
       </div>
     </Layout>

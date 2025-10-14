@@ -1,6 +1,6 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
-import { Baby, Heart, Shield, Clock, Users } from 'lucide-react'
+import { Sparkles, Heart, Shield, Clock, Users } from 'lucide-react'
 import { UserDropdown } from './UserDropdown'
 import { useUserProfile } from '../hooks/useUserProfile'
 
@@ -8,7 +8,7 @@ export const Sidebar: React.FC = () => {
   const { displayName, loading } = useUserProfile()
 
   const navItems = [
-    { path: '/tracker', label: 'Baby Tracker', icon: Baby },
+    { path: '/', label: 'AI Assistant', icon: Sparkles },
     { path: '/activities', label: 'Activities', icon: Clock },
     { path: '/insights', label: 'Insights', icon: Heart },
     { path: '/calm', label: 'Calm Space', icon: Shield },
@@ -21,10 +21,12 @@ export const Sidebar: React.FC = () => {
         {/* Logo/Brand */}
         <div className='flex items-center h-16 px-6 border-b border-gray-200'>
           <div className='flex items-center gap-3'>
-            <div className='w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center'>
-              <Baby size={20} className='text-white' />
+            <div className='w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center'>
+              <Sparkles size={20} className='text-white' />
             </div>
-            <span className='text-xl font-bold text-gray-800'>Lilybug</span>
+            <span className='text-xl font-bold text-gray-800'>
+              AI Baby Tracker
+            </span>
           </div>
         </div>
 

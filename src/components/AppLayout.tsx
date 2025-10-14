@@ -6,7 +6,6 @@ import { migrateBabyData } from '../utils/migrateBabyData'
 import { NavBar } from './NavBar'
 import { Sidebar } from './Sidebar'
 import { MobileHeader } from './MobileHeader'
-import { GlobalAIAssistant } from './GlobalAIAssistant'
 import type { User } from '@supabase/supabase-js'
 
 export const AppLayout: React.FC = () => {
@@ -85,7 +84,6 @@ export const AppLayout: React.FC = () => {
         <Outlet />
       </div>
       <NavBar />
-      <GlobalAIAssistant />
     </div>
   )
 }
