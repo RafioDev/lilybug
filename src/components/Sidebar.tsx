@@ -1,23 +1,15 @@
 import React from 'react'
+import { NavLink } from 'react-router-dom'
 import { Baby, Heart, Shield, Clock, LogOut, Users } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
-interface SidebarProps {
-  currentPage: string
-  onNavigate: (page: string) => void
-}
-
-export const Sidebar: React.FC<SidebarProps> = ({
-  currentPage,
-  onNavigate,
-}) => {
+export const Sidebar: React.FC = () => {
   const navItems = [
-    { id: 'tracker', label: 'Baby Tracker', icon: Baby },
-    { id: 'activities', label: 'Activities', icon: Clock },
-    { id: 'dashboard', label: 'Insights', icon: Heart },
-
-    { id: 'calm', label: 'Calm Space', icon: Shield },
-    { id: 'babies', label: 'Manage Babies', icon: Users },
+    { path: '/tracker', label: 'Baby Tracker', icon: Baby },
+    { path: '/activities', label: 'Activities', icon: Clock },
+    { path: '/insights', label: 'Insights', icon: Heart },
+    { path: '/calm', label: 'Calm Space', icon: Shield },
+    { path: '/babies', label: 'Manage Babies', icon: Users },
   ]
 
   const handleSignOut = async () => {
@@ -41,25 +33,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <nav className='flex-1 px-4 py-6 space-y-2'>
           {navItems.map((item) => {
             const Icon = item.icon
-            const isActive = currentPage === item.id
 
             return (
-              <button
-                key={item.id}
-                onClick={() => onNavigate(item.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left ${
-                  isActive
-                    ? 'text-blue-600 bg-blue-50 border border-blue-200'
-                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
-                }`}
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) =>
+                  `w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left ${
+                    isActive
+                      ? 'text-blue-600 bg-blue-50 border border-blue-200'
+                      : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                  }`
+                }
               >
-                <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
-                <span
-                  className={`font-medium ${isActive ? 'font-semibold' : ''}`}
-                >
-                  {item.label}
-                </span>
-              </button>
+                {({ isActive }) => (
+                  <>
+                    <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
+                    <span
+                      className={`font-medium ${
+                        isActive ? 'font-semibold' : ''
+                      }`}
+                    >
+                      {item.label}
+                    </span>
+                  </>
+                )}
+              </NavLink>
             )
           })}
         </nav>

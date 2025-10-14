@@ -11,7 +11,6 @@ import { babyService } from '../services/babyService'
 import { migrateBabyData } from '../utils/migrateBabyData'
 import { dateUtils } from '../utils/dateUtils'
 import { Input } from '../components/Input'
-import { DatabaseSetup } from '../components/DatabaseSetup'
 import type { Baby } from '../types'
 
 export const BabyManagementPage: React.FC = () => {
@@ -179,9 +178,6 @@ export const BabyManagementPage: React.FC = () => {
             </button>
           </div>
         </div>
-
-        {/* Database Setup */}
-        <DatabaseSetup />
 
         {/* Add/Edit Form */}
         {showAddForm && (

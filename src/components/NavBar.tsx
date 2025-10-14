@@ -1,18 +1,13 @@
 import React from 'react'
-import { Baby, Heart, Shield, Clock, Users } from 'lucide-react'
+import { NavLink } from 'react-router-dom'
+import { Baby, Heart, Clock, Users } from 'lucide-react'
 
-interface NavBarProps {
-  currentPage: string
-  onNavigate: (page: string) => void
-}
-
-export const NavBar: React.FC<NavBarProps> = ({ currentPage, onNavigate }) => {
+export const NavBar: React.FC = () => {
   const navItems = [
-    { id: 'tracker', label: 'Tracker', icon: Baby },
-    { id: 'activities', label: 'Activity', icon: Clock },
-    { id: 'dashboard', label: 'Insights', icon: Heart },
-
-    { id: 'babies', label: 'Babies', icon: Users },
+    { path: '/tracker', label: 'Tracker', icon: Baby },
+    { path: '/activities', label: 'Activity', icon: Clock },
+    { path: '/insights', label: 'Insights', icon: Heart },
+    { path: '/babies', label: 'Babies', icon: Users },
   ]
 
   return (
@@ -20,27 +15,32 @@ export const NavBar: React.FC<NavBarProps> = ({ currentPage, onNavigate }) => {
       <div className='flex justify-around items-center px-2 py-2'>
         {navItems.map((item) => {
           const Icon = item.icon
-          const isActive = currentPage === item.id
 
           return (
-            <button
-              key={item.id}
-              onClick={() => onNavigate(item.id)}
-              className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all ${
-                isActive
-                  ? 'text-blue-600 bg-blue-50'
-                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-              }`}
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) =>
+                `flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all ${
+                  isActive
+                    ? 'text-blue-600 bg-blue-50'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                }`
+              }
             >
-              <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
-              <span
-                className={`text-xs font-medium ${
-                  isActive ? 'font-semibold' : ''
-                }`}
-              >
-                {item.label}
-              </span>
-            </button>
+              {({ isActive }) => (
+                <>
+                  <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
+                  <span
+                    className={`text-xs font-medium ${
+                      isActive ? 'font-semibold' : ''
+                    }`}
+                  >
+                    {item.label}
+                  </span>
+                </>
+              )}
+            </NavLink>
           )
         })}
       </div>

@@ -8,14 +8,10 @@ import {
   AlertCircle,
 } from 'lucide-react'
 import type { PatternInsights } from '../services/aiPatternService'
-import type {
-  PersonalizedTip,
-  ContextualGuidance,
-} from '../services/aiAssistantService'
+import type { ContextualGuidance } from '../services/aiAssistantService'
 
 interface AIInsightsProps {
   insights: PatternInsights
-  personalizedTips: PersonalizedTip[]
   contextualGuidance: ContextualGuidance[]
   nextActivityPrediction?: {
     activity: 'feeding' | 'sleep' | 'diaper'
@@ -26,7 +22,6 @@ interface AIInsightsProps {
 
 export const AIInsights: React.FC<AIInsightsProps> = ({
   insights,
-  personalizedTips,
   contextualGuidance,
   nextActivityPrediction,
 }) => {
@@ -53,17 +48,6 @@ export const AIInsights: React.FC<AIInsightsProps> = ({
         return <TrendingDown className='w-4 h-4 text-red-500' />
       default:
         return <div className='w-4 h-4 bg-gray-300 rounded-full' />
-    }
-  }
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high':
-        return 'border-red-200 bg-red-50'
-      case 'medium':
-        return 'border-yellow-200 bg-yellow-50'
-      default:
-        return 'border-blue-200 bg-blue-50'
     }
   }
 
@@ -196,38 +180,6 @@ export const AIInsights: React.FC<AIInsightsProps> = ({
           </div>
         </div>
       )}
-
-      {/* Personalized Tips */}
-      <div className='bg-white rounded-lg border border-gray-200 p-4'>
-        <h3 className='font-medium text-gray-900 mb-3'>Personalized Tips</h3>
-        <div className='space-y-3'>
-          {personalizedTips.slice(0, 3).map((tip) => (
-            <div
-              key={tip.id}
-              className={`p-3 rounded-lg border ${getPriorityColor(
-                tip.priority
-              )}`}
-            >
-              <div className='flex items-start justify-between mb-2'>
-                <h4 className='font-medium text-gray-900 text-sm'>
-                  {tip.title}
-                </h4>
-                {tip.isPersonalized && (
-                  <span className='text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full'>
-                    AI Personalized
-                  </span>
-                )}
-              </div>
-              <p className='text-sm text-gray-700'>{tip.content}</p>
-              {tip.basedOn.length > 0 && (
-                <p className='text-xs text-gray-500 mt-2'>
-                  Based on: {tip.basedOn.join(', ')}
-                </p>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
 
       {/* Alerts */}
       {insights.alerts.length > 0 && (
