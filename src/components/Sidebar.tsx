@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom'
 import { Sparkles, Heart, Shield, Users } from 'lucide-react'
 import { UserDropdown } from './UserDropdown'
 import { useUserProfile } from '../hooks/useUserProfile'
+import { ThemeToggle } from './ThemeToggle'
 
 export const Sidebar: React.FC = () => {
   const { displayName, loading } = useUserProfile()
@@ -15,15 +16,17 @@ export const Sidebar: React.FC = () => {
   ]
 
   return (
-    <aside className='hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:bg-white lg:border-r lg:border-gray-200 lg:shadow-sm'>
+    <aside className='hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:bg-white lg:dark:bg-gray-800 lg:border-r lg:border-gray-200 lg:dark:border-gray-700 lg:shadow-sm'>
       <div className='flex flex-col flex-1 min-h-0'>
         {/* Logo/Brand */}
-        <div className='flex items-center h-16 px-6 border-b border-gray-200'>
+        <div className='flex items-center h-16 px-6 border-b border-gray-200 dark:border-gray-700'>
           <div className='flex items-center gap-3'>
             <div className='w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center'>
               <Sparkles size={20} className='text-white' />
             </div>
-            <span className='text-xl font-bold text-gray-800'>Lilybug</span>
+            <span className='text-xl font-bold text-gray-800 dark:text-gray-100'>
+              Lilybug
+            </span>
           </div>
         </div>
 
@@ -39,8 +42,8 @@ export const Sidebar: React.FC = () => {
                 className={({ isActive }) =>
                   `w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left ${
                     isActive
-                      ? 'text-blue-600 bg-blue-50 border border-blue-200'
-                      : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                      ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`
                 }
               >
@@ -60,6 +63,11 @@ export const Sidebar: React.FC = () => {
             )
           })}
         </nav>
+
+        {/* Theme Toggle */}
+        <div className='px-4 pb-4'>
+          <ThemeToggle />
+        </div>
 
         {/* User Dropdown */}
         <div className='px-4 pb-6'>

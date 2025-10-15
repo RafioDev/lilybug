@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 
+/* Configure dark mode for Tailwind v4 */
+@variant dark (&:is(.dark *));
+
 @layer base {
   body {
     @apply antialiased;

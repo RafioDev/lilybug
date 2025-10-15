@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom'
 import { Sparkles } from 'lucide-react'
 import { UserDropdown } from './UserDropdown'
 import { useUserProfile } from '../hooks/useUserProfile'
+import { ThemeToggleCompact } from './ThemeToggle'
 
 const getPageTitle = (pathname: string): string => {
   switch (pathname) {
@@ -25,17 +26,22 @@ export const MobileHeader: React.FC = () => {
   const pageTitle = getPageTitle(location.pathname)
 
   return (
-    <header className='lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-30'>
+    <header className='lg:hidden bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between sticky top-0 z-30'>
       {/* Logo and Page Title */}
       <div className='flex items-center gap-3'>
         <div className='w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center'>
           <Sparkles size={20} className='text-white' />
         </div>
-        <span className='text-xl font-bold text-gray-800'>{pageTitle}</span>
+        <span className='text-xl font-bold text-gray-800 dark:text-gray-100'>
+          {pageTitle}
+        </span>
       </div>
 
-      {/* User Dropdown */}
-      {!loading && <UserDropdown userName={displayName} variant='mobile' />}
+      {/* Theme Toggle and User Dropdown */}
+      <div className='flex items-center gap-2'>
+        <ThemeToggleCompact />
+        {!loading && <UserDropdown userName={displayName} variant='mobile' />}
+      </div>
     </header>
   )
 }

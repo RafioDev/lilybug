@@ -45,18 +45,3 @@ export const chatExamples = {
     diaperTypes: ['wet', 'dirty', 'wet and dirty', 'both'],
   },
 }
-
-// Test function to validate parsing (for development)
-export const testChatParsing = () => {
-  console.log('Chat parsing examples:')
-  console.log('✅ Natural language commands that work:')
-
-  chatExamples.createEntries.forEach((example) => {
-    console.log(`  • "${example}"`)
-  })
-
-  console.log('\n✅ Timer commands:')
-  chatExamples.timerActions.forEach((example) => {
-    console.log(`  • "${example}"`)
-  })
-}

@@ -5,6 +5,26 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Lilybug</title>
+    <script>
+      // Prevent flash of unstyled content by setting theme class immediately
+      ;(function () {
+        try {
+          const savedTheme = localStorage.getItem('lilybug-theme')
+          const systemTheme = window.matchMedia('(prefers-color-scheme: dark)')
+            .matches
+            ? 'dark'
+            : 'light'
+          const theme =
+            savedTheme === 'system' || !savedTheme ? systemTheme : savedTheme
+
+          if (theme === 'dark') {
+            document.documentElement.classList.add('dark')
+          }
+        } catch (e) {
+          // Fallback to light theme if there's any error
+        }
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -27,7 +27,7 @@ export const ActivityGroup: React.FC<ActivityGroupProps> = ({
         {dateGroup.entries.map((entry) => (
           <div
             key={entry.id}
-            className='flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer'
+            className='flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer'
             onClick={() => onViewDetails(entry)}
           >
             <div className='flex items-center gap-3'>
@@ -35,10 +35,10 @@ export const ActivityGroup: React.FC<ActivityGroupProps> = ({
                 {activityUtils.getActivityIcon(entry.entry_type)}
               </span>
               <div>
-                <p className='font-medium text-gray-900 text-sm'>
+                <p className='font-medium text-gray-900 dark:text-gray-100 text-sm'>
                   {activityUtils.getEntryDetails(entry)}
                 </p>
-                <p className='text-xs text-gray-500'>
+                <p className='text-xs text-gray-500 dark:text-gray-400'>
                   {new Date(entry.start_time).toLocaleTimeString('en-US', {
                     hour: 'numeric',
                     minute: '2-digit',
@@ -46,7 +46,7 @@ export const ActivityGroup: React.FC<ActivityGroupProps> = ({
                   })}
                 </p>
                 {entry.notes && (
-                  <p className='text-xs text-gray-400 mt-1 italic'>
+                  <p className='text-xs text-gray-400 dark:text-gray-500 mt-1 italic'>
                     "{entry.notes}"
                   </p>
                 )}
@@ -60,7 +60,7 @@ export const ActivityGroup: React.FC<ActivityGroupProps> = ({
                   e.stopPropagation()
                   onEditEntry(entry)
                 }}
-                className='p-1 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors'
+                className='p-1 text-gray-400 dark:text-gray-500 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors'
                 title='Edit entry'
               >
                 <Edit3 className='w-4 h-4' />
@@ -70,7 +70,7 @@ export const ActivityGroup: React.FC<ActivityGroupProps> = ({
                   e.stopPropagation()
                   onDeleteEntry(entry.id)
                 }}
-                className='p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors'
+                className='p-1 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors'
                 title='Delete entry'
               >
                 <Trash2 className='w-4 h-4' />
