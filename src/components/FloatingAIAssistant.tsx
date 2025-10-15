@@ -106,7 +106,10 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
 
       try {
         const babyName = activeBaby?.name || 'your baby'
-        const action = chatActionService.parseActionFromMessage(message)
+        const action = await chatActionService.parseActionFromMessage(
+          message,
+          babyName
+        )
 
         let responseContent = ''
 

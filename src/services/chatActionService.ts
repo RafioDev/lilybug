@@ -1,4 +1,5 @@
 import { trackerService } from './trackerService'
+import { aiService } from './aiService'
 import type {
   EntryType,
   FeedingType,
@@ -19,7 +20,33 @@ export interface ChatAction {
 }
 
 export const chatActionService = {
-  parseActionFromMessage(message: string): ChatAction {
+  async parseActionFromMessage(
+    message: string,
+    babyName?: string
+  ): Promise<ChatAction> {
+    // Try AI parsing first if OpenAI is configured
+    if (aiService.isConfigured()) {
+      try {
+        const aiResult = await aiService.parseNaturalLanguage(message, babyName)
+
+        // Use AI result if confidence is high enough
+        if (aiResult.confidence > 0.6) {
+          console.log('AI parsing:', aiResult.reasoning)
+          return aiResult.action
+        }
+      } catch (error) {
+        console.warn(
+          'AI parsing failed, falling back to pattern matching:',
+          error
+        )
+      }
+    }
+
+    // Fallback to existing pattern matching
+    return this.parseActionFromMessageLegacy(message)
+  },
+
+  parseActionFromMessageLegacy(message: string): ChatAction {
     const lowerMessage = message.toLowerCase()
 
     // Check for timer actions
@@ -298,18 +325,55 @@ export const chatActionService = {
     babyId: string
   ): Promise<string> {
     try {
+      let success = false
+      let result = ''
+
       switch (action.type) {
         case 'create_entry':
-          return await this.createEntry(action, babyName, babyId)
+          result = await this.createEntry(action, babyName, babyId)
+          success = true
+          break
         case 'start_timer':
-          return this.startTimer(action)
+          result = this.startTimer(action)
+          success = false // Timer start is not a success, it's an explanation
+          break
         case 'stop_timer':
-          return 'Timer functionality would need to be implemented with state management'
+          result =
+            'Timer functionality would need to be implemented with state management'
+          success = false
+          break
         default:
-          return ''
+          result = ''
+          success = false
       }
+
+      // Use AI to generate a more natural response if available
+      if (aiService.isConfigured() && action.type === 'create_entry') {
+        try {
+          const aiResponse = await aiService.generateResponse(
+            action,
+            success,
+            babyName
+          )
+          return aiResponse
+        } catch (error) {
+          console.warn('AI response generation failed, using fallback:', error)
+        }
+      }
+
+      return result
     } catch (error) {
       console.error('Error executing chat action:', error)
+
+      // Use AI to generate error response if available
+      if (aiService.isConfigured()) {
+        try {
+          return await aiService.generateResponse(action, false, babyName)
+        } catch (aiError) {
+          console.warn('AI error response generation failed:', aiError)
+        }
+      }
+
       return `Sorry, I had trouble ${
         action.type === 'create_entry'
           ? 'creating that entry'

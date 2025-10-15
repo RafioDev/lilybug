@@ -8,6 +8,7 @@ import { chatActionService } from '../services/chatActionService'
 import { smartSearchService } from '../services/smartSearchService'
 import { trackerService } from '../services/trackerService'
 import { babyService } from '../services/babyService'
+import { aiService } from '../services/aiService'
 import type { TrackerEntry, Baby } from '../types'
 
 // Speech Recognition types
@@ -123,8 +124,11 @@ export const AIHomePage: React.FC = () => {
       try {
         const babyName = activeBaby?.name || 'your baby'
 
-        // Parse the action
-        const action = chatActionService.parseActionFromMessage(message)
+        // Parse the action using AI
+        const action = await chatActionService.parseActionFromMessage(
+          message,
+          babyName
+        )
 
         let responseContent = ''
 
@@ -394,13 +398,17 @@ export const AIHomePage: React.FC = () => {
                   🎤 Listening...
                 </div>
                 <div className='text-sm text-gray-500'>
-                  Say something like "Log a bottle feeding"
+                  {aiService.isConfigured()
+                    ? "Say anything naturally - I'll understand!"
+                    : "Say something like 'Log a bottle feeding'"}
                 </div>
               </div>
             ) : isProcessing ? (
               <div className='text-center'>
                 <div className='text-blue-600 font-medium text-lg'>
-                  Processing...
+                  {aiService.isConfigured()
+                    ? '🤖 AI Processing...'
+                    : 'Processing...'}
                 </div>
                 <div className='flex justify-center space-x-1 mt-2'>
                   <div className='w-2 h-2 bg-blue-400 rounded-full animate-bounce'></div>
@@ -418,9 +426,14 @@ export const AIHomePage: React.FC = () => {
               <div className='text-center'>
                 <div className='text-gray-700 font-medium text-lg'>
                   Tap to speak
+                  {aiService.isConfigured() && (
+                    <span className='text-green-600 ml-2'>🤖 AI Ready</span>
+                  )}
                 </div>
                 <div className='text-sm text-gray-500'>
-                  Or type below if needed
+                  {aiService.isConfigured()
+                    ? 'Speak naturally - no specific phrases needed!'
+                    : 'Or type below if needed'}
                 </div>
               </div>
             )}

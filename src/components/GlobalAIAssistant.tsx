@@ -88,8 +88,11 @@ export const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
       try {
         const babyName = activeBaby?.name || 'your baby'
 
-        // Parse the action
-        const action = chatActionService.parseActionFromMessage(message)
+        // Parse the action using AI
+        const action = await chatActionService.parseActionFromMessage(
+          message,
+          babyName
+        )
 
         let responseContent = ''
 
