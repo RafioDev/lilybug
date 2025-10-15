@@ -448,34 +448,42 @@ export const AIHomePage: React.FC = () => {
               <div className='p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full'>
                 <Sparkles className='w-8 h-8 text-white' />
               </div>
-              <h1 className='text-3xl font-bold text-gray-800'>Lilybug</h1>
+              <h1 className='text-3xl font-bold text-gray-800 dark:text-gray-100'>
+                Lilybug
+              </h1>
             </div>
-            <p className='text-gray-600'>Loading...</p>
+            <p className='text-gray-600 dark:text-gray-400'>Loading...</p>
           </div>
 
           {/* Loading Stats */}
           <div className='grid grid-cols-3 gap-4'>
             <Card className='text-center'>
-              <div className='w-8 h-8 bg-gray-200 rounded mx-auto mb-2 animate-pulse'></div>
-              <div className='text-sm text-gray-400'>Loading...</div>
+              <div className='w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded mx-auto mb-2 animate-pulse'></div>
+              <div className='text-sm text-gray-400 dark:text-gray-500'>
+                Loading...
+              </div>
             </Card>
             <Card className='text-center'>
-              <div className='w-8 h-8 bg-gray-200 rounded mx-auto mb-2 animate-pulse'></div>
-              <div className='text-sm text-gray-400'>Loading...</div>
+              <div className='w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded mx-auto mb-2 animate-pulse'></div>
+              <div className='text-sm text-gray-400 dark:text-gray-500'>
+                Loading...
+              </div>
             </Card>
             <Card className='text-center'>
-              <div className='w-8 h-8 bg-gray-200 rounded mx-auto mb-2 animate-pulse'></div>
-              <div className='text-sm text-gray-400'>Loading...</div>
+              <div className='w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded mx-auto mb-2 animate-pulse'></div>
+              <div className='text-sm text-gray-400 dark:text-gray-500'>
+                Loading...
+              </div>
             </Card>
           </div>
 
           {/* Loading Voice Interface */}
           <Card className='p-8'>
             <div className='flex flex-col items-center space-y-6'>
-              <div className='w-24 h-24 bg-gray-200 rounded-full animate-pulse'></div>
+              <div className='w-24 h-24 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse'></div>
               <div className='text-center'>
-                <div className='w-32 h-6 bg-gray-200 rounded mx-auto mb-2 animate-pulse'></div>
-                <div className='w-48 h-4 bg-gray-200 rounded mx-auto animate-pulse'></div>
+                <div className='w-32 h-6 bg-gray-200 dark:bg-gray-700 rounded mx-auto mb-2 animate-pulse'></div>
+                <div className='w-48 h-4 bg-gray-200 dark:bg-gray-700 rounded mx-auto animate-pulse'></div>
               </div>
             </div>
           </Card>
@@ -484,20 +492,20 @@ export const AIHomePage: React.FC = () => {
           <Card>
             <div className='flex items-center justify-between mb-4'>
               <div className='flex items-center gap-3'>
-                <Clock className='w-5 h-5 text-gray-400' />
-                <div className='w-32 h-5 bg-gray-200 rounded animate-pulse'></div>
+                <Clock className='w-5 h-5 text-gray-400 dark:text-gray-500' />
+                <div className='w-32 h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse'></div>
               </div>
             </div>
             <div className='space-y-3'>
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className='flex items-center gap-3 p-3 bg-gray-50 rounded-lg'
+                  className='flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg'
                 >
-                  <div className='w-8 h-8 bg-gray-200 rounded animate-pulse'></div>
+                  <div className='w-8 h-8 bg-gray-200 dark:bg-gray-600 rounded animate-pulse'></div>
                   <div className='flex-1'>
-                    <div className='w-48 h-4 bg-gray-200 rounded mb-1 animate-pulse'></div>
-                    <div className='w-24 h-3 bg-gray-200 rounded animate-pulse'></div>
+                    <div className='w-48 h-4 bg-gray-200 dark:bg-gray-600 rounded mb-1 animate-pulse'></div>
+                    <div className='w-24 h-3 bg-gray-200 dark:bg-gray-600 rounded animate-pulse'></div>
                   </div>
                 </div>
               ))}
@@ -517,9 +525,11 @@ export const AIHomePage: React.FC = () => {
             <div className='p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full'>
               <Sparkles className='w-8 h-8 text-white' />
             </div>
-            <h1 className='text-3xl font-bold text-gray-800'>Lilybug</h1>
+            <h1 className='text-3xl font-bold text-gray-800 dark:text-gray-100'>
+              Lilybug
+            </h1>
           </div>
-          <p className='text-gray-600'>
+          <p className='text-gray-600 dark:text-gray-400'>
             {activeBaby
               ? `Tracking ${activeBaby.name}`
               : 'Add a baby to start tracking'}
