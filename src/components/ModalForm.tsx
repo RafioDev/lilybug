@@ -12,6 +12,7 @@ interface ModalFormProps {
   submitText?: string
   cancelText?: string
   submitDisabled?: boolean
+  size?: 'sm' | 'md' | 'lg' | 'full'
 }
 
 export const ModalForm: React.FC<ModalFormProps> = ({
@@ -24,6 +25,7 @@ export const ModalForm: React.FC<ModalFormProps> = ({
   submitText = 'Submit',
   cancelText = 'Cancel',
   submitDisabled = false,
+  size = 'md',
 }) => {
   const handleClose = () => {
     if (!isSubmitting) {
@@ -32,7 +34,7 @@ export const ModalForm: React.FC<ModalFormProps> = ({
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title={title}>
+    <Modal isOpen={isOpen} onClose={handleClose} title={title} size={size}>
       <form onSubmit={onSubmit} className='space-y-4'>
         {children}
 

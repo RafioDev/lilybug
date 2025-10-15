@@ -95,14 +95,14 @@ export const BabyModal: React.FC<BabyModalProps> = ({
     } else {
       form.reset()
     }
-  }, [baby, isEditMode, form])
+  }, [baby, isEditMode]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Reset form when modal closes
   useEffect(() => {
     if (!isOpen) {
       form.reset()
     }
-  }, [isOpen, form])
+  }, [isOpen]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const isSubmitting = createBaby.loading || updateBaby.loading
 

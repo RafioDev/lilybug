@@ -13,6 +13,7 @@ interface InputProps {
   step?: string | number
   rows?: number
   className?: string
+  error?: string
 }
 
 export const Input: React.FC<InputProps> = ({
@@ -28,8 +29,13 @@ export const Input: React.FC<InputProps> = ({
   step,
   rows = 3,
   className = '',
+  error,
 }) => {
-  const baseStyles = `w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:outline-none transition-colors text-gray-800 ${
+  const baseStyles = `w-full px-4 py-3 rounded-xl border-2 ${
+    error
+      ? 'border-red-500 focus:border-red-500'
+      : 'border-gray-200 focus:border-blue-500'
+  } focus:outline-none transition-colors text-gray-800 ${
     disabled ? 'opacity-50 cursor-not-allowed bg-gray-50' : ''
   }`
 
@@ -65,6 +71,7 @@ export const Input: React.FC<InputProps> = ({
           className={baseStyles}
         />
       )}
+      {error && <p className='text-red-600 text-sm px-1'>{error}</p>}
     </div>
   )
 }

@@ -11,7 +11,7 @@ import { babyService } from '../services/babyService'
 import { aiService } from '../services/aiService'
 import { activityUtils } from '../utils/activityUtils'
 import { Modal } from '../components/Modal'
-import { EditActivityModal } from '../components/EditActivityModal'
+import { ActivityModal } from '../components/ActivityModal'
 import { GroupedActivitiesList } from '../components/GroupedActivitiesList'
 import type {
   TrackerEntry,
@@ -979,7 +979,7 @@ export const AIHomePage: React.FC = () => {
       </Modal>
 
       {/* Edit Activity Modal */}
-      <EditActivityModal
+      <ActivityModal
         isOpen={isEditModalOpen}
         entry={selectedEntry}
         onClose={() => setIsEditModalOpen(false)}

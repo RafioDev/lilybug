@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { ChevronDown, Baby as BabyIcon } from 'lucide-react'
 import { babyService } from '../services/babyService'
 import { dateUtils } from '../utils/dateUtils'
+import { LoadingState } from './LoadingState'
+import { useAsyncOperation } from '../hooks/useAsyncOperation'
 import type { Baby } from '../types'
 
 interface BabySelectorProps {
@@ -16,30 +18,30 @@ export const BabySelector: React.FC<BabySelectorProps> = ({
   const [babies, setBabies] = useState<Baby[]>([])
   const [activeBaby, setActiveBaby] = useState<Baby | null>(null)
   const [isOpen, setIsOpen] = useState(false)
-  const [loading, setLoading] = useState(true)
+
+  // Use async operations for data loading
+  const loadBabiesOperation = useAsyncOperation(() =>
+    Promise.all([babyService.getBabies(), babyService.getActiveBaby()])
+  )
+  const setActiveBabyOperation = useAsyncOperation(babyService.setActiveBaby)
 
   useEffect(() => {
-    loadBabies()
-  }, [])
-
-  const loadBabies = async () => {
-    try {
-      const [babiesData, activeBabyData] = await Promise.all([
-        babyService.getBabies(),
-        babyService.getActiveBaby(),
-      ])
-      setBabies(babiesData)
-      setActiveBaby(activeBabyData)
-    } catch (error) {
-      console.error('Error loading babies:', error)
-    } finally {
-      setLoading(false)
+    const loadBabies = async () => {
+      try {
+        const [babiesData, activeBabyData] = await loadBabiesOperation.execute()
+        setBabies(babiesData)
+        setActiveBaby(activeBabyData)
+      } catch (error) {
+        console.error('Error loading babies:', error)
+      }
     }
-  }
+
+    loadBabies()
+  }, [loadBabiesOperation])
 
   const handleBabySelect = async (baby: Baby) => {
     try {
-      await babyService.setActiveBaby(baby.id)
+      await setActiveBabyOperation.execute(baby.id)
       setActiveBaby(baby)
       setIsOpen(false)
       if (onBabyChange) {
@@ -50,10 +52,10 @@ export const BabySelector: React.FC<BabySelectorProps> = ({
     }
   }
 
-  if (loading) {
+  if (loadBabiesOperation.loading && babies.length === 0) {
     return (
-      <div className={`animate-pulse ${className}`}>
-        <div className='h-10 bg-gray-200 rounded-lg'></div>
+      <div className={className}>
+        <LoadingState message='Loading babies...' size='sm' />
       </div>
     )
   }

@@ -4,12 +4,13 @@ import { Input } from './Input'
 export interface BabyFormData {
   name: string
   birthdate: string
+  [key: string]: unknown
 }
 
 interface BabyFormProps {
   values: BabyFormData
   errors: Record<string, string>
-  onChange: (field: keyof BabyFormData, value: string) => void
+  onChange: (field: keyof BabyFormData, value: unknown) => void
   disabled?: boolean
 }
 

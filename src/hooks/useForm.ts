@@ -10,13 +10,13 @@ export interface UseFormReturn<T> {
   values: T
   errors: Record<string, string>
   isSubmitting: boolean
-  handleChange: (field: keyof T, value: any) => void
+  handleChange: (field: keyof T, value: unknown) => void
   handleSubmit: (e: React.FormEvent) => Promise<void>
   reset: () => void
   setValues: (values: T) => void
 }
 
-export function useForm<T extends Record<string, any>>({
+export function useForm<T extends Record<string, unknown>>({
   initialValues,
   validate,
   onSubmit,
@@ -25,16 +25,18 @@ export function useForm<T extends Record<string, any>>({
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleChange = useCallback(
-    (field: keyof T, value: any) => {
-      setValues((prev) => ({ ...prev, [field]: value }))
-      // Clear error for this field when user starts typing
-      if (errors[field as string]) {
-        setErrors((prev) => ({ ...prev, [field as string]: '' }))
+  const handleChange = useCallback((field: keyof T, value: unknown) => {
+    setValues((prev) => ({ ...prev, [field]: value }))
+    // Clear error for this field when user starts typing
+    setErrors((prev) => {
+      if (prev[field as string]) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { [field as string]: _, ...rest } = prev
+        return rest
       }
-    },
-    [errors]
-  )
+      return prev
+    })
+  }, [])
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -54,9 +56,6 @@ export function useForm<T extends Record<string, any>>({
       setIsSubmitting(true)
       try {
         await onSubmit(values)
-      } catch (error) {
-        // Let the parent component handle the error
-        throw error
       } finally {
         setIsSubmitting(false)
       }
