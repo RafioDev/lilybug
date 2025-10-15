@@ -69,6 +69,8 @@ export const AIHomePage: React.FC = () => {
   const [messages, setMessages] = useState<AIMessage[]>([])
   const [inputText, setInputText] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
+  const [isLoading, setIsLoading] = useState(true) // Full page loading (initial only)
+  const [isUpdatingData, setIsUpdatingData] = useState(false) // Subtle loading for data updates
   const [activeBaby, setActiveBaby] = useState<Baby | null>(null)
   const [entries, setEntries] = useState<TrackerEntry[]>([])
   const [todayStats, setTodayStats] = useState({
@@ -94,8 +96,14 @@ export const AIHomePage: React.FC = () => {
   const recognitionRef = useRef<SpeechRecognitionInterface | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async (isInitialLoad = false) => {
     try {
+      if (isInitialLoad) {
+        setIsLoading(true)
+      } else {
+        setIsUpdatingData(true)
+      }
+
       const activeBabyData = await babyService.getActiveBaby()
       const entriesData = await trackerService.getEntries(
         100,
@@ -127,6 +135,12 @@ export const AIHomePage: React.FC = () => {
       setTodayStats(stats)
     } catch (error) {
       console.error('Error loading data:', error)
+    } finally {
+      if (isInitialLoad) {
+        setIsLoading(false)
+      } else {
+        setIsUpdatingData(false)
+      }
     }
   }, [])
 
@@ -158,8 +172,8 @@ export const AIHomePage: React.FC = () => {
             )
             responseContent = actionResult
 
-            // Refresh data
-            await loadData()
+            // Refresh data (not initial load)
+            await loadData(false)
           }
         } else if (action.type === 'start_timer') {
           const feedingTypeText =
@@ -238,8 +252,9 @@ export const AIHomePage: React.FC = () => {
     [processMessage]
   )
 
+  // Initial data load and setup - runs only once
   useEffect(() => {
-    loadData()
+    loadData(true)
 
     // Initialize speech recognition
     if (window.webkitSpeechRecognition || window.SpeechRecognition) {
@@ -254,11 +269,6 @@ export const AIHomePage: React.FC = () => {
 
         recognitionRef.current.onstart = () => {
           setIsListening(true)
-        }
-
-        recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
-          const transcript = event.results[0][0].transcript
-          handleVoiceInput(transcript)
         }
 
         recognitionRef.current.onerror = (
@@ -282,7 +292,17 @@ export const AIHomePage: React.FC = () => {
       timestamp: new Date(),
     }
     setMessages([welcomeMessage])
-  }, [handleVoiceInput, loadData])
+  }, [loadData]) // Empty dependency array - runs only once
+
+  // Update speech recognition handler when handleVoiceInput changes
+  useEffect(() => {
+    if (recognitionRef.current) {
+      recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
+        const transcript = event.results[0][0].transcript
+        handleVoiceInput(transcript)
+      }
+    }
+  }, [handleVoiceInput])
 
   useEffect(() => {
     scrollToBottom()
@@ -340,7 +360,7 @@ export const AIHomePage: React.FC = () => {
   const deleteEntry = async (id: string) => {
     try {
       await trackerService.deleteEntry(id)
-      await loadData()
+      await loadData(false)
     } catch (error) {
       console.error('Error deleting entry:', error)
     }
@@ -385,7 +405,7 @@ export const AIHomePage: React.FC = () => {
       }
 
       await trackerService.createEntry(entry)
-      await loadData()
+      await loadData(false)
       setIsManualEntryModalOpen(false)
     } catch (error) {
       console.error('Error creating manual entry:', error)
@@ -459,6 +479,79 @@ export const AIHomePage: React.FC = () => {
     }
   }
 
+  // Show loading state while data is being fetched
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className='max-w-4xl mx-auto space-y-6'>
+          {/* Header */}
+          <div className='text-center space-y-2'>
+            <div className='flex items-center justify-center gap-3'>
+              <div className='p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full'>
+                <Sparkles className='w-8 h-8 text-white' />
+              </div>
+              <h1 className='text-3xl font-bold text-gray-800'>
+                AI Baby Tracker
+              </h1>
+            </div>
+            <p className='text-gray-600'>Loading...</p>
+          </div>
+
+          {/* Loading Stats */}
+          <div className='grid grid-cols-3 gap-4'>
+            <Card className='text-center'>
+              <div className='w-8 h-8 bg-gray-200 rounded mx-auto mb-2 animate-pulse'></div>
+              <div className='text-sm text-gray-400'>Loading...</div>
+            </Card>
+            <Card className='text-center'>
+              <div className='w-8 h-8 bg-gray-200 rounded mx-auto mb-2 animate-pulse'></div>
+              <div className='text-sm text-gray-400'>Loading...</div>
+            </Card>
+            <Card className='text-center'>
+              <div className='w-8 h-8 bg-gray-200 rounded mx-auto mb-2 animate-pulse'></div>
+              <div className='text-sm text-gray-400'>Loading...</div>
+            </Card>
+          </div>
+
+          {/* Loading Voice Interface */}
+          <Card className='p-8'>
+            <div className='flex flex-col items-center space-y-6'>
+              <div className='w-24 h-24 bg-gray-200 rounded-full animate-pulse'></div>
+              <div className='text-center'>
+                <div className='w-32 h-6 bg-gray-200 rounded mx-auto mb-2 animate-pulse'></div>
+                <div className='w-48 h-4 bg-gray-200 rounded mx-auto animate-pulse'></div>
+              </div>
+            </div>
+          </Card>
+
+          {/* Loading Activities */}
+          <Card>
+            <div className='flex items-center justify-between mb-4'>
+              <div className='flex items-center gap-3'>
+                <Clock className='w-5 h-5 text-gray-400' />
+                <div className='w-32 h-5 bg-gray-200 rounded animate-pulse'></div>
+              </div>
+            </div>
+            <div className='space-y-3'>
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className='flex items-center gap-3 p-3 bg-gray-50 rounded-lg'
+                >
+                  <div className='w-8 h-8 bg-gray-200 rounded animate-pulse'></div>
+                  <div className='flex-1'>
+                    <div className='w-48 h-4 bg-gray-200 rounded mb-1 animate-pulse'></div>
+                    <div className='w-24 h-3 bg-gray-200 rounded animate-pulse'></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
+      </Layout>
+    )
+  }
+
   return (
     <Layout>
       <div className='max-w-4xl mx-auto space-y-6'>
@@ -482,21 +575,45 @@ export const AIHomePage: React.FC = () => {
         {/* Today's Summary */}
         {activeBaby && (
           <div className='grid grid-cols-3 gap-4'>
-            <Card className='text-center'>
+            <Card
+              className={`text-center transition-opacity ${
+                isUpdatingData ? 'opacity-60' : ''
+              }`}
+            >
               <div className='text-2xl font-bold text-blue-600'>
-                {todayStats.feedings}
+                {isUpdatingData ? (
+                  <div className='w-8 h-8 bg-blue-200 rounded mx-auto animate-pulse'></div>
+                ) : (
+                  todayStats.feedings
+                )}
               </div>
               <div className='text-sm text-gray-600'>Feedings Today</div>
             </Card>
-            <Card className='text-center'>
+            <Card
+              className={`text-center transition-opacity ${
+                isUpdatingData ? 'opacity-60' : ''
+              }`}
+            >
               <div className='text-2xl font-bold text-cyan-600'>
-                {todayStats.sleepHours.toFixed(1)}h
+                {isUpdatingData ? (
+                  <div className='w-8 h-8 bg-cyan-200 rounded mx-auto animate-pulse'></div>
+                ) : (
+                  `${todayStats.sleepHours.toFixed(1)}h`
+                )}
               </div>
               <div className='text-sm text-gray-600'>Sleep Today</div>
             </Card>
-            <Card className='text-center'>
+            <Card
+              className={`text-center transition-opacity ${
+                isUpdatingData ? 'opacity-60' : ''
+              }`}
+            >
               <div className='text-2xl font-bold text-emerald-600'>
-                {todayStats.diapers}
+                {isUpdatingData ? (
+                  <div className='w-8 h-8 bg-emerald-200 rounded mx-auto animate-pulse'></div>
+                ) : (
+                  todayStats.diapers
+                )}
               </div>
               <div className='text-sm text-gray-600'>Diapers Today</div>
             </Card>
@@ -509,12 +626,14 @@ export const AIHomePage: React.FC = () => {
             {/* Primary Voice Button */}
             <button
               onClick={isListening ? stopListening : startListening}
-              disabled={isProcessing}
+              disabled={isProcessing || isLoading}
               className={`w-24 h-24 rounded-full transition-all duration-200 ${
                 isListening
                   ? 'bg-red-500 animate-pulse shadow-lg scale-110'
                   : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:shadow-lg hover:scale-105'
-              } ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+              } ${
+                isProcessing || isLoading ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
               {isListening ? (
                 <MicOff className='w-12 h-12 text-white mx-auto' />
@@ -578,10 +697,11 @@ export const AIHomePage: React.FC = () => {
                 onChange={setInputText}
                 placeholder='Or type your request here...'
                 className='flex-1'
+                disabled={isLoading}
               />
               <Button
                 onClick={handleTextInput}
-                disabled={!inputText.trim() || isProcessing}
+                disabled={!inputText.trim() || isProcessing || isLoading}
                 className='px-4'
               >
                 <Send className='w-4 h-4' />
@@ -596,11 +716,18 @@ export const AIHomePage: React.FC = () => {
             <div className='flex items-center gap-3'>
               <Clock className='w-5 h-5 text-gray-600' />
               <h3 className='font-semibold text-gray-800'>Recent Activities</h3>
+              {isUpdatingData && (
+                <div className='flex items-center gap-2 text-sm text-blue-600'>
+                  <div className='w-3 h-3 bg-blue-400 rounded-full animate-pulse'></div>
+                  <span>Updating...</span>
+                </div>
+              )}
             </div>
             <Button
               onClick={openManualEntryModal}
               variant='outline'
               className='text-sm'
+              disabled={isLoading}
             >
               Manual Entry
             </Button>
@@ -615,7 +742,11 @@ export const AIHomePage: React.FC = () => {
               </p>
             </div>
           ) : (
-            <div className='space-y-3 max-h-96 overflow-y-auto'>
+            <div
+              className={`space-y-3 max-h-96 overflow-y-auto transition-opacity ${
+                isUpdatingData ? 'opacity-70' : ''
+              }`}
+            >
               {entries.slice(0, 10).map((entry) => (
                 <div
                   key={entry.id}
