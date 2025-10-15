@@ -1,6 +1,6 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
-import { Sparkles, Heart, Shield, Clock, Users } from 'lucide-react'
+import { Sparkles, Heart, Shield, Users } from 'lucide-react'
 import { UserDropdown } from './UserDropdown'
 import { useUserProfile } from '../hooks/useUserProfile'
 

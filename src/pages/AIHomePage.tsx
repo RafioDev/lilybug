@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import { Mic, MicOff, Send, Sparkles, Clock, Edit3, Trash2 } from 'lucide-react'
+import { Mic, MicOff, Send, Sparkles, Clock } from 'lucide-react'
 import { Layout } from '../components/Layout'
 import { Card } from '../components/Card'
 import { Button } from '../components/Button'
