@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import {
   Plus,
   Edit2,
@@ -10,23 +10,20 @@ import {
 import { babyService } from '../services/babyService'
 import { migrateBabyData } from '../utils/migrateBabyData'
 import { dateUtils } from '../utils/dateUtils'
-import { EditBabyModal } from '../components/EditBabyModal'
-import { AddBabyModal } from '../components/AddBabyModal'
+import { BabyModal } from '../components/BabyModal'
+import { LoadingState } from '../components/LoadingState'
+import { useAsyncOperation } from '../hooks/useAsyncOperation'
 import type { Baby } from '../types'
 
 export const BabyManagementPage: React.FC = () => {
   const [babies, setBabies] = useState<Baby[]>([])
-  const [loading, setLoading] = useState(true)
   const [editingBaby, setEditingBaby] = useState<Baby | null>(null)
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [isBabyModalOpen, setIsBabyModalOpen] = useState(false)
   const [migrating, setMigrating] = useState(false)
   const [showMigrationButton, setShowMigrationButton] = useState(false)
 
-  useEffect(() => {
-    loadBabies()
-    checkMigrationNeeded()
-  }, [])
+  // Use async operation hook for data loading
+  const loadBabiesOperation = useAsyncOperation(babyService.getBabies)
 
   const checkMigrationNeeded = async () => {
     try {
@@ -37,16 +34,19 @@ export const BabyManagementPage: React.FC = () => {
     }
   }
 
-  const loadBabies = async () => {
+  const loadBabies = useCallback(async () => {
     try {
-      const data = await babyService.getBabies()
+      const data = await loadBabiesOperation.execute()
       setBabies(data)
     } catch (error) {
       console.error('Error loading babies:', error)
-    } finally {
-      setLoading(false)
     }
-  }
+  }, [loadBabiesOperation])
+
+  useEffect(() => {
+    loadBabies()
+    checkMigrationNeeded()
+  }, [loadBabies])
 
   const handleSetActive = async (babyId: string) => {
     try {
@@ -76,7 +76,12 @@ export const BabyManagementPage: React.FC = () => {
 
   const startEdit = (baby: Baby) => {
     setEditingBaby(baby)
-    setIsEditModalOpen(true)
+    setIsBabyModalOpen(true)
+  }
+
+  const startAdd = () => {
+    setEditingBaby(null)
+    setIsBabyModalOpen(true)
   }
 
   const handleMigration = async () => {
@@ -98,36 +103,24 @@ export const BabyManagementPage: React.FC = () => {
     }
   }
 
-  const handleAddSave = async () => {
+  const handleBabySave = async () => {
     await loadBabies()
   }
 
-  const handleAddError = (error: string) => {
-    console.error('Add error:', error)
+  const handleBabyError = (error: string) => {
+    console.error('Baby operation error:', error)
     // You could add a toast notification here
   }
 
-  const handleEditSave = async () => {
-    await loadBabies()
-  }
-
-  const handleEditError = (error: string) => {
-    console.error('Edit error:', error)
-    // You could add a toast notification here
-  }
-
-  const handleEditClose = () => {
-    setIsEditModalOpen(false)
+  const handleBabyClose = () => {
+    setIsBabyModalOpen(false)
     setEditingBaby(null)
   }
 
-  if (loading) {
+  if (loadBabiesOperation.loading && babies.length === 0) {
     return (
       <div className='min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center'>
-        <div className='animate-pulse space-y-4'>
-          <div className='w-16 h-16 bg-blue-200 dark:bg-blue-800 rounded-full mx-auto'></div>
-          <p className='text-gray-500 dark:text-gray-400'>Loading babies...</p>
-        </div>
+        <LoadingState message='Loading babies...' size='lg' />
       </div>
     )
   }
@@ -157,7 +150,7 @@ export const BabyManagementPage: React.FC = () => {
             )}
 
             <button
-              onClick={() => setIsAddModalOpen(true)}
+              onClick={startAdd}
               className='flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors'
             >
               <Plus className='w-4 h-4' />
@@ -178,7 +171,7 @@ export const BabyManagementPage: React.FC = () => {
                 Add your first baby to start tracking
               </p>
               <button
-                onClick={() => setIsAddModalOpen(true)}
+                onClick={startAdd}
                 className='bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors'
               >
                 Add Your First Baby
@@ -260,22 +253,14 @@ export const BabyManagementPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Add Baby Modal */}
-      <AddBabyModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onSave={handleAddSave}
-        onError={handleAddError}
-        isFirstBaby={babies.length === 0}
-      />
-
-      {/* Edit Baby Modal */}
-      <EditBabyModal
-        isOpen={isEditModalOpen}
+      {/* Baby Modal (unified add/edit) */}
+      <BabyModal
+        isOpen={isBabyModalOpen}
+        onClose={handleBabyClose}
+        onSave={handleBabySave}
+        onError={handleBabyError}
         baby={editingBaby}
-        onClose={handleEditClose}
-        onSave={handleEditSave}
-        onError={handleEditError}
+        isFirstBaby={babies.length === 0}
       />
     </div>
   )
