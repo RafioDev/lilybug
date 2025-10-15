@@ -10,20 +10,18 @@ import {
 import { babyService } from '../services/babyService'
 import { migrateBabyData } from '../utils/migrateBabyData'
 import { dateUtils } from '../utils/dateUtils'
-import { Input } from '../components/Input'
+import { EditBabyModal } from '../components/EditBabyModal'
+import { AddBabyModal } from '../components/AddBabyModal'
 import type { Baby } from '../types'
 
 export const BabyManagementPage: React.FC = () => {
   const [babies, setBabies] = useState<Baby[]>([])
   const [loading, setLoading] = useState(true)
-  const [showAddForm, setShowAddForm] = useState(false)
   const [editingBaby, setEditingBaby] = useState<Baby | null>(null)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [migrating, setMigrating] = useState(false)
   const [showMigrationButton, setShowMigrationButton] = useState(false)
-  const [formData, setFormData] = useState({
-    name: '',
-    birthdate: '',
-  })
 
   useEffect(() => {
     loadBabies()
@@ -47,30 +45,6 @@ export const BabyManagementPage: React.FC = () => {
       console.error('Error loading babies:', error)
     } finally {
       setLoading(false)
-    }
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    try {
-      if (editingBaby) {
-        await babyService.updateBaby(editingBaby.id, {
-          name: formData.name,
-          birthdate: formData.birthdate,
-        })
-      } else {
-        await babyService.createBaby({
-          name: formData.name,
-          birthdate: formData.birthdate,
-          is_active: babies.length === 0, // First baby is active by default
-        })
-      }
-
-      await loadBabies()
-      resetForm()
-    } catch (error) {
-      console.error('Error saving baby:', error)
     }
   }
 
@@ -102,11 +76,7 @@ export const BabyManagementPage: React.FC = () => {
 
   const startEdit = (baby: Baby) => {
     setEditingBaby(baby)
-    setFormData({
-      name: baby.name,
-      birthdate: baby.birthdate,
-    })
-    setShowAddForm(true)
+    setIsEditModalOpen(true)
   }
 
   const handleMigration = async () => {
@@ -128,9 +98,26 @@ export const BabyManagementPage: React.FC = () => {
     }
   }
 
-  const resetForm = () => {
-    setFormData({ name: '', birthdate: '' })
-    setShowAddForm(false)
+  const handleAddSave = async () => {
+    await loadBabies()
+  }
+
+  const handleAddError = (error: string) => {
+    console.error('Add error:', error)
+    // You could add a toast notification here
+  }
+
+  const handleEditSave = async () => {
+    await loadBabies()
+  }
+
+  const handleEditError = (error: string) => {
+    console.error('Edit error:', error)
+    // You could add a toast notification here
+  }
+
+  const handleEditClose = () => {
+    setIsEditModalOpen(false)
     setEditingBaby(null)
   }
 
@@ -170,7 +157,7 @@ export const BabyManagementPage: React.FC = () => {
             )}
 
             <button
-              onClick={() => setShowAddForm(true)}
+              onClick={() => setIsAddModalOpen(true)}
               className='flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors'
             >
               <Plus className='w-4 h-4' />
@@ -178,59 +165,6 @@ export const BabyManagementPage: React.FC = () => {
             </button>
           </div>
         </div>
-
-        {/* Add/Edit Form */}
-        {showAddForm && (
-          <div className='bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6'>
-            <h2 className='text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4'>
-              {editingBaby ? 'Edit Baby' : 'Add New Baby'}
-            </h2>
-            <form onSubmit={handleSubmit} className='space-y-4'>
-              <div>
-                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
-                  Baby's Name
-                </label>
-                <Input
-                  type='text'
-                  value={formData.name}
-                  onChange={(value) =>
-                    setFormData({ ...formData, name: value })
-                  }
-                  placeholder="Enter baby's name"
-                  required
-                />
-              </div>
-              <div>
-                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
-                  Birth Date
-                </label>
-                <Input
-                  type='date'
-                  value={formData.birthdate}
-                  onChange={(value) =>
-                    setFormData({ ...formData, birthdate: value })
-                  }
-                  required
-                />
-              </div>
-              <div className='flex gap-3'>
-                <button
-                  type='submit'
-                  className='bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors'
-                >
-                  {editingBaby ? 'Update Baby' : 'Add Baby'}
-                </button>
-                <button
-                  type='button'
-                  onClick={resetForm}
-                  className='bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors'
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
 
         {/* Babies List */}
         <div className='space-y-4'>
@@ -244,7 +178,7 @@ export const BabyManagementPage: React.FC = () => {
                 Add your first baby to start tracking
               </p>
               <button
-                onClick={() => setShowAddForm(true)}
+                onClick={() => setIsAddModalOpen(true)}
                 className='bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors'
               >
                 Add Your First Baby
@@ -325,6 +259,24 @@ export const BabyManagementPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Add Baby Modal */}
+      <AddBabyModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSave={handleAddSave}
+        onError={handleAddError}
+        isFirstBaby={babies.length === 0}
+      />
+
+      {/* Edit Baby Modal */}
+      <EditBabyModal
+        isOpen={isEditModalOpen}
+        baby={editingBaby}
+        onClose={handleEditClose}
+        onSave={handleEditSave}
+        onError={handleEditError}
+      />
     </div>
   )
 }
