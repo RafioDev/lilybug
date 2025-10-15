@@ -57,6 +57,16 @@ export interface NewTrackerEntry {
   notes?: string | null
 }
 
+export interface UpdateTrackerEntry {
+  entry_type?: EntryType
+  start_time?: string
+  end_time?: string | null
+  quantity?: number | null
+  feeding_type?: FeedingType | null
+  diaper_type?: DiaperType | null
+  notes?: string | null
+}
+
 export interface NewWellnessEntry {
   date: string
   parent_name: string
