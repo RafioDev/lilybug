@@ -367,115 +367,80 @@ export const AIHomePage: React.FC = () => {
           </div>
         )}
 
-        {/* Main AI Chat Interface */}
-        <Card className='h-96 flex flex-col'>
-          {/* Chat Messages */}
-          <div className='flex-1 overflow-y-auto p-4 space-y-4'>
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex gap-3 ${
-                  message.type === 'user' ? 'justify-end' : 'justify-start'
-                }`}
-              >
-                <div
-                  className={`max-w-[80%] p-4 rounded-2xl ${
-                    message.type === 'user'
-                      ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white'
-                      : 'bg-gray-100 text-gray-900'
-                  }`}
-                >
-                  <p className='whitespace-pre-line'>{message.content}</p>
-                  <div
-                    className={`text-xs mt-2 ${
-                      message.type === 'user'
-                        ? 'text-blue-100'
-                        : 'text-gray-500'
-                    }`}
-                  >
-                    {message.isVoice && '🎤 '}
-                    {formatTime(message.timestamp)}
-                  </div>
+        {/* AI Voice Command Interface */}
+        <Card className='p-8'>
+          <div className='flex flex-col items-center space-y-6'>
+            {/* Primary Voice Button */}
+            <button
+              onClick={isListening ? stopListening : startListening}
+              disabled={isProcessing}
+              className={`w-24 h-24 rounded-full transition-all duration-200 ${
+                isListening
+                  ? 'bg-red-500 animate-pulse shadow-lg scale-110'
+                  : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:shadow-lg hover:scale-105'
+              } ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              {isListening ? (
+                <MicOff className='w-12 h-12 text-white mx-auto' />
+              ) : (
+                <Mic className='w-12 h-12 text-white mx-auto' />
+              )}
+            </button>
+
+            {/* Status Text */}
+            {isListening ? (
+              <div className='text-center'>
+                <div className='text-blue-600 font-medium animate-pulse text-lg'>
+                  🎤 Listening...
+                </div>
+                <div className='text-sm text-gray-500'>
+                  Say something like "Log a bottle feeding"
                 </div>
               </div>
-            ))}
-
-            {isProcessing && (
-              <div className='flex justify-start'>
-                <div className='bg-gray-100 text-gray-900 p-4 rounded-2xl'>
-                  <div className='flex space-x-1'>
-                    <div className='w-2 h-2 bg-gray-400 rounded-full animate-bounce'></div>
-                    <div
-                      className='w-2 h-2 bg-gray-400 rounded-full animate-bounce'
-                      style={{ animationDelay: '0.1s' }}
-                    ></div>
-                    <div
-                      className='w-2 h-2 bg-gray-400 rounded-full animate-bounce'
-                      style={{ animationDelay: '0.2s' }}
-                    ></div>
-                  </div>
+            ) : isProcessing ? (
+              <div className='text-center'>
+                <div className='text-blue-600 font-medium text-lg'>
+                  Processing...
+                </div>
+                <div className='flex justify-center space-x-1 mt-2'>
+                  <div className='w-2 h-2 bg-blue-400 rounded-full animate-bounce'></div>
+                  <div
+                    className='w-2 h-2 bg-blue-400 rounded-full animate-bounce'
+                    style={{ animationDelay: '0.1s' }}
+                  ></div>
+                  <div
+                    className='w-2 h-2 bg-blue-400 rounded-full animate-bounce'
+                    style={{ animationDelay: '0.2s' }}
+                  ></div>
+                </div>
+              </div>
+            ) : (
+              <div className='text-center'>
+                <div className='text-gray-700 font-medium text-lg'>
+                  Tap to speak
+                </div>
+                <div className='text-sm text-gray-500'>
+                  Or type below if needed
                 </div>
               </div>
             )}
 
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Voice-First Input */}
-          <div className='p-4 border-t border-gray-200'>
-            {/* Primary Voice Button */}
-            <div className='flex flex-col items-center space-y-4'>
-              <button
-                onClick={isListening ? stopListening : startListening}
-                disabled={isProcessing}
-                className={`w-20 h-20 rounded-full transition-all duration-200 ${
-                  isListening
-                    ? 'bg-red-500 animate-pulse shadow-lg scale-110'
-                    : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:shadow-lg hover:scale-105'
-                } ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+            {/* Secondary Text Input */}
+            <div className='w-full max-w-md flex gap-2'>
+              <Input
+                type='text'
+                value={inputText}
+                onChange={setInputText}
+                placeholder='Or type your request here...'
+                className='flex-1'
+              />
+              <Button
+                onClick={handleTextInput}
+                disabled={!inputText.trim() || isProcessing}
+                className='px-4'
               >
-                {isListening ? (
-                  <MicOff className='w-10 h-10 text-white mx-auto' />
-                ) : (
-                  <Mic className='w-10 h-10 text-white mx-auto' />
-                )}
-              </button>
-
-              {isListening ? (
-                <div className='text-center'>
-                  <div className='text-blue-600 font-medium animate-pulse'>
-                    🎤 Listening...
-                  </div>
-                  <div className='text-sm text-gray-500'>
-                    Say something like "Log a bottle feeding"
-                  </div>
-                </div>
-              ) : (
-                <div className='text-center'>
-                  <div className='text-gray-700 font-medium'>Tap to speak</div>
-                  <div className='text-sm text-gray-500'>
-                    Or type below if needed
-                  </div>
-                </div>
-              )}
-
-              {/* Secondary Text Input */}
-              <div className='w-full flex gap-2'>
-                <Input
-                  type='text'
-                  value={inputText}
-                  onChange={setInputText}
-                  placeholder='Or type your request here...'
-                  className='flex-1'
-                />
-                <Button
-                  onClick={handleTextInput}
-                  disabled={!inputText.trim() || isProcessing}
-                  className='px-4'
-                >
-                  <Send className='w-4 h-4' />
-                </Button>
-              </div>
+                <Send className='w-4 h-4' />
+              </Button>
             </div>
           </div>
         </Card>
