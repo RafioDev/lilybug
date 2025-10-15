@@ -66,4 +66,82 @@ export const dateUtils = {
   createSafeDate(dateString: string): Date {
     return new Date(dateString + 'T00:00:00')
   },
+
+  /**
+   * Calculate duration between two timestamps in minutes
+   */
+  calculateDurationMinutes(startTime: string, endTime: string): number {
+    const start = new Date(startTime)
+    const end = new Date(endTime)
+    return Math.round((end.getTime() - start.getTime()) / (1000 * 60))
+  },
+
+  /**
+   * Format duration in minutes to human-readable string
+   */
+  formatDuration(minutes: number): string {
+    if (minutes < 60) {
+      return `${minutes}m`
+    }
+
+    const hours = Math.floor(minutes / 60)
+    const remainingMinutes = minutes % 60
+
+    if (remainingMinutes === 0) {
+      return `${hours}h`
+    }
+
+    return `${hours}h ${remainingMinutes}m`
+  },
+
+  /**
+   * Calculate and format duration from start and end timestamps
+   */
+  calculateAndFormatDuration(
+    startTime: string,
+    endTime?: string | null
+  ): string | null {
+    if (!endTime) return null
+
+    const minutes = this.calculateDurationMinutes(startTime, endTime)
+    return this.formatDuration(minutes)
+  },
+
+  /**
+   * Format relative time (e.g., "2h ago", "30m ago", "yesterday")
+   */
+  formatRelativeTime(timestamp: string): string {
+    const date = new Date(timestamp)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMinutes = Math.floor(diffMs / (1000 * 60))
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+
+    if (diffMinutes < 1) {
+      return 'just now'
+    } else if (diffMinutes < 60) {
+      return `${diffMinutes}m ago`
+    } else if (diffHours < 24) {
+      return `${diffHours}h ago`
+    } else if (diffDays === 1) {
+      return 'yesterday'
+    } else if (diffDays < 7) {
+      return `${diffDays}d ago`
+    } else {
+      return date.toLocaleDateString()
+    }
+  },
+
+  /**
+   * Format quantity with appropriate units
+   */
+  formatQuantity(quantity: number, entryType: string): string {
+    if (entryType === 'pumping') {
+      return `${quantity}oz`
+    } else if (entryType === 'feeding') {
+      return `${quantity}ml`
+    }
+    return quantity.toString()
+  },
 }

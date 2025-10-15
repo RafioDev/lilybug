@@ -9,6 +9,7 @@ import { smartSearchService } from '../services/smartSearchService'
 import { trackerService } from '../services/trackerService'
 import { babyService } from '../services/babyService'
 import { aiService } from '../services/aiService'
+import { activityUtils } from '../utils/activityUtils'
 import { Modal } from '../components/Modal'
 import { EditActivityModal } from '../components/EditActivityModal'
 import type {
@@ -343,21 +344,6 @@ export const AIHomePage: React.FC = () => {
     await processMessage(message)
   }
 
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case 'feeding':
-        return '🍼'
-      case 'sleep':
-        return '😴'
-      case 'diaper':
-        return '👶'
-      case 'pumping':
-        return '🥛'
-      default:
-        return '📝'
-    }
-  }
-
   // Activities functions
   const deleteEntry = async (id: string) => {
     try {
@@ -447,60 +433,6 @@ export const AIHomePage: React.FC = () => {
         return 'Breast Right'
       case 'bottle':
         return 'Bottle'
-    }
-  }
-
-  const getEntryDetails = (entry: TrackerEntry) => {
-    const startTime = new Date(entry.start_time)
-    const timeStr = startTime.toLocaleString()
-    const feedingType = entry.feeding_type?.replace('_', ' ') || 'feeding'
-    const quantity = entry.quantity ? ` (${entry.quantity}ml)` : ''
-    const diaperType = entry.diaper_type || 'diaper'
-
-    switch (entry.entry_type) {
-      case 'feeding':
-        return `${feedingType}${quantity} at ${timeStr}`
-
-      case 'sleep':
-        if (entry.end_time) {
-          const endTime = new Date(entry.end_time)
-          const duration = Math.round(
-            (endTime.getTime() - startTime.getTime()) / (1000 * 60)
-          )
-          const hours = Math.floor(duration / 60)
-          const minutes = duration % 60
-          const durationStr =
-            hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`
-          return `Sleep for ${durationStr} at ${timeStr}`
-        }
-        return `Sleep started at ${timeStr}`
-
-      case 'diaper':
-        return `${diaperType} diaper at ${timeStr}`
-
-      case 'pumping': {
-        const pumpQuantity = entry.quantity ? ` (${entry.quantity}oz)` : ''
-        return `Pumping${pumpQuantity} at ${timeStr}`
-      }
-
-      default:
-        return `${entry.entry_type} at ${timeStr}`
-    }
-  }
-
-  const formatEntryTime = (entry: TrackerEntry) => {
-    const date = new Date(entry.start_time)
-    const now = new Date()
-    const diffMs = now.getTime() - date.getTime()
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-    const diffMinutes = Math.floor(diffMs / (1000 * 60))
-
-    if (diffMinutes < 60) {
-      return `${diffMinutes}m ago`
-    } else if (diffHours < 24) {
-      return `${diffHours}h ago`
-    } else {
-      return date.toLocaleDateString()
     }
   }
 
@@ -776,14 +708,14 @@ export const AIHomePage: React.FC = () => {
                 >
                   <div className='flex items-center gap-3'>
                     <span className='text-2xl'>
-                      {getActivityIcon(entry.entry_type)}
+                      {activityUtils.getActivityIcon(entry.entry_type)}
                     </span>
                     <div>
                       <p className='font-medium text-gray-900 text-sm'>
-                        {getEntryDetails(entry)}
+                        {activityUtils.getEntryDetails(entry)}
                       </p>
                       <p className='text-xs text-gray-500'>
-                        {formatEntryTime(entry)}
+                        {activityUtils.formatEntryTime(entry)}
                       </p>
                       {entry.notes && (
                         <p className='text-xs text-gray-400 mt-1 italic'>
@@ -831,7 +763,7 @@ export const AIHomePage: React.FC = () => {
           <div className='space-y-4'>
             <div className='flex items-center gap-3 p-3 bg-gray-100 rounded-lg'>
               <span className='text-3xl'>
-                {getActivityIcon(selectedEntry.entry_type)}
+                {activityUtils.getActivityIcon(selectedEntry.entry_type)}
               </span>
               <div>
                 <p className='font-medium text-gray-900 capitalize'>
@@ -961,7 +893,7 @@ export const AIHomePage: React.FC = () => {
                         : 'border-gray-200 text-gray-600'
                     }`}
                   >
-                    {getActivityIcon(type)} {type}
+                    {activityUtils.getActivityIcon(type)} {type}
                   </button>
                 )
               )}
