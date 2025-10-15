@@ -136,24 +136,24 @@ export const BabyManagementPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className='min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 flex items-center justify-center'>
+      <div className='min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center'>
         <div className='animate-pulse space-y-4'>
-          <div className='w-16 h-16 bg-blue-200 rounded-full mx-auto'></div>
-          <p className='text-gray-500'>Loading babies...</p>
+          <div className='w-16 h-16 bg-blue-200 dark:bg-blue-800 rounded-full mx-auto'></div>
+          <p className='text-gray-500 dark:text-gray-400'>Loading babies...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className='min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50'>
+    <div className='min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900'>
       <div className='max-w-4xl mx-auto px-4 py-8'>
         <div className='flex items-center justify-between mb-8'>
           <div>
-            <h1 className='text-3xl font-bold text-gray-900 mb-2'>
+            <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2'>
               Manage Babies
             </h1>
-            <p className='text-gray-600'>
+            <p className='text-gray-600 dark:text-gray-400'>
               Add, edit, or switch between your babies
             </p>
           </div>
@@ -181,13 +181,13 @@ export const BabyManagementPage: React.FC = () => {
 
         {/* Add/Edit Form */}
         {showAddForm && (
-          <div className='bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6'>
-            <h2 className='text-xl font-semibold text-gray-900 mb-4'>
+          <div className='bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6'>
+            <h2 className='text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4'>
               {editingBaby ? 'Edit Baby' : 'Add New Baby'}
             </h2>
             <form onSubmit={handleSubmit} className='space-y-4'>
               <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                   Baby's Name
                 </label>
                 <Input
@@ -201,7 +201,7 @@ export const BabyManagementPage: React.FC = () => {
                 />
               </div>
               <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                   Birth Date
                 </label>
                 <Input
@@ -223,7 +223,7 @@ export const BabyManagementPage: React.FC = () => {
                 <button
                   type='button'
                   onClick={resetForm}
-                  className='bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors'
+                  className='bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors'
                 >
                   Cancel
                 </button>
@@ -236,11 +236,11 @@ export const BabyManagementPage: React.FC = () => {
         <div className='space-y-4'>
           {babies.length === 0 ? (
             <div className='text-center py-12'>
-              <BabyIcon className='w-16 h-16 text-gray-300 mx-auto mb-4' />
-              <h3 className='text-lg font-medium text-gray-900 mb-2'>
+              <BabyIcon className='w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4' />
+              <h3 className='text-lg font-medium text-gray-900 dark:text-gray-100 mb-2'>
                 No babies added yet
               </h3>
-              <p className='text-gray-500 mb-4'>
+              <p className='text-gray-500 dark:text-gray-400 mb-4'>
                 Add your first baby to start tracking
               </p>
               <button
@@ -254,40 +254,44 @@ export const BabyManagementPage: React.FC = () => {
             babies.map((baby) => (
               <div
                 key={baby.id}
-                className={`bg-white rounded-xl shadow-sm border p-6 transition-all ${
+                className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm border p-6 transition-all ${
                   baby.is_active
-                    ? 'border-blue-200 bg-blue-50'
-                    : 'border-gray-200'
+                    ? 'border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20'
+                    : 'border-gray-200 dark:border-gray-700'
                 }`}
               >
                 <div className='flex items-center justify-between'>
                   <div className='flex items-center gap-4'>
                     <div
                       className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                        baby.is_active ? 'bg-blue-100' : 'bg-gray-100'
+                        baby.is_active
+                          ? 'bg-blue-100 dark:bg-blue-900/40'
+                          : 'bg-gray-100 dark:bg-gray-700'
                       }`}
                     >
                       <BabyIcon
                         className={`w-6 h-6 ${
-                          baby.is_active ? 'text-blue-600' : 'text-gray-600'
+                          baby.is_active
+                            ? 'text-blue-600 dark:text-blue-400'
+                            : 'text-gray-600 dark:text-gray-400'
                         }`}
                       />
                     </div>
                     <div>
                       <div className='flex items-center gap-2'>
-                        <h3 className='text-lg font-semibold text-gray-900'>
+                        <h3 className='text-lg font-semibold text-gray-900 dark:text-gray-100'>
                           {baby.name}
                         </h3>
                         {baby.is_active && (
-                          <span className='bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-medium'>
+                          <span className='bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 text-xs px-2 py-1 rounded-full font-medium'>
                             Active
                           </span>
                         )}
                       </div>
-                      <p className='text-gray-600'>
+                      <p className='text-gray-600 dark:text-gray-400'>
                         {dateUtils.calculateDetailedAge(baby.birthdate)}
                       </p>
-                      <p className='text-sm text-gray-500'>
+                      <p className='text-sm text-gray-500 dark:text-gray-500'>
                         Born: {dateUtils.formatBirthdate(baby.birthdate)}
                       </p>
                     </div>
@@ -296,7 +300,7 @@ export const BabyManagementPage: React.FC = () => {
                     {!baby.is_active && (
                       <button
                         onClick={() => handleSetActive(baby.id)}
-                        className='flex items-center gap-1 bg-green-100 text-green-700 px-3 py-1 rounded-lg hover:bg-green-200 transition-colors text-sm'
+                        className='flex items-center gap-1 bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 px-3 py-1 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/60 transition-colors text-sm'
                       >
                         <Check className='w-3 h-3' />
                         Set Active
@@ -304,13 +308,13 @@ export const BabyManagementPage: React.FC = () => {
                     )}
                     <button
                       onClick={() => startEdit(baby)}
-                      className='p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors'
+                      className='p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors'
                     >
                       <Edit2 className='w-4 h-4' />
                     </button>
                     <button
                       onClick={() => handleDelete(baby.id)}
-                      className='p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors'
+                      className='p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors'
                     >
                       <Trash2 className='w-4 h-4' />
                     </button>

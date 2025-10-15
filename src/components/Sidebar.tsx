@@ -3,7 +3,6 @@ import { NavLink } from 'react-router-dom'
 import { Sparkles, Heart, Shield, Users } from 'lucide-react'
 import { UserDropdown } from './UserDropdown'
 import { useUserProfile } from '../hooks/useUserProfile'
-import { ThemeToggle } from './ThemeToggle'
 
 export const Sidebar: React.FC = () => {
   const { displayName, loading } = useUserProfile()
@@ -63,11 +62,6 @@ export const Sidebar: React.FC = () => {
             )
           })}
         </nav>
-
-        {/* Theme Toggle */}
-        <div className='px-4 pb-4'>
-          <ThemeToggle />
-        </div>
 
         {/* User Dropdown */}
         <div className='px-4 pb-6'>

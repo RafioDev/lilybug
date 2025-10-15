@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { User, LogOut, ChevronDown } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { ThemeToggleDropdown } from './ThemeToggle'
 
 interface UserDropdownProps {
   userName: string
@@ -40,7 +41,7 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
       <div className={`relative ${className}`} ref={dropdownRef}>
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className='p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors'
+          className='p-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors'
         >
           <User className='w-5 h-5' />
         </button>
@@ -51,15 +52,15 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
               className='fixed inset-0 z-10'
               onClick={() => setIsOpen(false)}
             />
-            <div className='absolute right-0 top-full mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-20'>
-              <div className='px-4 py-3 border-b border-gray-100'>
-                <p className='text-sm font-medium text-gray-900 truncate'>
+            <div className='absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20'>
+              <div className='px-4 py-3 border-b border-gray-100 dark:border-gray-700'>
+                <p className='text-sm font-medium text-gray-900 dark:text-gray-100 truncate'>
                   {userName}
                 </p>
               </div>
               <button
                 onClick={handleSignOut}
-                className='w-full flex items-center gap-3 px-4 py-3 text-left text-gray-700 hover:bg-gray-50 transition-colors'
+                className='w-full flex items-center gap-3 px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors'
               >
                 <LogOut className='w-4 h-4' />
                 <span className='text-sm'>Sign Out</span>
@@ -76,7 +77,7 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
     <div className={`relative ${className}`} ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className='w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition-all'
+        className='w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all'
       >
         <div className='flex items-center gap-3'>
           <User className='w-5 h-5' />
@@ -95,10 +96,11 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
             className='fixed inset-0 z-10'
             onClick={() => setIsOpen(false)}
           />
-          <div className='absolute left-0 bottom-full mb-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-20'>
+          <div className='absolute left-0 bottom-full mb-2 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20'>
+            <ThemeToggleDropdown />
             <button
               onClick={handleSignOut}
-              className='w-full flex items-center gap-3 px-4 py-3 text-left text-gray-700 hover:bg-gray-50 transition-colors rounded-lg'
+              className='w-full flex items-center gap-3 px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-b-lg'
             >
               <LogOut className='w-4 h-4' />
               <span className='text-sm'>Sign Out</span>
