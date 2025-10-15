@@ -3,42 +3,51 @@ import { babyService } from '../services/babyService'
 import { useAsyncOperation } from './useAsyncOperation'
 import type { Baby } from '../types'
 
+/**
+ * Form data structure for baby operations
+ */
 export interface BabyFormData {
+  /** Baby's name */
   name: string
+  /** Baby's birth date in YYYY-MM-DD format */
   birthdate: string
+  /** Whether this baby should be set as active (optional) */
   is_active?: boolean
 }
 
+/**
+ * Return type for the useBabyOperations hook
+ */
 export interface UseBabyOperationsReturn {
-  // Create operations
+  /** Create a new baby */
   createBaby: {
     execute: (babyData: BabyFormData) => Promise<Baby>
     loading: boolean
     error: string | null
   }
 
-  // Update operations
+  /** Update an existing baby */
   updateBaby: {
     execute: (id: string, updates: Partial<BabyFormData>) => Promise<Baby>
     loading: boolean
     error: string | null
   }
 
-  // Delete operations
+  /** Delete a baby */
   deleteBaby: {
     execute: (id: string) => Promise<void>
     loading: boolean
     error: string | null
   }
 
-  // Set active baby
+  /** Set a baby as the active one */
   setActiveBaby: {
     execute: (id: string) => Promise<void>
     loading: boolean
     error: string | null
   }
 
-  // Load operations
+  /** Load all babies for the current user */
   loadBabies: {
     execute: () => Promise<Baby[]>
     data: Baby[] | null
@@ -46,6 +55,7 @@ export interface UseBabyOperationsReturn {
     error: string | null
   }
 
+  /** Load the currently active baby */
   loadActiveBaby: {
     execute: () => Promise<Baby | null>
     data: Baby | null
@@ -54,6 +64,43 @@ export interface UseBabyOperationsReturn {
   }
 }
 
+/**
+ * Custom hook that provides all baby-related CRUD operations
+ *
+ * Encapsulates all baby management functionality including:
+ * - Creating new babies
+ * - Updating existing baby information
+ * - Deleting babies
+ * - Setting active baby
+ * - Loading babies and active baby data
+ *
+ * Each operation includes loading states and error handling through
+ * the useAsyncOperation hook.
+ *
+ * @returns Object containing all baby operations with their states
+ *
+ * @example
+ * ```tsx
+ * const { createBaby, loadBabies } = useBabyOperations()
+ *
+ * // Create a new baby
+ * const handleCreate = async () => {
+ *   try {
+ *     await createBaby.execute({
+ *       name: 'Baby Name',
+ *       birthdate: '2024-01-01'
+ *     })
+ *   } catch (error) {
+ *     // Handle error
+ *   }
+ * }
+ *
+ * // Load all babies
+ * useEffect(() => {
+ *   loadBabies.execute()
+ * }, [])
+ * ```
+ */
 export function useBabyOperations(): UseBabyOperationsReturn {
   // Create baby operation
   const createBabyOperation = useAsyncOperation(

@@ -1,21 +1,67 @@
 import { useState, useCallback, useMemo } from 'react'
 
+/**
+ * Configuration options for the useForm hook
+ * @template T - The type of form values
+ */
 export interface UseFormOptions<T> {
+  /** Initial values for the form fields */
   initialValues: T
+  /** Optional validation function that returns field errors */
   validate?: (values: T) => Record<string, string>
+  /** Function called when form is submitted with valid data */
   onSubmit: (values: T) => Promise<void>
 }
 
+/**
+ * Return type for the useForm hook
+ * @template T - The type of form values
+ */
 export interface UseFormReturn<T> {
+  /** Current form field values */
   values: T
+  /** Current validation errors by field name */
   errors: Record<string, string>
+  /** Whether the form is currently being submitted */
   isSubmitting: boolean
+  /** Handler to update a specific form field */
   handleChange: (field: keyof T, value: unknown) => void
+  /** Handler for form submission */
   handleSubmit: (e: React.FormEvent) => Promise<void>
+  /** Reset form to initial state */
   reset: () => void
+  /** Set all form values at once */
   setValues: (values: T) => void
 }
 
+/**
+ * Custom hook for managing form state, validation, and submission
+ *
+ * Provides a complete form management solution with:
+ * - Form state management
+ * - Real-time validation with error clearing
+ * - Submission handling with loading states
+ * - Form reset functionality
+ *
+ * @template T - The type of form values (must extend Record<string, unknown>)
+ * @param options - Configuration options for the form
+ * @returns Form state and handlers
+ *
+ * @example
+ * ```tsx
+ * const form = useForm({
+ *   initialValues: { name: '', email: '' },
+ *   validate: (values) => {
+ *     const errors = {}
+ *     if (!values.name) errors.name = 'Name is required'
+ *     return errors
+ *   },
+ *   onSubmit: async (values) => {
+ *     await submitForm(values)
+ *   }
+ * })
+ * ```
+ */
 export function useForm<T extends Record<string, unknown>>({
   initialValues,
   validate,

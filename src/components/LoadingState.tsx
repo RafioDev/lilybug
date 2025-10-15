@@ -1,11 +1,38 @@
 import React, { memo } from 'react'
 
+/**
+ * Props for the LoadingState component
+ */
 interface LoadingStateProps {
+  /** Custom loading message to display */
   message?: string
+  /** Size of the loading spinner and text */
   size?: 'sm' | 'md' | 'lg'
+  /** Additional CSS classes to apply */
   className?: string
 }
 
+/**
+ * A reusable loading state component with spinner and message
+ *
+ * Provides a consistent loading indicator across the application with:
+ * - Animated spinner with theme support (light/dark)
+ * - Customizable loading message
+ * - Multiple size options
+ * - Accessibility features (role, aria-live)
+ * - Additional styling support via className
+ *
+ * The component is memoized to prevent unnecessary re-renders.
+ *
+ * @param props - The component props
+ * @returns A loading indicator with spinner and message
+ *
+ * @example
+ * ```tsx
+ * <LoadingState message="Loading babies..." size="lg" />
+ * <LoadingState /> // Uses default "Loading..." message
+ * ```
+ */
 export const LoadingState: React.FC<LoadingStateProps> = memo(
   ({ message = 'Loading...', size = 'md', className = '' }) => {
     const sizeClasses = {

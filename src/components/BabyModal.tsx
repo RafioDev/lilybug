@@ -5,15 +5,63 @@ import { useForm } from '../hooks/useForm'
 import { useBabyOperations } from '../hooks/useBabyOperations'
 import type { Baby } from '../types'
 
+/**
+ * Props for the BabyModal component
+ */
 interface BabyModalProps {
+  /** Whether the modal is open */
   isOpen: boolean
+  /** Function called when modal should be closed */
   onClose: () => void
+  /** Function called when baby is successfully saved */
   onSave: () => void
+  /** Function called when an error occurs */
   onError: (error: string) => void
-  baby?: Baby | null // If provided, edit mode; if null/undefined, add mode
-  isFirstBaby?: boolean // Only used in add mode
+  /** Baby data for edit mode, null/undefined for add mode */
+  baby?: Baby | null
+  /** Whether this is the first baby being added (sets as active) */
+  isFirstBaby?: boolean
 }
 
+/**
+ * A unified modal component for adding and editing baby information
+ *
+ * Handles both create and update operations for baby data with:
+ * - Automatic mode detection (add vs edit) based on baby prop
+ * - Form validation with real-time error feedback
+ * - Integration with baby operations (create/update)
+ * - Loading states during submission
+ * - Error handling and user feedback
+ * - Form reset on modal close/open
+ * - Pre-population of form data in edit mode
+ *
+ * The component consolidates the functionality of separate AddBabyModal
+ * and EditBabyModal components into a single, reusable component.
+ *
+ * @param props - The component props
+ * @returns A modal for baby creation or editing
+ *
+ * @example
+ * ```tsx
+ * // Add mode
+ * <BabyModal
+ *   isOpen={showAddModal}
+ *   onClose={() => setShowAddModal(false)}
+ *   onSave={handleBabyAdded}
+ *   onError={handleError}
+ *   isFirstBaby={babies.length === 0}
+ * />
+ *
+ * // Edit mode
+ * <BabyModal
+ *   isOpen={showEditModal}
+ *   onClose={() => setShowEditModal(false)}
+ *   onSave={handleBabyUpdated}
+ *   onError={handleError}
+ *   baby={selectedBaby}
+ * />
+ * ```
+ */
 export const BabyModal: React.FC<BabyModalProps> = ({
   isOpen,
   onClose,
