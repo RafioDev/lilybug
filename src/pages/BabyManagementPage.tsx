@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, Suspense } from 'react'
 import {
   Plus,
   Edit2,
@@ -10,7 +10,7 @@ import {
 import { babyService } from '../services/babyService'
 import { migrateBabyData } from '../utils/migrateBabyData'
 import { dateUtils } from '../utils/dateUtils'
-import { BabyModal } from '../components/BabyModal'
+import { BabyModal } from '../components/LazyModals'
 import { LoadingState } from '../components/LoadingState'
 import { useAsyncOperation } from '../hooks/useAsyncOperation'
 import type { Baby } from '../types'
@@ -254,14 +254,16 @@ export const BabyManagementPage: React.FC = () => {
       </div>
 
       {/* Baby Modal (unified add/edit) */}
-      <BabyModal
-        isOpen={isBabyModalOpen}
-        onClose={handleBabyClose}
-        onSave={handleBabySave}
-        onError={handleBabyError}
-        baby={editingBaby}
-        isFirstBaby={babies.length === 0}
-      />
+      <Suspense fallback={<LoadingState message='Loading modal...' />}>
+        <BabyModal
+          isOpen={isBabyModalOpen}
+          onClose={handleBabyClose}
+          onSave={handleBabySave}
+          onError={handleBabyError}
+          baby={editingBaby}
+          isFirstBaby={babies.length === 0}
+        />
+      </Suspense>
     </div>
   )
 }

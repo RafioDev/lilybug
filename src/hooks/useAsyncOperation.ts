@@ -1,22 +1,22 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 
 export interface UseAsyncOperationReturn<T> {
   data: T | null
   loading: boolean
   error: string | null
-  execute: (...args: any[]) => Promise<T>
+  execute: (...args: unknown[]) => Promise<T>
   reset: () => void
 }
 
 export function useAsyncOperation<T>(
-  asyncFunction: (...args: any[]) => Promise<T>
+  asyncFunction: (...args: unknown[]) => Promise<T>
 ): UseAsyncOperationReturn<T> {
   const [data, setData] = useState<T | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const execute = useCallback(
-    async (...args: any[]): Promise<T> => {
+    async (...args: unknown[]): Promise<T> => {
       setLoading(true)
       setError(null)
 
@@ -42,11 +42,14 @@ export function useAsyncOperation<T>(
     setError(null)
   }, [])
 
-  return {
-    data,
-    loading,
-    error,
-    execute,
-    reset,
-  }
+  return useMemo(
+    () => ({
+      data,
+      loading,
+      error,
+      execute,
+      reset,
+    }),
+    [data, loading, error, execute, reset]
+  )
 }

@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  Suspense,
+} from 'react'
 import { Mic, MicOff, Send, Sparkles, Clock } from 'lucide-react'
 import { Layout } from '../components/Layout'
 import { Card } from '../components/Card'
@@ -11,7 +17,7 @@ import { babyService } from '../services/babyService'
 import { aiService } from '../services/aiService'
 import { activityUtils } from '../utils/activityUtils'
 import { Modal } from '../components/Modal'
-import { ActivityModal } from '../components/ActivityModal'
+import { ActivityModal } from '../components/LazyModals'
 import { GroupedActivitiesList } from '../components/GroupedActivitiesList'
 import type {
   TrackerEntry,
@@ -979,13 +985,15 @@ export const AIHomePage: React.FC = () => {
       </Modal>
 
       {/* Edit Activity Modal */}
-      <ActivityModal
-        isOpen={isEditModalOpen}
-        entry={selectedEntry}
-        onClose={() => setIsEditModalOpen(false)}
-        onSave={handleEditSave}
-        onError={handleEditError}
-      />
+      <Suspense fallback={<div>Loading modal...</div>}>
+        <ActivityModal
+          isOpen={isEditModalOpen}
+          entry={selectedEntry}
+          onClose={() => setIsEditModalOpen(false)}
+          onSave={handleEditSave}
+          onError={handleEditError}
+        />
+      </Suspense>
     </Layout>
   )
 }

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 
 export interface UseFormOptions<T> {
   initialValues: T
@@ -74,13 +74,24 @@ export function useForm<T extends Record<string, unknown>>({
     setErrors({}) // Clear errors when setting new values
   }, [])
 
-  return {
-    values,
-    errors,
-    isSubmitting,
-    handleChange,
-    handleSubmit,
-    reset,
-    setValues: setValuesCallback,
-  }
+  return useMemo(
+    () => ({
+      values,
+      errors,
+      isSubmitting,
+      handleChange,
+      handleSubmit,
+      reset,
+      setValues: setValuesCallback,
+    }),
+    [
+      values,
+      errors,
+      isSubmitting,
+      handleChange,
+      handleSubmit,
+      reset,
+      setValuesCallback,
+    ]
+  )
 }

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { memo } from 'react'
 
 interface LoadingStateProps {
   message?: string
@@ -6,38 +6,36 @@ interface LoadingStateProps {
   className?: string
 }
 
-export const LoadingState: React.FC<LoadingStateProps> = ({
-  message = 'Loading...',
-  size = 'md',
-  className = '',
-}) => {
-  const sizeClasses = {
-    sm: 'w-4 h-4',
-    md: 'w-6 h-6',
-    lg: 'w-8 h-8',
-  }
+export const LoadingState: React.FC<LoadingStateProps> = memo(
+  ({ message = 'Loading...', size = 'md', className = '' }) => {
+    const sizeClasses = {
+      sm: 'w-4 h-4',
+      md: 'w-6 h-6',
+      lg: 'w-8 h-8',
+    }
 
-  const textSizeClasses = {
-    sm: 'text-sm',
-    md: 'text-base',
-    lg: 'text-lg',
-  }
+    const textSizeClasses = {
+      sm: 'text-sm',
+      md: 'text-base',
+      lg: 'text-lg',
+    }
 
-  return (
-    <div
-      className={`flex items-center justify-center space-x-2 ${className}`}
-      role='status'
-      aria-live='polite'
-    >
+    return (
       <div
-        className={`${sizeClasses[size]} animate-spin rounded-full border-2 border-gray-300 border-t-blue-600 dark:border-gray-600 dark:border-t-blue-400`}
-        aria-hidden='true'
-      />
-      <span
-        className={`${textSizeClasses[size]} text-gray-600 dark:text-gray-400`}
+        className={`flex items-center justify-center space-x-2 ${className}`}
+        role='status'
+        aria-live='polite'
       >
-        {message}
-      </span>
-    </div>
-  )
-}
+        <div
+          className={`${sizeClasses[size]} animate-spin rounded-full border-2 border-gray-300 border-t-blue-600 dark:border-gray-600 dark:border-t-blue-400`}
+          aria-hidden='true'
+        />
+        <span
+          className={`${textSizeClasses[size]} text-gray-600 dark:text-gray-400`}
+        >
+          {message}
+        </span>
+      </div>
+    )
+  }
+)
