@@ -1,11 +1,7 @@
-import OpenAI from 'openai'
 import type { ChatAction } from './chatActionService'
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true, // We'll handle this properly
-})
+// Use Netlify function to avoid CORS issues
+const OPENAI_API_ENDPOINT = '/.netlify/functions/openai'
 
 export interface AIParseResult {
   action: ChatAction
@@ -55,15 +51,27 @@ Guidelines:
 Current time: ${new Date().toISOString()}
 Baby name: ${babyName || 'the baby'}`
 
-      const completion = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userInput },
-        ],
-        temperature: 0.1,
-        max_tokens: 500,
+      const response = await fetch(OPENAI_API_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userInput },
+          ],
+          temperature: 0.1,
+          max_tokens: 500,
+        }),
       })
+
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`)
+      }
+
+      const completion = await response.json()
 
       const responseContent = completion.choices[0]?.message?.content
       if (!responseContent) {
@@ -114,15 +122,27 @@ Baby name: ${babyName || 'your baby'}`
         ? `Successfully logged: ${JSON.stringify(action)}`
         : `Failed to process: ${JSON.stringify(action)}`
 
-      const completion = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
-        temperature: 0.7,
-        max_tokens: 100,
+      const response = await fetch(OPENAI_API_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt },
+          ],
+          temperature: 0.7,
+          max_tokens: 100,
+        }),
       })
+
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`)
+      }
+
+      const completion = await response.json()
 
       return completion.choices[0]?.message?.content || 'Action completed!'
     } catch (error) {
@@ -139,9 +159,8 @@ Baby name: ${babyName || 'your baby'}`
 
   // Helper method to check if OpenAI is configured
   isConfigured(): boolean {
-    return (
-      !!import.meta.env.VITE_OPENAI_API_KEY &&
-      import.meta.env.VITE_OPENAI_API_KEY !== 'your_openai_api_key_here'
-    )
+    // For now, return false due to CORS issues in development
+    // This will be true when deployed with proper backend
+    return false
   },
 }
