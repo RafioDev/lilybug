@@ -5,7 +5,6 @@ import { Sparkles, Heart, Clock, Users } from 'lucide-react'
 export const NavBar: React.FC = () => {
   const navItems = [
     { path: '/', label: 'AI Chat', icon: Sparkles },
-    { path: '/activities', label: 'Activity', icon: Clock },
     { path: '/insights', label: 'Insights', icon: Heart },
     { path: '/babies', label: 'Babies', icon: Users },
   ]

@@ -1,6 +1,18 @@
 import type { TrackerEntry, EntryType, FeedingType, DiaperType } from '../types'
 import { dateUtils } from './dateUtils'
 
+export interface DateGroup {
+  date: string // YYYY-MM-DD format
+  displayDate: string // e.g., "Today", "Yesterday", "Oct 14, 2024"
+  entries: TrackerEntry[]
+  isToday: boolean
+  isYesterday: boolean
+}
+
+export interface GroupedActivities {
+  [date: string]: TrackerEntry[]
+}
+
 export interface ActivityDisplayData {
   duration?: string // e.g., "25 minutes", "2h 30m"
   quantity?: string // e.g., "4 oz", "120ml"
@@ -228,5 +240,103 @@ export const activityUtils = {
       default:
         return 'gray'
     }
+  },
+
+  /**
+   * Get date string in YYYY-MM-DD format from timestamp
+   */
+  getDateString(timestamp: string): string {
+    const date = new Date(timestamp)
+    return date.toISOString().split('T')[0]
+  },
+
+  /**
+   * Check if a date string represents today
+   */
+  isToday(dateString: string): boolean {
+    const today = new Date().toISOString().split('T')[0]
+    return dateString === today
+  },
+
+  /**
+   * Check if a date string represents yesterday
+   */
+  isYesterday(dateString: string): boolean {
+    const yesterday = new Date()
+    yesterday.setDate(yesterday.getDate() - 1)
+    const yesterdayString = yesterday.toISOString().split('T')[0]
+    return dateString === yesterdayString
+  },
+
+  /**
+   * Format date string for display
+   */
+  formatDateForDisplay(dateString: string): string {
+    if (this.isToday(dateString)) {
+      return 'Today'
+    }
+
+    if (this.isYesterday(dateString)) {
+      return 'Yesterday'
+    }
+
+    // Format as "Oct 14, 2024"
+    const date = new Date(dateString + 'T00:00:00')
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    })
+  },
+
+  /**
+   * Group activities by date
+   */
+  groupActivitiesByDate(entries: TrackerEntry[]): DateGroup[] {
+    // First, group entries by date string
+    const grouped: GroupedActivities = {}
+
+    entries.forEach((entry) => {
+      const dateString = this.getDateString(entry.start_time)
+      if (!grouped[dateString]) {
+        grouped[dateString] = []
+      }
+      grouped[dateString].push(entry)
+    })
+
+    // Convert to DateGroup array and sort
+    const dateGroups: DateGroup[] = Object.entries(grouped)
+      .map(([dateString, entries]) => ({
+        date: dateString,
+        displayDate: this.formatDateForDisplay(dateString),
+        entries: entries.sort(
+          (a, b) =>
+            new Date(b.start_time).getTime() - new Date(a.start_time).getTime()
+        ), // Sort entries within each day (newest first)
+        isToday: this.isToday(dateString),
+        isYesterday: this.isYesterday(dateString),
+      }))
+      .sort((a, b) => b.date.localeCompare(a.date)) // Sort groups by date (newest first)
+
+    return dateGroups
+  },
+
+  /**
+   * Get total count of entries across all groups
+   */
+  getTotalEntryCount(dateGroups: DateGroup[]): number {
+    return dateGroups.reduce((total, group) => total + group.entries.length, 0)
+  },
+
+  /**
+   * Get entries for a specific date
+   */
+  getEntriesForDate(
+    entries: TrackerEntry[],
+    dateString: string
+  ): TrackerEntry[] {
+    return entries.filter(
+      (entry) => this.getDateString(entry.start_time) === dateString
+    )
   },
 }

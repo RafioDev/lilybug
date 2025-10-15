@@ -2,7 +2,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { AuthPage } from './pages/AuthPage'
 import { OnboardingPage } from './pages/OnboardingPage'
 import { AIHomePage } from './pages/AIHomePage'
-import { ActivitiesPage } from './pages/ActivitiesPage'
+
 import { DashboardPage } from './pages/DashboardPage'
 import { CalmPage } from './pages/CalmPage'
 import { BabyManagementPage } from './pages/BabyManagementPage'
@@ -27,7 +27,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'activities',
-        element: <ActivitiesPage />,
+        element: <Navigate to='/' replace />,
       },
       {
         path: 'insights',

@@ -8,8 +8,6 @@ const getPageTitle = (pathname: string): string => {
   switch (pathname) {
     case '/':
       return 'Assistant'
-    case '/activities':
-      return 'Activities'
     case '/insights':
       return 'Insights'
     case '/calm':

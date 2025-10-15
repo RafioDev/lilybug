@@ -12,6 +12,7 @@ import { aiService } from '../services/aiService'
 import { activityUtils } from '../utils/activityUtils'
 import { Modal } from '../components/Modal'
 import { EditActivityModal } from '../components/EditActivityModal'
+import { GroupedActivitiesList } from '../components/GroupedActivitiesList'
 import type {
   TrackerEntry,
   Baby,
@@ -686,70 +687,14 @@ export const AIHomePage: React.FC = () => {
             </Button>
           </div>
 
-          {entries.length === 0 ? (
-            <div className='text-center py-8'>
-              <Clock className='w-12 h-12 text-gray-300 mx-auto mb-4' />
-              <p className='text-gray-500 mb-2'>No activities tracked yet</p>
-              <p className='text-sm text-gray-400'>
-                Use the voice assistant above to log activities
-              </p>
-            </div>
-          ) : (
-            <div
-              className={`space-y-3 max-h-96 overflow-y-auto transition-opacity ${
-                isUpdatingData ? 'opacity-70' : ''
-              }`}
-            >
-              {entries.slice(0, 10).map((entry) => (
-                <div
-                  key={entry.id}
-                  className='flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer'
-                  onClick={() => openDetailsModal(entry)}
-                >
-                  <div className='flex items-center gap-3'>
-                    <span className='text-2xl'>
-                      {activityUtils.getActivityIcon(entry.entry_type)}
-                    </span>
-                    <div>
-                      <p className='font-medium text-gray-900 text-sm'>
-                        {activityUtils.getEntryDetails(entry)}
-                      </p>
-                      <p className='text-xs text-gray-500'>
-                        {activityUtils.formatEntryTime(entry)}
-                      </p>
-                      {entry.notes && (
-                        <p className='text-xs text-gray-400 mt-1 italic'>
-                          "{entry.notes}"
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className='flex items-center gap-1'>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        openEditModal(entry)
-                      }}
-                      className='p-1 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors'
-                      title='Edit entry'
-                    >
-                      <Edit3 className='w-4 h-4' />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        deleteEntry(entry.id)
-                      }}
-                      className='p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors'
-                      title='Delete entry'
-                    >
-                      <Trash2 className='w-4 h-4' />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          <GroupedActivitiesList
+            entries={entries.slice(0, 50)} // Show more entries with grouping
+            onEditEntry={openEditModal}
+            onDeleteEntry={deleteEntry}
+            onViewDetails={openDetailsModal}
+            isLoading={isUpdatingData}
+            className='max-h-96 overflow-y-auto'
+          />
         </Card>
       </div>
 
