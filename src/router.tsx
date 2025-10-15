@@ -4,7 +4,6 @@ import { OnboardingPage } from './pages/OnboardingPage'
 import { AIHomePage } from './pages/AIHomePage'
 
 import { DashboardPage } from './pages/DashboardPage'
-import { CalmPage } from './pages/CalmPage'
 import { BabyManagementPage } from './pages/BabyManagementPage'
 import { AppLayout } from './components/AppLayout'
 
@@ -32,10 +31,6 @@ export const router = createBrowserRouter([
       {
         path: 'insights',
         element: <DashboardPage />,
-      },
-      {
-        path: 'calm',
-        element: <CalmPage />,
       },
       {
         path: 'babies',

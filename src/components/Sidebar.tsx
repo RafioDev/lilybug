@@ -1,6 +1,6 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
-import { Sparkles, Heart, Shield, Users } from 'lucide-react'
+import { Sparkles, Heart, Users } from 'lucide-react'
 import { UserDropdown } from './UserDropdown'
 import { useUserProfile } from '../hooks/useUserProfile'
 
@@ -10,7 +10,6 @@ export const Sidebar: React.FC = () => {
   const navItems = [
     { path: '/', label: 'Assistant', icon: Sparkles },
     { path: '/insights', label: 'Insights', icon: Heart },
-    { path: '/calm', label: 'Calm Space', icon: Shield },
     { path: '/babies', label: 'Manage Babies', icon: Users },
   ]
 

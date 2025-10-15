@@ -11,8 +11,6 @@ const getPageTitle = (pathname: string): string => {
       return 'Assistant'
     case '/insights':
       return 'Insights'
-    case '/calm':
-      return 'Calm Space'
     case '/babies':
       return 'Manage Babies'
     default:
