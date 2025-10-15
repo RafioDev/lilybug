@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import { Mic, MicOff, Send, Sparkles, Clock } from 'lucide-react'
+import { Mic, MicOff, Send, Sparkles, Clock, Edit3, Trash2 } from 'lucide-react'
 import { Layout } from '../components/Layout'
 import { Card } from '../components/Card'
 import { Button } from '../components/Button'
@@ -10,6 +10,7 @@ import { trackerService } from '../services/trackerService'
 import { babyService } from '../services/babyService'
 import { aiService } from '../services/aiService'
 import { Modal } from '../components/Modal'
+import { EditActivityModal } from '../components/EditActivityModal'
 import type {
   TrackerEntry,
   Baby,
@@ -82,6 +83,7 @@ export const AIHomePage: React.FC = () => {
   // Activities state
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
   const [isManualEntryModalOpen, setIsManualEntryModalOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [selectedEntry, setSelectedEntry] = useState<TrackerEntry | null>(null)
   const [formData, setFormData] = useState({
     entryType: 'feeding' as EntryType,
@@ -369,6 +371,29 @@ export const AIHomePage: React.FC = () => {
   const openDetailsModal = (entry: TrackerEntry) => {
     setSelectedEntry(entry)
     setIsDetailsModalOpen(true)
+  }
+
+  const openEditModal = (entry: TrackerEntry) => {
+    setSelectedEntry(entry)
+    setIsEditModalOpen(true)
+  }
+
+  const handleEditSave = async (updatedEntry: TrackerEntry) => {
+    // Update the entries list with the updated entry
+    setEntries((prevEntries) =>
+      prevEntries.map((entry) =>
+        entry.id === updatedEntry.id ? updatedEntry : entry
+      )
+    )
+
+    // Refresh data to ensure consistency
+    await loadData(false)
+    setIsEditModalOpen(false)
+  }
+
+  const handleEditError = (error: string) => {
+    console.error('Edit error:', error)
+    // You could add a toast notification here
   }
 
   const openManualEntryModal = () => {
@@ -767,27 +792,28 @@ export const AIHomePage: React.FC = () => {
                       )}
                     </div>
                   </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      deleteEntry(entry.id)
-                    }}
-                    className='p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors'
-                  >
-                    <svg
-                      className='w-4 h-4'
-                      fill='none'
-                      stroke='currentColor'
-                      viewBox='0 0 24 24'
+                  <div className='flex items-center gap-1'>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        openEditModal(entry)
+                      }}
+                      className='p-1 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors'
+                      title='Edit entry'
                     >
-                      <path
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        strokeWidth={2}
-                        d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'
-                      />
-                    </svg>
-                  </button>
+                      <Edit3 className='w-4 h-4' />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        deleteEntry(entry.id)
+                      }}
+                      className='p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors'
+                      title='Delete entry'
+                    >
+                      <Trash2 className='w-4 h-4' />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -1064,6 +1090,15 @@ export const AIHomePage: React.FC = () => {
           </div>
         </div>
       </Modal>
+
+      {/* Edit Activity Modal */}
+      <EditActivityModal
+        isOpen={isEditModalOpen}
+        entry={selectedEntry}
+        onClose={() => setIsEditModalOpen(false)}
+        onSave={handleEditSave}
+        onError={handleEditError}
+      />
     </Layout>
   )
 }
