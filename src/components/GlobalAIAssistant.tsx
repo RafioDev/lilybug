@@ -312,7 +312,7 @@ export const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
         <div className='flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg'>
           <div className='flex items-center gap-2'>
             <MessageCircle className='w-5 h-5' />
-            <span className='font-medium text-sm'>AI Assistant</span>
+            <span className='font-medium text-sm'>Assistant</span>
           </div>
           <div className='flex items-center gap-1'>
             <button
@@ -341,7 +341,7 @@ export const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
               {messages.length === 0 && (
                 <div className='text-center text-gray-500 text-sm py-4'>
                   <MessageCircle className='w-8 h-8 mx-auto mb-2 opacity-50' />
-                  <p>Hi! I'm your AI assistant.</p>
+                  <p>Hi! I'm your assistant.</p>
                   <p className='text-xs mt-1'>
                     Try saying "Log a bottle feeding" or click the mic!
                   </p>

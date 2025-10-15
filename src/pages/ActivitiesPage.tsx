@@ -231,7 +231,7 @@ export const ActivitiesPage: React.FC = () => {
               <Clock className='w-12 h-12 text-gray-300 mx-auto mb-4' />
               <p className='text-gray-500 mb-2'>No activities tracked yet</p>
               <p className='text-sm text-gray-400'>
-                Use the AI assistant or Baby Tracker to log activities
+                Use the assistant or tracker to log activities
               </p>
             </div>
           </Card>

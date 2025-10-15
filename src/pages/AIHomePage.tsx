@@ -490,9 +490,7 @@ export const AIHomePage: React.FC = () => {
               <div className='p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full'>
                 <Sparkles className='w-8 h-8 text-white' />
               </div>
-              <h1 className='text-3xl font-bold text-gray-800'>
-                AI Baby Tracker
-              </h1>
+              <h1 className='text-3xl font-bold text-gray-800'>Lilybug</h1>
             </div>
             <p className='text-gray-600'>Loading...</p>
           </div>
@@ -561,9 +559,7 @@ export const AIHomePage: React.FC = () => {
             <div className='p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full'>
               <Sparkles className='w-8 h-8 text-white' />
             </div>
-            <h1 className='text-3xl font-bold text-gray-800'>
-              AI Baby Tracker
-            </h1>
+            <h1 className='text-3xl font-bold text-gray-800'>Lilybug</h1>
           </div>
           <p className='text-gray-600'>
             {activeBaby

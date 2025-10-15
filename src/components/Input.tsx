@@ -1,17 +1,18 @@
-import React from 'react';
+import React from 'react'
 
 interface InputProps {
-  label?: string;
-  type?: 'text' | 'number' | 'date' | 'time' | 'datetime-local' | 'textarea';
-  value: string | number;
-  onChange: (value: string) => void;
-  placeholder?: string;
-  required?: boolean;
-  min?: string | number;
-  max?: string | number;
-  step?: string | number;
-  rows?: number;
-  className?: string;
+  label?: string
+  type?: 'text' | 'number' | 'date' | 'time' | 'datetime-local' | 'textarea'
+  value: string | number
+  onChange: (value: string) => void
+  placeholder?: string
+  required?: boolean
+  disabled?: boolean
+  min?: string | number
+  max?: string | number
+  step?: string | number
+  rows?: number
+  className?: string
 }
 
 export const Input: React.FC<InputProps> = ({
@@ -21,20 +22,23 @@ export const Input: React.FC<InputProps> = ({
   onChange,
   placeholder,
   required = false,
+  disabled = false,
   min,
   max,
   step,
   rows = 3,
   className = '',
 }) => {
-  const baseStyles = 'w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:outline-none transition-colors text-gray-800';
+  const baseStyles = `w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:outline-none transition-colors text-gray-800 ${
+    disabled ? 'opacity-50 cursor-not-allowed bg-gray-50' : ''
+  }`
 
   return (
     <div className={`flex flex-col gap-1.5 ${className}`}>
       {label && (
-        <label className="text-sm font-medium text-gray-700 px-1">
+        <label className='text-sm font-medium text-gray-700 px-1'>
           {label}
-          {required && <span className="text-rose-500 ml-1">*</span>}
+          {required && <span className='text-rose-500 ml-1'>*</span>}
         </label>
       )}
       {type === 'textarea' ? (
@@ -43,6 +47,7 @@ export const Input: React.FC<InputProps> = ({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           required={required}
+          disabled={disabled}
           rows={rows}
           className={`${baseStyles} resize-none`}
         />
@@ -53,6 +58,7 @@ export const Input: React.FC<InputProps> = ({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           required={required}
+          disabled={disabled}
           min={min}
           max={max}
           step={step}
@@ -60,5 +66,5 @@ export const Input: React.FC<InputProps> = ({
         />
       )}
     </div>
-  );
-};
+  )
+}

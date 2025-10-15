@@ -252,7 +252,7 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
         const welcomeMessage: AIMessage = {
           id: 'welcome',
           type: 'assistant',
-          content: `Hi! I'm your AI assistant. Just tap the mic and say something like "Log a bottle feeding of 4 ounces" to quickly track activities!`,
+          content: `Hi! I'm your assistant. Just tap the mic and say something like "Log a bottle feeding of 4 ounces" to quickly track activities!`,
           timestamp: new Date(),
         }
         setMessages([welcomeMessage])
@@ -329,7 +329,7 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
         <div className='flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg'>
           <div className='flex items-center gap-2'>
             <Sparkles className='w-5 h-5' />
-            <span className='font-medium text-sm'>AI Assistant</span>
+            <span className='font-medium text-sm'>Assistant</span>
           </div>
           <div className='flex items-center gap-1'>
             <button

@@ -7,7 +7,7 @@ import { useUserProfile } from '../hooks/useUserProfile'
 const getPageTitle = (pathname: string): string => {
   switch (pathname) {
     case '/':
-      return 'AI Assistant'
+      return 'Assistant'
     case '/activities':
       return 'Activities'
     case '/insights':
@@ -17,7 +17,7 @@ const getPageTitle = (pathname: string): string => {
     case '/babies':
       return 'Manage Babies'
     default:
-      return 'AI Baby Tracker'
+      return 'Lilybug'
   }
 }
 

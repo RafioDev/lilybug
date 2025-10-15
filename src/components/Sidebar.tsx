@@ -8,7 +8,7 @@ export const Sidebar: React.FC = () => {
   const { displayName, loading } = useUserProfile()
 
   const navItems = [
-    { path: '/', label: 'AI Assistant', icon: Sparkles },
+    { path: '/', label: 'Assistant', icon: Sparkles },
     { path: '/activities', label: 'Activities', icon: Clock },
     { path: '/insights', label: 'Insights', icon: Heart },
     { path: '/calm', label: 'Calm Space', icon: Shield },
@@ -24,9 +24,7 @@ export const Sidebar: React.FC = () => {
             <div className='w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center'>
               <Sparkles size={20} className='text-white' />
             </div>
-            <span className='text-xl font-bold text-gray-800'>
-              AI Baby Tracker
-            </span>
+            <span className='text-xl font-bold text-gray-800'>Lilybug</span>
           </div>
         </div>
 
