@@ -9,7 +9,14 @@ import { smartSearchService } from '../services/smartSearchService'
 import { trackerService } from '../services/trackerService'
 import { babyService } from '../services/babyService'
 import { aiService } from '../services/aiService'
-import type { TrackerEntry, Baby } from '../types'
+import { Modal } from '../components/Modal'
+import type {
+  TrackerEntry,
+  Baby,
+  EntryType,
+  FeedingType,
+  DiaperType,
+} from '../types'
 
 // Speech Recognition types
 interface SpeechRecognitionResult {
@@ -64,13 +71,24 @@ export const AIHomePage: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false)
   const [activeBaby, setActiveBaby] = useState<Baby | null>(null)
   const [entries, setEntries] = useState<TrackerEntry[]>([])
-  const [recentActivity, setRecentActivity] = useState<TrackerEntry | null>(
-    null
-  )
   const [todayStats, setTodayStats] = useState({
     feedings: 0,
     sleepHours: 0,
     diapers: 0,
+  })
+
+  // Activities state
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
+  const [isManualEntryModalOpen, setIsManualEntryModalOpen] = useState(false)
+  const [selectedEntry, setSelectedEntry] = useState<TrackerEntry | null>(null)
+  const [formData, setFormData] = useState({
+    entryType: 'feeding' as EntryType,
+    startTime: new Date().toISOString().slice(0, 16),
+    endTime: '',
+    quantity: '',
+    feedingType: 'bottle' as FeedingType,
+    diaperType: 'wet' as DiaperType,
+    notes: '',
   })
 
   const recognitionRef = useRef<SpeechRecognitionInterface | null>(null)
@@ -86,11 +104,6 @@ export const AIHomePage: React.FC = () => {
 
       setActiveBaby(activeBabyData)
       setEntries(entriesData)
-
-      // Get most recent activity
-      if (entriesData.length > 0) {
-        setRecentActivity(entriesData[0])
-      }
 
       // Calculate today's stats
       const today = new Date()
@@ -308,10 +321,6 @@ export const AIHomePage: React.FC = () => {
     await processMessage(message)
   }
 
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  }
-
   const getActivityIcon = (type: string) => {
     switch (type) {
       case 'feeding':
@@ -324,6 +333,129 @@ export const AIHomePage: React.FC = () => {
         return '🥛'
       default:
         return '📝'
+    }
+  }
+
+  // Activities functions
+  const deleteEntry = async (id: string) => {
+    try {
+      await trackerService.deleteEntry(id)
+      await loadData()
+    } catch (error) {
+      console.error('Error deleting entry:', error)
+    }
+  }
+
+  const openDetailsModal = (entry: TrackerEntry) => {
+    setSelectedEntry(entry)
+    setIsDetailsModalOpen(true)
+  }
+
+  const openManualEntryModal = () => {
+    setFormData({
+      entryType: 'feeding',
+      startTime: new Date().toISOString().slice(0, 16),
+      endTime: '',
+      quantity: '',
+      feedingType: 'bottle',
+      diaperType: 'wet',
+      notes: '',
+    })
+    setIsManualEntryModalOpen(true)
+  }
+
+  const handleManualSubmit = async () => {
+    if (!activeBaby) {
+      console.error('No active baby selected')
+      return
+    }
+
+    try {
+      const entry = {
+        entry_type: formData.entryType,
+        start_time: formData.startTime,
+        end_time: formData.endTime || null,
+        quantity: formData.quantity ? parseFloat(formData.quantity) : null,
+        feeding_type:
+          formData.entryType === 'feeding' ? formData.feedingType : null,
+        diaper_type:
+          formData.entryType === 'diaper' ? formData.diaperType : null,
+        notes: formData.notes || null,
+        baby_id: activeBaby.id,
+      }
+
+      await trackerService.createEntry(entry)
+      await loadData()
+      setIsManualEntryModalOpen(false)
+    } catch (error) {
+      console.error('Error creating manual entry:', error)
+    }
+  }
+
+  const getFeedingTypeLabel = (type: FeedingType) => {
+    switch (type) {
+      case 'both':
+        return 'Both Breasts'
+      case 'breast_left':
+        return 'Breast Left'
+      case 'breast_right':
+        return 'Breast Right'
+      case 'bottle':
+        return 'Bottle'
+    }
+  }
+
+  const getEntryDetails = (entry: TrackerEntry) => {
+    const startTime = new Date(entry.start_time)
+    const timeStr = startTime.toLocaleString()
+    const feedingType = entry.feeding_type?.replace('_', ' ') || 'feeding'
+    const quantity = entry.quantity ? ` (${entry.quantity}ml)` : ''
+    const diaperType = entry.diaper_type || 'diaper'
+
+    switch (entry.entry_type) {
+      case 'feeding':
+        return `${feedingType}${quantity} at ${timeStr}`
+
+      case 'sleep':
+        if (entry.end_time) {
+          const endTime = new Date(entry.end_time)
+          const duration = Math.round(
+            (endTime.getTime() - startTime.getTime()) / (1000 * 60)
+          )
+          const hours = Math.floor(duration / 60)
+          const minutes = duration % 60
+          const durationStr =
+            hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`
+          return `Sleep for ${durationStr} at ${timeStr}`
+        }
+        return `Sleep started at ${timeStr}`
+
+      case 'diaper':
+        return `${diaperType} diaper at ${timeStr}`
+
+      case 'pumping': {
+        const pumpQuantity = entry.quantity ? ` (${entry.quantity}oz)` : ''
+        return `Pumping${pumpQuantity} at ${timeStr}`
+      }
+
+      default:
+        return `${entry.entry_type} at ${timeStr}`
+    }
+  }
+
+  const formatEntryTime = (entry: TrackerEntry) => {
+    const date = new Date(entry.start_time)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+    const diffMinutes = Math.floor(diffMs / (1000 * 60))
+
+    if (diffMinutes < 60) {
+      return `${diffMinutes}m ago`
+    } else if (diffHours < 24) {
+      return `${diffHours}h ago`
+    } else {
+      return date.toLocaleDateString()
     }
   }
 
@@ -458,50 +590,353 @@ export const AIHomePage: React.FC = () => {
           </div>
         </Card>
 
-        {/* Recent Activity */}
-        {recentActivity && (
-          <Card>
-            <div className='flex items-center justify-between'>
-              <div>
-                <h3 className='font-semibold text-gray-800'>Recent Activity</h3>
-                <div className='flex items-center gap-2 mt-1'>
-                  <span className='text-2xl'>
-                    {getActivityIcon(recentActivity.entry_type)}
-                  </span>
-                  <span className='text-gray-600 capitalize'>
-                    {recentActivity.entry_type}
-                  </span>
-                  <span className='text-sm text-gray-500'>
-                    {formatTime(new Date(recentActivity.start_time))}
-                  </span>
-                </div>
-              </div>
-              <Clock className='w-5 h-5 text-gray-400' />
-            </div>
-          </Card>
-        )}
-
-        {/* Quick Examples */}
+        {/* Activities List */}
         <Card>
-          <h3 className='font-semibold text-gray-800 mb-3'>
-            Try saying these:
-          </h3>
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-2 text-sm'>
-            <div className='p-2 bg-blue-50 rounded-lg'>
-              "Log a bottle feeding of 4 ounces"
+          <div className='flex items-center justify-between mb-4'>
+            <div className='flex items-center gap-3'>
+              <Clock className='w-5 h-5 text-gray-600' />
+              <h3 className='font-semibold text-gray-800'>Recent Activities</h3>
             </div>
-            <div className='p-2 bg-cyan-50 rounded-lg'>
-              "Record a 2 hour nap"
-            </div>
-            <div className='p-2 bg-emerald-50 rounded-lg'>
-              "Add a wet diaper change"
-            </div>
-            <div className='p-2 bg-pink-50 rounded-lg'>
-              "Log pumping session 3 ounces"
-            </div>
+            <Button
+              onClick={openManualEntryModal}
+              variant='outline'
+              className='text-sm'
+            >
+              Manual Entry
+            </Button>
           </div>
+
+          {entries.length === 0 ? (
+            <div className='text-center py-8'>
+              <Clock className='w-12 h-12 text-gray-300 mx-auto mb-4' />
+              <p className='text-gray-500 mb-2'>No activities tracked yet</p>
+              <p className='text-sm text-gray-400'>
+                Use the voice assistant above to log activities
+              </p>
+            </div>
+          ) : (
+            <div className='space-y-3 max-h-96 overflow-y-auto'>
+              {entries.slice(0, 10).map((entry) => (
+                <div
+                  key={entry.id}
+                  className='flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer'
+                  onClick={() => openDetailsModal(entry)}
+                >
+                  <div className='flex items-center gap-3'>
+                    <span className='text-2xl'>
+                      {getActivityIcon(entry.entry_type)}
+                    </span>
+                    <div>
+                      <p className='font-medium text-gray-900 text-sm'>
+                        {getEntryDetails(entry)}
+                      </p>
+                      <p className='text-xs text-gray-500'>
+                        {formatEntryTime(entry)}
+                      </p>
+                      {entry.notes && (
+                        <p className='text-xs text-gray-400 mt-1 italic'>
+                          "{entry.notes}"
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      deleteEntry(entry.id)
+                    }}
+                    className='p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors'
+                  >
+                    <svg
+                      className='w-4 h-4'
+                      fill='none'
+                      stroke='currentColor'
+                      viewBox='0 0 24 24'
+                    >
+                      <path
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth={2}
+                        d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'
+                      />
+                    </svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </Card>
       </div>
+
+      {/* Entry Details Modal */}
+      <Modal
+        isOpen={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
+        title='Activity Details'
+      >
+        {selectedEntry && (
+          <div className='space-y-4'>
+            <div className='flex items-center gap-3 p-3 bg-gray-100 rounded-lg'>
+              <span className='text-3xl'>
+                {getActivityIcon(selectedEntry.entry_type)}
+              </span>
+              <div>
+                <p className='font-medium text-gray-900 capitalize'>
+                  {selectedEntry.entry_type}
+                </p>
+                <p className='text-sm text-gray-500'>
+                  {new Date(selectedEntry.start_time).toLocaleString()}
+                </p>
+              </div>
+            </div>
+
+            <div className='space-y-3'>
+              {selectedEntry.feeding_type && (
+                <div>
+                  <label className='text-sm font-medium text-gray-700'>
+                    Feeding Type
+                  </label>
+                  <p className='text-gray-900 capitalize'>
+                    {selectedEntry.feeding_type.replace('_', ' ')}
+                  </p>
+                </div>
+              )}
+
+              {selectedEntry.quantity && (
+                <div>
+                  <label className='text-sm font-medium text-gray-700'>
+                    Quantity
+                  </label>
+                  <p className='text-gray-900'>
+                    {selectedEntry.quantity}
+                    {selectedEntry.entry_type === 'pumping' ? 'oz' : 'ml'}
+                  </p>
+                </div>
+              )}
+
+              {selectedEntry.diaper_type && (
+                <div>
+                  <label className='text-sm font-medium text-gray-700'>
+                    Diaper Type
+                  </label>
+                  <p className='text-gray-900 capitalize'>
+                    {selectedEntry.diaper_type}
+                  </p>
+                </div>
+              )}
+
+              {selectedEntry.end_time && (
+                <div>
+                  <label className='text-sm font-medium text-gray-700'>
+                    Duration
+                  </label>
+                  <p className='text-gray-900'>
+                    {(() => {
+                      const start = new Date(selectedEntry.start_time)
+                      const end = new Date(selectedEntry.end_time!)
+                      const duration = Math.round(
+                        (end.getTime() - start.getTime()) / (1000 * 60)
+                      )
+                      const hours = Math.floor(duration / 60)
+                      const minutes = duration % 60
+                      return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`
+                    })()}
+                  </p>
+                </div>
+              )}
+
+              {selectedEntry.notes && (
+                <div>
+                  <label className='text-sm font-medium text-gray-700'>
+                    Notes
+                  </label>
+                  <p className='text-gray-900'>{selectedEntry.notes}</p>
+                </div>
+              )}
+            </div>
+
+            <div className='flex gap-2 pt-4'>
+              <Button
+                onClick={() => deleteEntry(selectedEntry.id)}
+                variant='outline'
+                className='flex-1 text-red-600 border-red-200 hover:bg-red-50'
+              >
+                Delete Entry
+              </Button>
+              <Button
+                onClick={() => setIsDetailsModalOpen(false)}
+                className='flex-1'
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Manual Entry Modal */}
+      <Modal
+        isOpen={isManualEntryModalOpen}
+        onClose={() => setIsManualEntryModalOpen(false)}
+        title='Manual Entry'
+      >
+        <div className='space-y-4'>
+          <div className='p-3 bg-blue-50 rounded-lg'>
+            <p className='text-sm text-blue-800'>
+              💡 <strong>Tip:</strong> For faster tracking, try using the voice
+              assistant above! Just say "Log a bottle feeding of 4 ounces" or
+              similar.
+            </p>
+          </div>
+
+          {/* Entry Type Selection */}
+          <div>
+            <label className='text-sm font-medium text-gray-700 block mb-2'>
+              Activity Type
+            </label>
+            <div className='grid grid-cols-2 gap-2'>
+              {(['feeding', 'sleep', 'diaper', 'pumping'] as EntryType[]).map(
+                (type) => (
+                  <button
+                    key={type}
+                    onClick={() =>
+                      setFormData({ ...formData, entryType: type })
+                    }
+                    className={`p-3 rounded-xl border-2 transition-all capitalize ${
+                      formData.entryType === type
+                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                        : 'border-gray-200 text-gray-600'
+                    }`}
+                  >
+                    {getActivityIcon(type)} {type}
+                  </button>
+                )
+              )}
+            </div>
+          </div>
+
+          <Input
+            label='Start Time'
+            type='datetime-local'
+            value={formData.startTime}
+            onChange={(val) => setFormData({ ...formData, startTime: val })}
+          />
+
+          {formData.entryType === 'sleep' && (
+            <Input
+              label='End Time (optional)'
+              type='datetime-local'
+              value={formData.endTime}
+              onChange={(val) => setFormData({ ...formData, endTime: val })}
+            />
+          )}
+
+          {formData.entryType === 'feeding' && (
+            <>
+              <div>
+                <label className='text-sm font-medium text-gray-700 block mb-2'>
+                  Feeding Type
+                </label>
+                <div className='grid grid-cols-2 gap-2'>
+                  {(
+                    [
+                      'both',
+                      'breast_left',
+                      'breast_right',
+                      'bottle',
+                    ] as FeedingType[]
+                  ).map((type) => (
+                    <button
+                      key={type}
+                      onClick={() =>
+                        setFormData({ ...formData, feedingType: type })
+                      }
+                      className={`p-3 rounded-xl border-2 transition-all text-sm ${
+                        formData.feedingType === type
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-gray-200 text-gray-600'
+                      }`}
+                    >
+                      {getFeedingTypeLabel(type)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {formData.feedingType === 'bottle' && (
+                <Input
+                  label='Amount (oz)'
+                  type='number'
+                  step='0.5'
+                  value={formData.quantity}
+                  onChange={(val) =>
+                    setFormData({ ...formData, quantity: val })
+                  }
+                  placeholder='e.g., 4'
+                />
+              )}
+            </>
+          )}
+
+          {formData.entryType === 'pumping' && (
+            <Input
+              label='Amount (oz)'
+              type='number'
+              step='0.5'
+              value={formData.quantity}
+              onChange={(val) => setFormData({ ...formData, quantity: val })}
+              placeholder='e.g., 4'
+            />
+          )}
+
+          {formData.entryType === 'diaper' && (
+            <div>
+              <label className='text-sm font-medium text-gray-700 block mb-2'>
+                Diaper Type
+              </label>
+              <div className='grid grid-cols-3 gap-2'>
+                {(['wet', 'dirty', 'both'] as DiaperType[]).map((type) => (
+                  <button
+                    key={type}
+                    onClick={() =>
+                      setFormData({ ...formData, diaperType: type })
+                    }
+                    className={`p-3 rounded-xl border-2 transition-all capitalize ${
+                      formData.diaperType === type
+                        ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                        : 'border-gray-200 text-gray-600'
+                    }`}
+                  >
+                    {type}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <Input
+            label='Notes (optional)'
+            type='textarea'
+            value={formData.notes}
+            onChange={(val) => setFormData({ ...formData, notes: val })}
+            placeholder='Any additional details...'
+            rows={2}
+          />
+
+          <div className='flex gap-3'>
+            <Button
+              onClick={() => setIsManualEntryModalOpen(false)}
+              variant='outline'
+              fullWidth
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleManualSubmit} fullWidth>
+              Save Entry
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </Layout>
   )
 }
