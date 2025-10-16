@@ -35,31 +35,6 @@ export const ThemeToggle: React.FC = () => {
   )
 }
 
-// Compact version for mobile/small spaces
-export const ThemeToggleCompact: React.FC = () => {
-  const { theme, setTheme, resolvedTheme } = useTheme()
-
-  const handleToggle = () => {
-    if (theme === 'system') {
-      setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')
-    } else {
-      setTheme(theme === 'light' ? 'dark' : 'light')
-    }
-  }
-
-  const Icon = resolvedTheme === 'dark' ? Sun : Moon
-
-  return (
-    <button
-      onClick={handleToggle}
-      className='p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors'
-      title={`Switch to ${resolvedTheme === 'dark' ? 'light' : 'dark'} theme`}
-    >
-      <Icon size={18} className='text-gray-600 dark:text-gray-400' />
-    </button>
-  )
-}
-
 // Dropdown menu version for user dropdown
 export const ThemeToggleDropdown: React.FC = () => {
   const { theme, setTheme } = useTheme()

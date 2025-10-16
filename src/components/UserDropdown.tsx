@@ -58,9 +58,10 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
                   {userName}
                 </p>
               </div>
+              <ThemeToggleDropdown />
               <button
                 onClick={handleSignOut}
-                className='w-full flex items-center gap-3 px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors'
+                className='w-full flex items-center gap-3 px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-b-lg'
               >
                 <LogOut className='w-4 h-4' />
                 <span className='text-sm'>Sign Out</span>

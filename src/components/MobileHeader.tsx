@@ -2,7 +2,6 @@ import React from 'react'
 import { useLocation } from 'react-router-dom'
 import { Sparkles } from 'lucide-react'
 import { UserDropdown } from './UserDropdown'
-import { ThemeToggleCompact } from './ThemeToggle'
 import type { Profile } from '../types'
 
 interface UserProfileData {
@@ -46,9 +45,8 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ userProfile }) => {
         </span>
       </div>
 
-      {/* Theme Toggle and User Dropdown */}
-      <div className='flex items-center gap-2'>
-        <ThemeToggleCompact />
+      {/* User Dropdown */}
+      <div className='flex items-center'>
         {!loading && <UserDropdown userName={displayName} variant='mobile' />}
       </div>
     </header>
