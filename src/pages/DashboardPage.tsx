@@ -60,7 +60,9 @@ export const DashboardPage: React.FC = () => {
     return (
       <Layout title='Insights'>
         <Card>
-          <p className='text-center text-gray-500'>Loading...</p>
+          <p className='text-center text-gray-500 dark:text-gray-400'>
+            Loading...
+          </p>
         </Card>
       </Layout>
     )

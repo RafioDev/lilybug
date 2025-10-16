@@ -518,19 +518,25 @@ export const AIHomePage: React.FC = () => {
               <div className='text-2xl font-bold text-blue-600'>
                 {todayStats.feedings}
               </div>
-              <div className='text-sm text-gray-600'>Feedings Today</div>
+              <div className='text-sm text-gray-600 dark:text-gray-300'>
+                Feedings Today
+              </div>
             </Card>
             <Card className='text-center'>
               <div className='text-2xl font-bold text-cyan-600'>
                 {`${todayStats.sleepHours.toFixed(1)}h`}
               </div>
-              <div className='text-sm text-gray-600'>Sleep Today</div>
+              <div className='text-sm text-gray-600 dark:text-gray-300'>
+                Sleep Today
+              </div>
             </Card>
             <Card className='text-center'>
               <div className='text-2xl font-bold text-emerald-600'>
                 {todayStats.diapers}
               </div>
-              <div className='text-sm text-gray-600'>Diapers Today</div>
+              <div className='text-sm text-gray-600 dark:text-gray-300'>
+                Diapers Today
+              </div>
             </Card>
           </div>
         )}
@@ -560,10 +566,10 @@ export const AIHomePage: React.FC = () => {
             {/* Status Text */}
             {isListening ? (
               <div className='text-center'>
-                <div className='text-blue-600 font-medium animate-pulse text-lg'>
+                <div className='text-blue-600 dark:text-blue-400 font-medium animate-pulse text-lg'>
                   🎤 Listening...
                 </div>
-                <div className='text-sm text-gray-500'>
+                <div className='text-sm text-gray-500 dark:text-gray-400'>
                   {aiService.isConfigured()
                     ? "Say anything naturally - I'll understand!"
                     : "Say something like 'Log a bottle feeding'"}
@@ -571,7 +577,7 @@ export const AIHomePage: React.FC = () => {
               </div>
             ) : isProcessing ? (
               <div className='text-center'>
-                <div className='text-blue-600 font-medium text-lg'>
+                <div className='text-blue-600 dark:text-blue-400 font-medium text-lg'>
                   {aiService.isConfigured()
                     ? '🤖 AI Processing...'
                     : 'Processing...'}
@@ -590,13 +596,15 @@ export const AIHomePage: React.FC = () => {
               </div>
             ) : (
               <div className='text-center'>
-                <div className='text-gray-700 font-medium text-lg'>
+                <div className='text-gray-700 dark:text-gray-200 font-medium text-lg'>
                   Tap to speak
                   {aiService.isConfigured() && (
-                    <span className='text-green-600 ml-2'>🤖 AI Ready</span>
+                    <span className='text-green-600 dark:text-green-400 ml-2'>
+                      🤖 AI Ready
+                    </span>
                   )}
                 </div>
-                <div className='text-sm text-gray-500'>
+                <div className='text-sm text-gray-500 dark:text-gray-400'>
                   {aiService.isConfigured()
                     ? 'Speak naturally - no specific phrases needed!'
                     : 'Or type below if needed'}
@@ -629,8 +637,10 @@ export const AIHomePage: React.FC = () => {
         <Card>
           <div className='flex items-center justify-between mb-4'>
             <div className='flex items-center gap-3'>
-              <Clock className='w-5 h-5 text-gray-600' />
-              <h3 className='font-semibold text-gray-800'>Recent Activities</h3>
+              <Clock className='w-5 h-5 text-gray-600 dark:text-gray-400' />
+              <h3 className='font-semibold text-gray-800 dark:text-gray-200'>
+                Recent Activities
+              </h3>
             </div>
             <Button
               onClick={openManualEntryModal}
@@ -669,7 +679,7 @@ export const AIHomePage: React.FC = () => {
                 <p className='font-medium text-gray-900 capitalize'>
                   {selectedEntry.entry_type}
                 </p>
-                <p className='text-sm text-gray-500'>
+                <p className='text-sm text-gray-500 dark:text-gray-400'>
                   {new Date(selectedEntry.start_time).toLocaleString()}
                 </p>
               </div>
@@ -790,7 +800,7 @@ export const AIHomePage: React.FC = () => {
                     className={`p-3 rounded-xl border-2 transition-all capitalize ${
                       formData.entryType === type
                         ? 'border-blue-500 bg-blue-50 text-blue-700'
-                        : 'border-gray-200 text-gray-600'
+                        : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300'
                     }`}
                   >
                     {activityUtils.getActivityIcon(type)} {type}
@@ -839,7 +849,7 @@ export const AIHomePage: React.FC = () => {
                       className={`p-3 rounded-xl border-2 transition-all text-sm ${
                         formData.feedingType === type
                           ? 'border-blue-500 bg-blue-50 text-blue-700'
-                          : 'border-gray-200 text-gray-600'
+                          : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300'
                       }`}
                     >
                       {getFeedingTypeLabel(type)}
@@ -889,7 +899,7 @@ export const AIHomePage: React.FC = () => {
                     className={`p-3 rounded-xl border-2 transition-all capitalize ${
                       formData.diaperType === type
                         ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                        : 'border-gray-200 text-gray-600'
+                        : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300'
                     }`}
                   >
                     {type}
