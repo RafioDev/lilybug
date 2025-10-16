@@ -8,11 +8,14 @@ import { Sidebar } from './Sidebar'
 import { MobileHeader } from './MobileHeader'
 import { FloatingAIAssistant } from './FloatingAIAssistant'
 import type { User } from '@supabase/supabase-js'
+import type { Profile } from '../types'
 
 export const AppLayout: React.FC = () => {
   const [user, setUser] = useState<User | null>(null)
   const [hasProfile, setHasProfile] = useState<boolean | null>(null)
   const [loading, setLoading] = useState(true)
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [userEmail, setUserEmail] = useState<string>('')
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -41,12 +44,20 @@ export const AppLayout: React.FC = () => {
 
   const checkProfile = async () => {
     try {
-      const profile = await profileService.getProfile()
-      setHasProfile(!!profile)
+      const {
+        data: { user: currentUser },
+      } = await supabase.auth.getUser()
 
-      // Run baby data migration if needed
-      if (profile) {
-        await migrateBabyData.runMigrationIfNeeded()
+      if (currentUser) {
+        setUserEmail(currentUser.email || '')
+        const profileData = await profileService.getProfile()
+        setProfile(profileData)
+        setHasProfile(!!profileData)
+
+        // Run baby data migration if needed
+        if (profileData) {
+          await migrateBabyData.runMigrationIfNeeded()
+        }
       }
     } catch (error) {
       console.error('Error checking profile:', error)
@@ -77,11 +88,29 @@ export const AppLayout: React.FC = () => {
     return <Navigate to='/onboarding' replace />
   }
 
+  const getUserDisplayName = (): string => {
+    if (profile?.parent1_name) {
+      return profile.parent1_name
+    }
+    if (userEmail) {
+      // Extract name from email (before @)
+      return userEmail.split('@')[0]
+    }
+    return 'User'
+  }
+
+  const userProfileData = {
+    profile,
+    userEmail,
+    displayName: getUserDisplayName(),
+    loading: false, // AppLayout loading is handled separately
+  }
+
   return (
     <div className='min-h-screen lg:flex'>
-      <Sidebar />
+      <Sidebar userProfile={userProfileData} />
       <div className='flex-1 lg:ml-64'>
-        <MobileHeader />
+        <MobileHeader userProfile={userProfileData} />
         <Outlet />
       </div>
       <NavBar />

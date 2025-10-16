@@ -2,10 +2,21 @@ import React from 'react'
 import { NavLink } from 'react-router-dom'
 import { Sparkles, Heart, Users } from 'lucide-react'
 import { UserDropdown } from './UserDropdown'
-import { useUserProfile } from '../hooks/useUserProfile'
+import type { Profile } from '../types'
 
-export const Sidebar: React.FC = () => {
-  const { displayName, loading } = useUserProfile()
+interface UserProfileData {
+  profile: Profile | null
+  userEmail: string
+  displayName: string
+  loading: boolean
+}
+
+interface SidebarProps {
+  userProfile: UserProfileData
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ userProfile }) => {
+  const { displayName, loading } = userProfile
 
   const navItems = [
     { path: '/', label: 'Assistant', icon: Sparkles },

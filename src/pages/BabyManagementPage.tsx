@@ -12,7 +12,6 @@ import { migrateBabyData } from '../utils/migrateBabyData'
 import { dateUtils } from '../utils/dateUtils'
 import { BabyModal } from '../components/LazyModals'
 import { LoadingState } from '../components/LoadingState'
-import { useAsyncOperation } from '../hooks/useAsyncOperation'
 import type { Baby } from '../types'
 
 export const BabyManagementPage: React.FC = () => {
@@ -21,9 +20,7 @@ export const BabyManagementPage: React.FC = () => {
   const [isBabyModalOpen, setIsBabyModalOpen] = useState(false)
   const [migrating, setMigrating] = useState(false)
   const [showMigrationButton, setShowMigrationButton] = useState(false)
-
-  // Use async operation hook for data loading
-  const loadBabiesOperation = useAsyncOperation(babyService.getBabies)
+  const [loading, setLoading] = useState(true)
 
   const checkMigrationNeeded = async () => {
     try {
@@ -36,12 +33,15 @@ export const BabyManagementPage: React.FC = () => {
 
   const loadBabies = useCallback(async () => {
     try {
-      const data = await loadBabiesOperation.execute()
+      setLoading(true)
+      const data = await babyService.getBabies()
       setBabies(data)
     } catch (error) {
       console.error('Error loading babies:', error)
+    } finally {
+      setLoading(false)
     }
-  }, [loadBabiesOperation])
+  }, [])
 
   useEffect(() => {
     loadBabies()
@@ -117,7 +117,7 @@ export const BabyManagementPage: React.FC = () => {
     setEditingBaby(null)
   }
 
-  if (loadBabiesOperation.loading && babies.length === 0) {
+  if (loading && babies.length === 0) {
     return (
       <div className='min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center'>
         <LoadingState message='Loading babies...' size='lg' />

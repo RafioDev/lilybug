@@ -2,8 +2,15 @@ import React from 'react'
 import { useLocation } from 'react-router-dom'
 import { Sparkles } from 'lucide-react'
 import { UserDropdown } from './UserDropdown'
-import { useUserProfile } from '../hooks/useUserProfile'
 import { ThemeToggleCompact } from './ThemeToggle'
+import type { Profile } from '../types'
+
+interface UserProfileData {
+  profile: Profile | null
+  userEmail: string
+  displayName: string
+  loading: boolean
+}
 
 const getPageTitle = (pathname: string): string => {
   switch (pathname) {
@@ -18,8 +25,12 @@ const getPageTitle = (pathname: string): string => {
   }
 }
 
-export const MobileHeader: React.FC = () => {
-  const { displayName, loading } = useUserProfile()
+interface MobileHeaderProps {
+  userProfile: UserProfileData
+}
+
+export const MobileHeader: React.FC<MobileHeaderProps> = ({ userProfile }) => {
+  const { displayName, loading } = userProfile
   const location = useLocation()
   const pageTitle = getPageTitle(location.pathname)
 

@@ -311,7 +311,7 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className='fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center z-50 hover:scale-105'
+        className='fixed bottom-24 lg:bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center z-50 hover:scale-105'
       >
         <Sparkles className='w-6 h-6' />
       </button>
@@ -320,13 +320,13 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
 
   return (
     <div
-      className={`fixed bottom-6 right-6 z-50 transition-all duration-200 ${
+      className={`fixed bottom-24 lg:bottom-6 right-6 z-50 transition-all duration-200 ${
         isMinimized ? 'w-80 h-16' : 'w-80 h-96'
       }`}
     >
-      <div className='bg-white rounded-lg shadow-2xl border border-gray-200 flex flex-col h-full'>
+      <div className='bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col h-full'>
         {/* Header */}
-        <div className='flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg'>
+        <div className='flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg'>
           <div className='flex items-center gap-2'>
             <Sparkles className='w-5 h-5' />
             <span className='font-medium text-sm'>Assistant</span>
@@ -354,7 +354,7 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
         {!isMinimized && (
           <>
             {/* Messages */}
-            <div className='flex-1 overflow-y-auto p-3 space-y-3'>
+            <div className='flex-1 overflow-y-auto p-3 space-y-3 bg-white dark:bg-gray-800'>
               {messages.map((message) => (
                 <div
                   key={message.id}
@@ -366,7 +366,7 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
                     className={`max-w-[80%] p-2 rounded-lg text-sm ${
                       message.type === 'user'
                         ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-900'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                     }`}
                   >
                     <p className='whitespace-pre-line'>{message.content}</p>
@@ -374,7 +374,7 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
                       className={`text-xs mt-1 ${
                         message.type === 'user'
                           ? 'text-blue-100'
-                          : 'text-gray-500'
+                          : 'text-gray-500 dark:text-gray-400'
                       }`}
                     >
                       {message.isVoice && '🎤 '}
@@ -386,15 +386,15 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
 
               {isProcessing && (
                 <div className='flex justify-start'>
-                  <div className='bg-gray-100 text-gray-900 p-2 rounded-lg'>
+                  <div className='bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 p-2 rounded-lg'>
                     <div className='flex space-x-1'>
-                      <div className='w-2 h-2 bg-gray-400 rounded-full animate-bounce'></div>
+                      <div className='w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce'></div>
                       <div
-                        className='w-2 h-2 bg-gray-400 rounded-full animate-bounce'
+                        className='w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce'
                         style={{ animationDelay: '0.1s' }}
                       ></div>
                       <div
-                        className='w-2 h-2 bg-gray-400 rounded-full animate-bounce'
+                        className='w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce'
                         style={{ animationDelay: '0.2s' }}
                       ></div>
                     </div>
@@ -406,24 +406,8 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
             </div>
 
             {/* Input */}
-            <div className='p-3 border-t border-gray-200'>
+            <div className='p-3 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'>
               <div className='flex gap-2 mb-2'>
-                <button
-                  onClick={isListening ? stopListening : startListening}
-                  disabled={isProcessing}
-                  className={`p-2 rounded-lg transition-colors flex-shrink-0 ${
-                    isListening
-                      ? 'bg-red-500 text-white animate-pulse'
-                      : 'bg-blue-500 hover:bg-blue-600 text-white'
-                  } ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  {isListening ? (
-                    <MicOff className='w-4 h-4' />
-                  ) : (
-                    <Mic className='w-4 h-4' />
-                  )}
-                </button>
-
                 <Input
                   type='text'
                   value={inputText}
@@ -439,10 +423,26 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
                 >
                   <Send className='w-4 h-4' />
                 </button>
+
+                <button
+                  onClick={isListening ? stopListening : startListening}
+                  disabled={isProcessing}
+                  className={`p-2 rounded-lg transition-colors flex-shrink-0 ${
+                    isListening
+                      ? 'bg-red-500 text-white animate-pulse'
+                      : 'bg-blue-500 hover:bg-blue-600 text-white'
+                  } ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {isListening ? (
+                    <MicOff className='w-4 h-4' />
+                  ) : (
+                    <Mic className='w-4 h-4' />
+                  )}
+                </button>
               </div>
 
               {isListening && (
-                <div className='text-center text-xs text-blue-600 animate-pulse'>
+                <div className='text-center text-xs text-blue-600 dark:text-blue-400 animate-pulse'>
                   🎤 Listening... Speak now!
                 </div>
               )}

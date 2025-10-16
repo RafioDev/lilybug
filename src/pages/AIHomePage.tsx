@@ -264,7 +264,51 @@ export const AIHomePage: React.FC = () => {
 
   // Initial data load and setup - runs only once
   useEffect(() => {
-    loadData(true)
+    // Load data directly without depending on the callback
+    const initialLoad = async () => {
+      try {
+        setIsLoading(true)
+
+        const activeBabyData = await babyService.getActiveBaby()
+        const entriesData = await trackerService.getEntries(
+          100,
+          activeBabyData?.id
+        )
+
+        setActiveBaby(activeBabyData)
+        setEntries(entriesData)
+
+        // Calculate today's stats
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        const todayEntries = entriesData.filter(
+          (entry) => new Date(entry.start_time) >= today
+        )
+
+        const stats = {
+          feedings: todayEntries.filter((e) => e.entry_type === 'feeding')
+            .length,
+          sleepHours: todayEntries
+            .filter((e) => e.entry_type === 'sleep' && e.end_time)
+            .reduce((total, entry) => {
+              const start = new Date(entry.start_time)
+              const end = new Date(entry.end_time!)
+              return (
+                total + (end.getTime() - start.getTime()) / (1000 * 60 * 60)
+              )
+            }, 0),
+          diapers: todayEntries.filter((e) => e.entry_type === 'diaper').length,
+        }
+
+        setTodayStats(stats)
+      } catch (error) {
+        console.error('Error loading data:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    initialLoad()
 
     // Initialize speech recognition
     if (window.webkitSpeechRecognition || window.SpeechRecognition) {
@@ -302,7 +346,7 @@ export const AIHomePage: React.FC = () => {
       timestamp: new Date(),
     }
     setMessages([welcomeMessage])
-  }, [loadData]) // Empty dependency array - runs only once
+  }, []) // Empty dependency array - runs only once
 
   // Update speech recognition handler when handleVoiceInput changes
   useEffect(() => {
