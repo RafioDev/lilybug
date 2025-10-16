@@ -12,20 +12,18 @@ import { Button } from '../components/Button'
 import { Input } from '../components/Input'
 import { chatActionService } from '../services/chatActionService'
 import { smartSearchService } from '../services/smartSearchService'
-import { trackerService } from '../services/trackerService'
-import { babyService } from '../services/babyService'
 import { aiService } from '../services/aiService'
+import { useActiveBaby } from '../hooks/queries/useBabyQueries'
+import {
+  useEntries,
+  useCreateEntry,
+  useDeleteEntry,
+} from '../hooks/queries/useTrackerQueries'
 import { activityUtils } from '../utils/activityUtils'
 import { Modal } from '../components/Modal'
 import { ActivityModal } from '../components/LazyModals'
 import { GroupedActivitiesList } from '../components/GroupedActivitiesList'
-import type {
-  TrackerEntry,
-  Baby,
-  EntryType,
-  FeedingType,
-  DiaperType,
-} from '../types'
+import type { TrackerEntry, EntryType, FeedingType, DiaperType } from '../types'
 
 // Speech Recognition types
 interface SpeechRecognitionResult {
@@ -78,15 +76,22 @@ export const AIHomePage: React.FC = () => {
   const [messages, setMessages] = useState<AIMessage[]>([])
   const [inputText, setInputText] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
-  const [isLoading, setIsLoading] = useState(true) // Full page loading (initial only)
-  const [isUpdatingData, setIsUpdatingData] = useState(false) // Subtle loading for data updates
-  const [activeBaby, setActiveBaby] = useState<Baby | null>(null)
-  const [entries, setEntries] = useState<TrackerEntry[]>([])
   const [todayStats, setTodayStats] = useState({
     feedings: 0,
     sleepHours: 0,
     diapers: 0,
   })
+
+  // Use React Query for data
+  const { data: activeBaby, isLoading: babyLoading } = useActiveBaby()
+  const { data: entries = [], isLoading: entriesLoading } = useEntries(
+    100,
+    activeBaby?.id
+  )
+  const createEntryMutation = useCreateEntry()
+  const deleteEntryMutation = useDeleteEntry()
+
+  const isLoading = babyLoading || entriesLoading
 
   // Activities state
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
@@ -106,27 +111,12 @@ export const AIHomePage: React.FC = () => {
   const recognitionRef = useRef<SpeechRecognitionInterface | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  const loadData = useCallback(async (isInitialLoad = false) => {
-    try {
-      if (isInitialLoad) {
-        setIsLoading(true)
-      } else {
-        setIsUpdatingData(true)
-      }
-
-      const activeBabyData = await babyService.getActiveBaby()
-      const entriesData = await trackerService.getEntries(
-        100,
-        activeBabyData?.id
-      )
-
-      setActiveBaby(activeBabyData)
-      setEntries(entriesData)
-
-      // Calculate today's stats
+  // Calculate today's stats when entries change
+  useEffect(() => {
+    if (entries.length > 0) {
       const today = new Date()
       today.setHours(0, 0, 0, 0)
-      const todayEntries = entriesData.filter(
+      const todayEntries = entries.filter(
         (entry) => new Date(entry.start_time) >= today
       )
 
@@ -143,16 +133,8 @@ export const AIHomePage: React.FC = () => {
       }
 
       setTodayStats(stats)
-    } catch (error) {
-      console.error('Error loading data:', error)
-    } finally {
-      if (isInitialLoad) {
-        setIsLoading(false)
-      } else {
-        setIsUpdatingData(false)
-      }
     }
-  }, [])
+  }, [entries])
 
   const processMessage = useCallback(
     async (message: string) => {
@@ -182,8 +164,7 @@ export const AIHomePage: React.FC = () => {
             )
             responseContent = actionResult
 
-            // Refresh data (not initial load)
-            await loadData(false)
+            // React Query will automatically refetch after mutations
           }
         } else if (action.type === 'start_timer') {
           const feedingTypeText =
@@ -243,7 +224,7 @@ export const AIHomePage: React.FC = () => {
         setIsProcessing(false)
       }
     },
-    [activeBaby, entries, loadData]
+    [activeBaby, entries]
   )
 
   const handleVoiceInput = useCallback(
@@ -262,54 +243,8 @@ export const AIHomePage: React.FC = () => {
     [processMessage]
   )
 
-  // Initial data load and setup - runs only once
+  // Initial setup - runs only once
   useEffect(() => {
-    // Load data directly without depending on the callback
-    const initialLoad = async () => {
-      try {
-        setIsLoading(true)
-
-        const activeBabyData = await babyService.getActiveBaby()
-        const entriesData = await trackerService.getEntries(
-          100,
-          activeBabyData?.id
-        )
-
-        setActiveBaby(activeBabyData)
-        setEntries(entriesData)
-
-        // Calculate today's stats
-        const today = new Date()
-        today.setHours(0, 0, 0, 0)
-        const todayEntries = entriesData.filter(
-          (entry) => new Date(entry.start_time) >= today
-        )
-
-        const stats = {
-          feedings: todayEntries.filter((e) => e.entry_type === 'feeding')
-            .length,
-          sleepHours: todayEntries
-            .filter((e) => e.entry_type === 'sleep' && e.end_time)
-            .reduce((total, entry) => {
-              const start = new Date(entry.start_time)
-              const end = new Date(entry.end_time!)
-              return (
-                total + (end.getTime() - start.getTime()) / (1000 * 60 * 60)
-              )
-            }, 0),
-          diapers: todayEntries.filter((e) => e.entry_type === 'diaper').length,
-        }
-
-        setTodayStats(stats)
-      } catch (error) {
-        console.error('Error loading data:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    initialLoad()
-
     // Initialize speech recognition
     if (window.webkitSpeechRecognition || window.SpeechRecognition) {
       const SpeechRecognitionClass =
@@ -398,8 +333,7 @@ export const AIHomePage: React.FC = () => {
   // Activities functions
   const deleteEntry = async (id: string) => {
     try {
-      await trackerService.deleteEntry(id)
-      await loadData(false)
+      await deleteEntryMutation.mutateAsync(id)
     } catch (error) {
       console.error('Error deleting entry:', error)
     }
@@ -415,16 +349,8 @@ export const AIHomePage: React.FC = () => {
     setIsEditModalOpen(true)
   }
 
-  const handleEditSave = async (updatedEntry: TrackerEntry) => {
-    // Update the entries list with the updated entry
-    setEntries((prevEntries) =>
-      prevEntries.map((entry) =>
-        entry.id === updatedEntry.id ? updatedEntry : entry
-      )
-    )
-
-    // Refresh data to ensure consistency
-    await loadData(false)
+  const handleEditSave = async () => {
+    // React Query will automatically update the cache
     setIsEditModalOpen(false)
   }
 
@@ -466,8 +392,7 @@ export const AIHomePage: React.FC = () => {
         baby_id: activeBaby.id,
       }
 
-      await trackerService.createEntry(entry)
-      await loadData(false)
+      await createEntryMutation.mutateAsync(entry)
       setIsManualEntryModalOpen(false)
     } catch (error) {
       console.error('Error creating manual entry:', error)
@@ -589,45 +514,21 @@ export const AIHomePage: React.FC = () => {
         {/* Today's Summary */}
         {activeBaby && (
           <div className='grid grid-cols-3 gap-4'>
-            <Card
-              className={`text-center transition-opacity ${
-                isUpdatingData ? 'opacity-60' : ''
-              }`}
-            >
+            <Card className='text-center'>
               <div className='text-2xl font-bold text-blue-600'>
-                {isUpdatingData ? (
-                  <div className='w-8 h-8 bg-blue-200 rounded mx-auto animate-pulse'></div>
-                ) : (
-                  todayStats.feedings
-                )}
+                {todayStats.feedings}
               </div>
               <div className='text-sm text-gray-600'>Feedings Today</div>
             </Card>
-            <Card
-              className={`text-center transition-opacity ${
-                isUpdatingData ? 'opacity-60' : ''
-              }`}
-            >
+            <Card className='text-center'>
               <div className='text-2xl font-bold text-cyan-600'>
-                {isUpdatingData ? (
-                  <div className='w-8 h-8 bg-cyan-200 rounded mx-auto animate-pulse'></div>
-                ) : (
-                  `${todayStats.sleepHours.toFixed(1)}h`
-                )}
+                {`${todayStats.sleepHours.toFixed(1)}h`}
               </div>
               <div className='text-sm text-gray-600'>Sleep Today</div>
             </Card>
-            <Card
-              className={`text-center transition-opacity ${
-                isUpdatingData ? 'opacity-60' : ''
-              }`}
-            >
+            <Card className='text-center'>
               <div className='text-2xl font-bold text-emerald-600'>
-                {isUpdatingData ? (
-                  <div className='w-8 h-8 bg-emerald-200 rounded mx-auto animate-pulse'></div>
-                ) : (
-                  todayStats.diapers
-                )}
+                {todayStats.diapers}
               </div>
               <div className='text-sm text-gray-600'>Diapers Today</div>
             </Card>
@@ -730,12 +631,6 @@ export const AIHomePage: React.FC = () => {
             <div className='flex items-center gap-3'>
               <Clock className='w-5 h-5 text-gray-600' />
               <h3 className='font-semibold text-gray-800'>Recent Activities</h3>
-              {isUpdatingData && (
-                <div className='flex items-center gap-2 text-sm text-blue-600'>
-                  <div className='w-3 h-3 bg-blue-400 rounded-full animate-pulse'></div>
-                  <span>Updating...</span>
-                </div>
-              )}
             </div>
             <Button
               onClick={openManualEntryModal}
@@ -752,7 +647,7 @@ export const AIHomePage: React.FC = () => {
             onEditEntry={openEditModal}
             onDeleteEntry={deleteEntry}
             onViewDetails={openDetailsModal}
-            isLoading={isUpdatingData}
+            isLoading={entriesLoading}
             className='max-h-96 overflow-y-auto'
           />
         </Card>

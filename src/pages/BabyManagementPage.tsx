@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, Suspense } from 'react'
+import React, { useState, useEffect, Suspense } from 'react'
 import {
   Plus,
   Edit2,
@@ -7,20 +7,27 @@ import {
   Check,
   Download,
 } from 'lucide-react'
-import { babyService } from '../services/babyService'
 import { migrateBabyData } from '../utils/migrateBabyData'
 import { dateUtils } from '../utils/dateUtils'
 import { BabyModal } from '../components/LazyModals'
 import { LoadingState } from '../components/LoadingState'
+import {
+  useBabies,
+  useSetActiveBaby,
+  useDeleteBaby,
+} from '../hooks/queries/useBabyQueries'
 import type { Baby } from '../types'
 
 export const BabyManagementPage: React.FC = () => {
-  const [babies, setBabies] = useState<Baby[]>([])
   const [editingBaby, setEditingBaby] = useState<Baby | null>(null)
   const [isBabyModalOpen, setIsBabyModalOpen] = useState(false)
   const [migrating, setMigrating] = useState(false)
   const [showMigrationButton, setShowMigrationButton] = useState(false)
-  const [loading, setLoading] = useState(true)
+
+  // Use React Query for babies data
+  const { data: babies = [], isLoading, refetch } = useBabies()
+  const setActiveBabyMutation = useSetActiveBaby()
+  const deleteBabyMutation = useDeleteBaby()
 
   const checkMigrationNeeded = async () => {
     try {
@@ -31,27 +38,13 @@ export const BabyManagementPage: React.FC = () => {
     }
   }
 
-  const loadBabies = useCallback(async () => {
-    try {
-      setLoading(true)
-      const data = await babyService.getBabies()
-      setBabies(data)
-    } catch (error) {
-      console.error('Error loading babies:', error)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
   useEffect(() => {
-    loadBabies()
     checkMigrationNeeded()
-  }, [loadBabies])
+  }, [])
 
   const handleSetActive = async (babyId: string) => {
     try {
-      await babyService.setActiveBaby(babyId)
-      await loadBabies()
+      await setActiveBabyMutation.mutateAsync(babyId)
     } catch (error) {
       console.error('Error setting active baby:', error)
     }
@@ -67,8 +60,7 @@ export const BabyManagementPage: React.FC = () => {
     }
 
     try {
-      await babyService.deleteBaby(babyId)
-      await loadBabies()
+      await deleteBabyMutation.mutateAsync(babyId)
     } catch (error) {
       console.error('Error deleting baby:', error)
     }
@@ -89,7 +81,7 @@ export const BabyManagementPage: React.FC = () => {
     try {
       const success = await migrateBabyData.migrateFromProfile()
       if (success) {
-        await loadBabies()
+        await refetch()
         setShowMigrationButton(false)
         alert('Successfully migrated your baby data!')
       } else {
@@ -104,7 +96,7 @@ export const BabyManagementPage: React.FC = () => {
   }
 
   const handleBabySave = async () => {
-    await loadBabies()
+    // React Query will automatically refetch after mutations
   }
 
   const handleBabyError = (error: string) => {
@@ -117,7 +109,7 @@ export const BabyManagementPage: React.FC = () => {
     setEditingBaby(null)
   }
 
-  if (loading && babies.length === 0) {
+  if (isLoading) {
     return (
       <div className='min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center'>
         <LoadingState message='Loading babies...' size='lg' />

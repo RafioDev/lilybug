@@ -12,9 +12,8 @@ import { useLocation } from 'react-router-dom'
 import { Input } from './Input'
 import { chatActionService } from '../services/chatActionService'
 import { smartSearchService } from '../services/smartSearchService'
-import { trackerService } from '../services/trackerService'
-import { babyService } from '../services/babyService'
-import type { TrackerEntry, Baby } from '../types'
+import { useActiveBaby } from '../hooks/queries/useBabyQueries'
+import { useEntries } from '../hooks/queries/useTrackerQueries'
 
 // Speech Recognition types
 interface SpeechRecognitionResult {
@@ -76,8 +75,6 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
   const [messages, setMessages] = useState<AIMessage[]>([])
   const [inputText, setInputText] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
-  const [activeBaby, setActiveBaby] = useState<Baby | null>(null)
-  const [entries, setEntries] = useState<TrackerEntry[]>([])
 
   const recognitionRef = useRef<SpeechRecognitionInterface | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -85,20 +82,9 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
   // Don't show on AI home page - but keep hooks consistent
   const shouldShow = location.pathname !== '/'
 
-  const loadData = useCallback(async () => {
-    try {
-      const activeBabyData = await babyService.getActiveBaby()
-      const entriesData = await trackerService.getEntries(
-        100,
-        activeBabyData?.id
-      )
-
-      setActiveBaby(activeBabyData)
-      setEntries(entriesData)
-    } catch (error) {
-      console.error('Error loading AI assistant data:', error)
-    }
-  }, [])
+  // Use React Query for data - only fetch when component should show and is open
+  const { data: activeBaby } = useActiveBaby()
+  const { data: entries = [] } = useEntries(100, activeBaby?.id)
 
   const processMessage = useCallback(
     async (message: string) => {
@@ -124,9 +110,6 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
               activeBaby.id
             )
             responseContent = actionResult
-
-            // Refresh data
-            await loadData()
 
             // Notify parent component
             if (onEntryCreated) {
@@ -191,7 +174,7 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
         setIsProcessing(false)
       }
     },
-    [activeBaby, entries, loadData, onEntryCreated]
+    [activeBaby, entries, onEntryCreated]
   )
 
   const handleVoiceInput = useCallback(
@@ -212,8 +195,6 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      loadData()
-
       // Initialize speech recognition
       if (window.webkitSpeechRecognition || window.SpeechRecognition) {
         const SpeechRecognitionClass =
@@ -258,7 +239,7 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
         setMessages([welcomeMessage])
       }
     }
-  }, [isOpen, handleVoiceInput, loadData, messages.length])
+  }, [isOpen, handleVoiceInput, messages.length])
 
   useEffect(() => {
     scrollToBottom()

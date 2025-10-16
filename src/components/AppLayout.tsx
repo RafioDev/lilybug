@@ -1,73 +1,45 @@
 import React, { useState, useEffect } from 'react'
 import { Outlet, Navigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { profileService } from '../services/profileService'
 import { migrateBabyData } from '../utils/migrateBabyData'
 import { NavBar } from './NavBar'
 import { Sidebar } from './Sidebar'
 import { MobileHeader } from './MobileHeader'
 import { FloatingAIAssistant } from './FloatingAIAssistant'
+import { useUserProfile } from '../hooks/queries/useProfileQueries'
 import type { User } from '@supabase/supabase-js'
-import type { Profile } from '../types'
 
 export const AppLayout: React.FC = () => {
   const [user, setUser] = useState<User | null>(null)
-  const [hasProfile, setHasProfile] = useState<boolean | null>(null)
   const [loading, setLoading] = useState(true)
-  const [profile, setProfile] = useState<Profile | null>(null)
-  const [userEmail, setUserEmail] = useState<string>('')
+
+  // Use React Query for profile data
+  const { data: profileData, isLoading: profileLoading } = useUserProfile()
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
-      if (session?.user) {
-        checkProfile()
-      } else {
-        setLoading(false)
-      }
+      setLoading(false)
     })
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
-      if (session?.user) {
-        checkProfile()
-      } else {
-        setHasProfile(null)
-        setLoading(false)
-      }
+      setLoading(false)
     })
 
     return () => subscription.unsubscribe()
   }, [])
 
-  const checkProfile = async () => {
-    try {
-      const {
-        data: { user: currentUser },
-      } = await supabase.auth.getUser()
-
-      if (currentUser) {
-        setUserEmail(currentUser.email || '')
-        const profileData = await profileService.getProfile()
-        setProfile(profileData)
-        setHasProfile(!!profileData)
-
-        // Run baby data migration if needed
-        if (profileData) {
-          await migrateBabyData.runMigrationIfNeeded()
-        }
-      }
-    } catch (error) {
-      console.error('Error checking profile:', error)
-      setHasProfile(false)
-    } finally {
-      setLoading(false)
+  // Run migration when profile is available
+  useEffect(() => {
+    if (profileData?.profile) {
+      migrateBabyData.runMigrationIfNeeded().catch(console.error)
     }
-  }
+  }, [profileData?.profile])
 
-  if (loading) {
+  if (loading || profileLoading) {
     return (
       <div className='min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 flex items-center justify-center'>
         <div className='text-center'>
@@ -84,33 +56,22 @@ export const AppLayout: React.FC = () => {
     return <Navigate to='/auth' replace />
   }
 
-  if (hasProfile === false) {
+  if (!profileData?.profile) {
     return <Navigate to='/onboarding' replace />
   }
 
-  const getUserDisplayName = (): string => {
-    if (profile?.parent1_name) {
-      return profile.parent1_name
-    }
-    if (userEmail) {
-      // Extract name from email (before @)
-      return userEmail.split('@')[0]
-    }
-    return 'User'
-  }
-
-  const userProfileData = {
-    profile,
-    userEmail,
-    displayName: getUserDisplayName(),
-    loading: false, // AppLayout loading is handled separately
+  const userProfileForProps = {
+    profile: profileData.profile,
+    userEmail: profileData.userEmail,
+    displayName: profileData.displayName,
+    loading: false,
   }
 
   return (
     <div className='min-h-screen lg:flex'>
-      <Sidebar userProfile={userProfileData} />
+      <Sidebar userProfile={userProfileForProps} />
       <div className='flex-1 lg:ml-64'>
-        <MobileHeader userProfile={userProfileData} />
+        <MobileHeader userProfile={userProfileForProps} />
         <Outlet />
       </div>
       <NavBar />
