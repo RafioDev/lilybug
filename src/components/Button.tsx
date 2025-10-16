@@ -121,7 +121,7 @@ export const Button: React.FC<ButtonProps> = ({
   }
 
   const baseStyles =
-    'font-medium rounded-xl transition-all duration-200 active:scale-95 disabled:opacity-50 dark:disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 disabled:shadow-none focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900 inline-flex items-center'
+    'font-medium rounded-xl transition-all duration-200 active:scale-95 disabled:opacity-50 dark:disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 disabled:shadow-none focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900 inline-flex items-center cursor-pointer'
 
   const variantStyles = {
     primary:

@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { useLocation } from 'react-router-dom'
 import { Input } from './Input'
+import { IconButton } from './Button'
 import { chatActionService } from '../services/chatActionService'
 import { smartSearchService } from '../services/smartSearchService'
 import { useActiveBaby } from '../hooks/queries/useBabyQueries'
@@ -290,12 +291,16 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
   // Floating action button when closed
   if (!isOpen) {
     return (
-      <button
-        onClick={() => setIsOpen(true)}
-        className='fixed bottom-24 lg:bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center z-50 hover:scale-105'
-      >
-        <Sparkles className='w-6 h-6' />
-      </button>
+      <div className='fixed bottom-24 lg:bottom-6 right-6 z-50'>
+        <IconButton
+          icon={<Sparkles className='w-6 h-6' />}
+          onClick={() => setIsOpen(true)}
+          variant='primary'
+          size='lg'
+          aria-label='Open AI Assistant'
+          className='w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full shadow-lg hover:shadow-xl hover:scale-105'
+        />
+      </div>
     )
   }
 
@@ -313,22 +318,30 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
             <span className='font-medium text-sm'>Assistant</span>
           </div>
           <div className='flex items-center gap-1'>
-            <button
+            <IconButton
+              icon={
+                isMinimized ? (
+                  <Maximize2 className='w-4 h-4' />
+                ) : (
+                  <Minimize2 className='w-4 h-4' />
+                )
+              }
               onClick={() => setIsMinimized(!isMinimized)}
-              className='p-1 hover:bg-white/20 rounded'
-            >
-              {isMinimized ? (
-                <Maximize2 className='w-4 h-4' />
-              ) : (
-                <Minimize2 className='w-4 h-4' />
-              )}
-            </button>
-            <button
+              variant='primary'
+              size='sm'
+              aria-label={
+                isMinimized ? 'Maximize assistant' : 'Minimize assistant'
+              }
+              className='p-1 hover:bg-white/20 bg-transparent border-none shadow-none min-h-auto min-w-auto'
+            />
+            <IconButton
+              icon={<X className='w-4 h-4' />}
               onClick={() => setIsOpen(false)}
-              className='p-1 hover:bg-white/20 rounded'
-            >
-              <X className='w-4 h-4' />
-            </button>
+              variant='primary'
+              size='sm'
+              aria-label='Close assistant'
+              className='p-1 hover:bg-white/20 bg-transparent border-none shadow-none min-h-auto min-w-auto'
+            />
           </div>
         </div>
 
@@ -397,29 +410,35 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
                   className='flex-1 text-sm'
                 />
 
-                <button
+                <IconButton
+                  icon={<Send className='w-4 h-4' />}
                   onClick={handleTextInput}
                   disabled={!inputText.trim() || isProcessing}
-                  className='p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0'
-                >
-                  <Send className='w-4 h-4' />
-                </button>
+                  variant='primary'
+                  size='sm'
+                  aria-label='Send message'
+                  className='p-2 flex-shrink-0'
+                />
 
-                <button
+                <IconButton
+                  icon={
+                    isListening ? (
+                      <MicOff className='w-4 h-4' />
+                    ) : (
+                      <Mic className='w-4 h-4' />
+                    )
+                  }
                   onClick={isListening ? stopListening : startListening}
                   disabled={isProcessing}
-                  className={`p-2 rounded-lg transition-colors flex-shrink-0 ${
-                    isListening
-                      ? 'bg-red-500 text-white animate-pulse'
-                      : 'bg-blue-500 hover:bg-blue-600 text-white'
-                  } ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  {isListening ? (
-                    <MicOff className='w-4 h-4' />
-                  ) : (
-                    <Mic className='w-4 h-4' />
-                  )}
-                </button>
+                  variant={isListening ? 'danger' : 'primary'}
+                  size='sm'
+                  aria-label={
+                    isListening ? 'Stop listening' : 'Start voice input'
+                  }
+                  className={`p-2 flex-shrink-0 ${
+                    isListening ? 'animate-pulse' : ''
+                  }`}
+                />
               </div>
 
               {isListening && (

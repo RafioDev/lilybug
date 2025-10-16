@@ -11,6 +11,7 @@ import { migrateBabyData } from '../utils/migrateBabyData'
 import { dateUtils } from '../utils/dateUtils'
 import { BabyModal } from '../components/LazyModals'
 import { LoadingState } from '../components/LoadingState'
+import { Button, IconButton } from '../components/Button'
 import {
   useBabies,
   useSetActiveBaby,
@@ -131,23 +132,21 @@ export const BabyManagementPage: React.FC = () => {
           </div>
           <div className='flex gap-3'>
             {showMigrationButton && (
-              <button
+              <Button
                 onClick={handleMigration}
                 disabled={migrating}
-                className='flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50'
+                variant='secondary'
+                leftIcon={<Download />}
+                loading={migrating}
+                loadingText='Migrating...'
               >
-                <Download className='w-4 h-4' />
-                {migrating ? 'Migrating...' : 'Import Existing Baby'}
-              </button>
+                Import Existing Baby
+              </Button>
             )}
 
-            <button
-              onClick={startAdd}
-              className='flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors'
-            >
-              <Plus className='w-4 h-4' />
+            <Button onClick={startAdd} variant='primary' leftIcon={<Plus />}>
               Add Baby
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -162,12 +161,9 @@ export const BabyManagementPage: React.FC = () => {
               <p className='text-gray-500 dark:text-gray-400 mb-4'>
                 Add your first baby to start tracking
               </p>
-              <button
-                onClick={startAdd}
-                className='bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors'
-              >
+              <Button onClick={startAdd} variant='primary'>
                 Add Your First Baby
-              </button>
+              </Button>
             </div>
           ) : (
             babies.map((baby) => (
@@ -217,26 +213,32 @@ export const BabyManagementPage: React.FC = () => {
                   </div>
                   <div className='flex items-center gap-2'>
                     {!baby.is_active && (
-                      <button
+                      <Button
                         onClick={() => handleSetActive(baby.id)}
-                        className='flex items-center gap-1 bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 px-3 py-1 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/60 transition-colors text-sm'
+                        variant='outline'
+                        size='sm'
+                        leftIcon={<Check />}
+                        className='bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 border-green-200 dark:border-green-700 hover:bg-green-200 dark:hover:bg-green-900/60'
                       >
-                        <Check className='w-3 h-3' />
                         Set Active
-                      </button>
+                      </Button>
                     )}
-                    <button
+                    <IconButton
                       onClick={() => startEdit(baby)}
-                      className='p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors'
-                    >
-                      <Edit2 className='w-4 h-4' />
-                    </button>
-                    <button
+                      variant='outline'
+                      size='sm'
+                      icon={<Edit2 />}
+                      aria-label={`Edit ${baby.name}`}
+                      className='text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-600 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-300 dark:hover:border-blue-500'
+                    />
+                    <IconButton
                       onClick={() => handleDelete(baby.id)}
-                      className='p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors'
-                    >
-                      <Trash2 className='w-4 h-4' />
-                    </button>
+                      variant='outline'
+                      size='sm'
+                      icon={<Trash2 />}
+                      aria-label={`Delete ${baby.name}`}
+                      className='text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-600 hover:text-red-600 dark:hover:text-red-400 hover:border-red-300 dark:hover:border-red-500'
+                    />
                   </div>
                 </div>
               </div>
