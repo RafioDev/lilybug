@@ -124,10 +124,11 @@ export const BabyModal: React.FC<BabyModalProps> = ({
   }
 
   // Initialize form
-  const form = useForm({
+  const form = useForm<BabyFormData>({
     initialValues: {
       name: '',
       birthdate: '',
+      is_active: isFirstBaby,
     },
     validate: validateBaby,
     onSubmit: handleSubmit,
@@ -139,6 +140,7 @@ export const BabyModal: React.FC<BabyModalProps> = ({
       form.setValues({
         name: baby.name,
         birthdate: baby.birthdate,
+        is_active: baby.is_active,
       })
     } else {
       form.reset()

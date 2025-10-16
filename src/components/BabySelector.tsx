@@ -23,7 +23,9 @@ export const BabySelector: React.FC<BabySelectorProps> = ({
   const loadBabiesOperation = useAsyncOperation(() =>
     Promise.all([babyService.getBabies(), babyService.getActiveBaby()])
   )
-  const setActiveBabyOperation = useAsyncOperation(babyService.setActiveBaby)
+  const setActiveBabyOperation = useAsyncOperation((...args: unknown[]) =>
+    babyService.setActiveBaby(args[0] as string)
+  )
 
   useEffect(() => {
     const loadBabies = async () => {

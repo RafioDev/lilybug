@@ -187,8 +187,8 @@ export const activityUtils = {
     }
 
     return {
-      duration,
-      quantity,
+      duration: duration ?? undefined,
+      quantity: quantity ?? undefined,
       details,
       primaryText,
       secondaryText,

@@ -104,29 +104,36 @@ export interface UseBabyOperationsReturn {
 export function useBabyOperations(): UseBabyOperationsReturn {
   // Create baby operation
   const createBabyOperation = useAsyncOperation(
-    useCallback(async (babyData: BabyFormData) => {
-      return await babyService.createBaby(babyData)
+    useCallback(async (...args: unknown[]) => {
+      const babyData = args[0] as BabyFormData
+      return await babyService.createBaby({
+        ...babyData,
+        is_active: babyData.is_active ?? false,
+      })
     }, [])
   )
 
   // Update baby operation
   const updateBabyOperation = useAsyncOperation(
-    useCallback(async (id: string, updates: Partial<BabyFormData>) => {
-      return await babyService.updateBaby(id, updates)
+    useCallback(async (...args: unknown[]) => {
+      return await babyService.updateBaby(
+        args[0] as string,
+        args[1] as Partial<BabyFormData>
+      )
     }, [])
   )
 
   // Delete baby operation
   const deleteBabyOperation = useAsyncOperation(
-    useCallback(async (id: string) => {
-      return await babyService.deleteBaby(id)
+    useCallback(async (...args: unknown[]) => {
+      return await babyService.deleteBaby(args[0] as string)
     }, [])
   )
 
   // Set active baby operation
   const setActiveBabyOperation = useAsyncOperation(
-    useCallback(async (id: string) => {
-      return await babyService.setActiveBaby(id)
+    useCallback(async (...args: unknown[]) => {
+      return await babyService.setActiveBaby(args[0] as string)
     }, [])
   )
 

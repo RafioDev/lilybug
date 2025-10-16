@@ -2,7 +2,8 @@ import React from 'react'
 import { Edit3, Trash2 } from 'lucide-react'
 import { DateHeader } from './DateHeader'
 import { activityUtils } from '../utils/activityUtils'
-import type { DateGroup, TrackerEntry } from '../utils/activityUtils'
+import type { DateGroup } from '../utils/activityUtils'
+import type { TrackerEntry } from '../types'
 
 interface ActivityGroupProps {
   dateGroup: DateGroup
