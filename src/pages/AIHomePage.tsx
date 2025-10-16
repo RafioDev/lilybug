@@ -8,7 +8,7 @@ import React, {
 import { Mic, MicOff, Send, Sparkles, Clock } from 'lucide-react'
 import { Layout } from '../components/Layout'
 import { Card } from '../components/Card'
-import { Button } from '../components/Button'
+import { Button, IconButton } from '../components/Button'
 import { Input } from '../components/Input'
 import { chatActionService } from '../services/chatActionService'
 import { smartSearchService } from '../services/smartSearchService'
@@ -545,23 +545,19 @@ export const AIHomePage: React.FC = () => {
         <Card className='p-8'>
           <div className='flex flex-col items-center space-y-6'>
             {/* Primary Voice Button */}
-            <button
+            <IconButton
+              icon={isListening ? <MicOff /> : <Mic />}
               onClick={isListening ? stopListening : startListening}
               disabled={isProcessing || isLoading}
+              variant={isListening ? 'danger' : 'primary'}
+              size='lg'
+              aria-label={isListening ? 'Stop listening' : 'Start voice input'}
               className={`w-24 h-24 rounded-full transition-all duration-200 ${
                 isListening
-                  ? 'bg-red-500 animate-pulse shadow-lg scale-110'
+                  ? 'animate-pulse shadow-lg scale-110 !bg-red-500 hover:!bg-red-600'
                   : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:shadow-lg hover:scale-105'
-              } ${
-                isProcessing || isLoading ? 'opacity-50 cursor-not-allowed' : ''
               }`}
-            >
-              {isListening ? (
-                <MicOff className='w-12 h-12 text-white mx-auto' />
-              ) : (
-                <Mic className='w-12 h-12 text-white mx-auto' />
-              )}
-            </button>
+            />
 
             {/* Status Text */}
             {isListening ? (
@@ -622,13 +618,12 @@ export const AIHomePage: React.FC = () => {
                 className='flex-1'
                 disabled={isLoading}
               />
-              <Button
+              <IconButton
+                icon={<Send />}
                 onClick={handleTextInput}
                 disabled={!inputText.trim() || isProcessing || isLoading}
-                className='px-4'
-              >
-                <Send className='w-4 h-4' />
-              </Button>
+                aria-label='Send message'
+              />
             </div>
           </div>
         </Card>
