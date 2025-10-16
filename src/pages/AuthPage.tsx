@@ -1,15 +1,41 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Baby, Mail, Lock } from 'lucide-react'
 import { Card } from '../components/Card'
 import { Button } from '../components/Button'
 import { supabase } from '../lib/supabase'
 
 export const AuthPage: React.FC = () => {
+  const navigate = useNavigate()
   const [isSignUp, setIsSignUp] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    // Check if user is already authenticated
+    const checkAuth = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      if (session?.user) {
+        navigate('/', { replace: true })
+      }
+    }
+    checkAuth()
+
+    // Listen for auth state changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        navigate('/', { replace: true })
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [navigate])
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
