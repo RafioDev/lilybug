@@ -552,8 +552,9 @@ export const AIHomePage: React.FC = () => {
               variant={isListening ? 'danger' : 'primary'}
               size='lg'
               iconSize='2xl'
+              fullRounded
               aria-label={isListening ? 'Stop listening' : 'Start voice input'}
-              className={`w-24 h-24 rounded-full transition-all duration-200 ${
+              className={`w-24 h-24 transition-all duration-200 ${
                 isListening
                   ? 'animate-pulse shadow-lg scale-110 !bg-red-500 hover:!bg-red-600'
                   : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:shadow-lg hover:scale-105'
@@ -624,6 +625,7 @@ export const AIHomePage: React.FC = () => {
                 onClick={handleTextInput}
                 disabled={!inputText.trim() || isProcessing || isLoading}
                 aria-label='Send message'
+                className='min-w-[60px]'
               />
             </div>
           </div>

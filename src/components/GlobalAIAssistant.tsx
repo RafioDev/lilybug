@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 
 import { Input } from './Input'
+import { IconButton } from './Button'
 import { chatActionService } from '../services/chatActionService'
 import { smartSearchService } from '../services/smartSearchService'
 import { trackerService } from '../services/trackerService'
@@ -292,12 +293,15 @@ export const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
   // Don't render if not open
   if (!isOpen) {
     return (
-      <button
+      <IconButton
+        icon={<MessageCircle className='w-6 h-6' />}
         onClick={() => setIsOpen(true)}
-        className='fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center z-50'
-      >
-        <MessageCircle className='w-6 h-6' />
-      </button>
+        variant='primary'
+        size='lg'
+        fullRounded
+        aria-label='Open AI Assistant'
+        className='fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg hover:shadow-xl transition-all duration-200 z-50'
+      />
     )
   }
 
@@ -401,21 +405,24 @@ export const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
             {/* Input */}
             <div className='p-3 border-t border-gray-200'>
               <div className='flex gap-2'>
-                <button
+                <IconButton
+                  icon={
+                    isListening ? (
+                      <MicOff className='w-4 h-4' />
+                    ) : (
+                      <Mic className='w-4 h-4' />
+                    )
+                  }
                   onClick={isListening ? stopListening : startListening}
                   disabled={isProcessing}
-                  className={`p-2 rounded-lg transition-colors ${
-                    isListening
-                      ? 'bg-red-500 text-white animate-pulse'
-                      : 'bg-blue-500 hover:bg-blue-600 text-white'
-                  } ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  {isListening ? (
-                    <MicOff className='w-4 h-4' />
-                  ) : (
-                    <Mic className='w-4 h-4' />
-                  )}
-                </button>
+                  variant={isListening ? 'danger' : 'primary'}
+                  size='sm'
+                  fullRounded
+                  aria-label={
+                    isListening ? 'Stop listening' : 'Start voice input'
+                  }
+                  className={`${isListening ? 'animate-pulse' : ''}`}
+                />
 
                 <Input
                   type='text'
@@ -425,13 +432,15 @@ export const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
                   className='flex-1 text-sm'
                 />
 
-                <button
+                <IconButton
+                  icon={<Send className='w-4 h-4' />}
                   onClick={handleTextInput}
                   disabled={!inputText.trim() || isProcessing}
-                  className='p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
-                >
-                  <Send className='w-4 h-4' />
-                </button>
+                  variant='primary'
+                  size='sm'
+                  fullRounded
+                  aria-label='Send message'
+                />
               </div>
 
               {isListening && (

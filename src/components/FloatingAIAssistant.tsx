@@ -297,8 +297,9 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
           onClick={() => setIsOpen(true)}
           variant='primary'
           size='lg'
+          fullRounded
           aria-label='Open AI Assistant'
-          className='w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full shadow-lg hover:shadow-xl hover:scale-105'
+          className='w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg hover:shadow-xl hover:scale-105'
         />
       </div>
     )
@@ -416,6 +417,7 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
                   disabled={!inputText.trim() || isProcessing}
                   variant='primary'
                   size='sm'
+                  fullRounded
                   aria-label='Send message'
                   className='p-2 flex-shrink-0'
                 />
@@ -432,6 +434,7 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
                   disabled={isProcessing}
                   variant={isListening ? 'danger' : 'primary'}
                   size='sm'
+                  fullRounded
                   aria-label={
                     isListening ? 'Stop listening' : 'Start voice input'
                   }

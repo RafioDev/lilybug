@@ -9,7 +9,7 @@ interface ButtonProps {
   disabled?: boolean
   type?: 'button' | 'submit' | 'reset'
   className?: string
-  rounded?: boolean // New prop for fully rounded buttons
+  fullRounded?: boolean // New prop for fully circular buttons
 
   // Icon props
   leftIcon?: React.ReactNode
@@ -30,11 +30,6 @@ interface ButtonProps {
 const BUTTON_BASE_CLASSES =
   'font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 dark:disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 disabled:shadow-none focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900 inline-flex items-center justify-center cursor-pointer'
 
-const BUTTON_ROUNDED_CLASSES = {
-  default: 'rounded-xl',
-  full: 'rounded-full',
-} as const
-
 const BUTTON_VARIANT_CLASSES = {
   primary:
     'bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white shadow-sm hover:shadow-md hover:from-blue-600 hover:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 focus:ring-blue-500 dark:focus:ring-blue-400',
@@ -44,6 +39,11 @@ const BUTTON_VARIANT_CLASSES = {
     'border-2 border-blue-500 dark:border-blue-400 text-blue-600 dark:text-blue-300 bg-transparent hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:border-blue-600 dark:hover:border-blue-300 focus:ring-blue-500 dark:focus:ring-blue-400',
   danger:
     'bg-gradient-to-r from-rose-500 to-rose-600 dark:from-rose-600 dark:to-rose-700 text-white shadow-sm hover:shadow-md hover:from-rose-600 hover:to-rose-700 dark:hover:from-rose-700 dark:hover:to-rose-800 focus:ring-rose-500 dark:focus:ring-rose-400',
+} as const
+
+const BUTTON_ROUNDED_CLASSES = {
+  default: 'rounded-xl',
+  full: 'rounded-full',
 } as const
 
 const BUTTON_SIZE_CLASSES = {
@@ -160,6 +160,7 @@ export const Button = React.memo<ButtonProps>(
     disabled = false,
     type = 'button',
     className = '',
+    fullRounded = false,
     leftIcon,
     rightIcon,
     iconOnly = false,
@@ -199,6 +200,9 @@ export const Button = React.memo<ButtonProps>(
         BUTTON_VARIANT_CLASSES[variant],
         sizeClass,
         widthClass,
+        fullRounded
+          ? BUTTON_ROUNDED_CLASSES.full
+          : BUTTON_ROUNDED_CLASSES.default,
         className,
       ]
         .filter(Boolean)
@@ -217,13 +221,14 @@ export const Button = React.memo<ButtonProps>(
         ariaDisabled: isDisabled ? true : undefined,
       }
     }, [
-      variant,
-      size,
-      iconOnly,
-      fullWidth,
-      className,
       disabled,
       loading,
+      iconOnly,
+      size,
+      fullWidth,
+      variant,
+      fullRounded,
+      className,
       ariaLabel,
       loadingText,
     ])
