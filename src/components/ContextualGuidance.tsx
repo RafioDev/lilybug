@@ -16,26 +16,32 @@ export const ContextualGuidance: React.FC<ContextualGuidanceProps> = ({
   const getIcon = (type: string) => {
     switch (type) {
       case 'milestone':
-        return <Heart className='w-4 h-4 text-pink-500' />
+        return <Heart className='w-4 h-4 text-pink-500 dark:text-pink-400' />
       case 'alert':
-        return <AlertCircle className='w-4 h-4 text-red-500' />
+        return (
+          <AlertCircle className='w-4 h-4 text-red-500 dark:text-red-400' />
+        )
       case 'encouragement':
-        return <TrendingUp className='w-4 h-4 text-green-500' />
+        return (
+          <TrendingUp className='w-4 h-4 text-green-500 dark:text-green-400' />
+        )
       default:
-        return <Lightbulb className='w-4 h-4 text-blue-500' />
+        return (
+          <Lightbulb className='w-4 h-4 text-blue-500 dark:text-blue-400' />
+        )
     }
   }
 
   const getBackgroundColor = (type: string) => {
     switch (type) {
       case 'milestone':
-        return 'bg-pink-50 border-pink-200'
+        return 'bg-pink-50 dark:bg-pink-900/20 border-pink-200 dark:border-pink-800'
       case 'alert':
-        return 'bg-red-50 border-red-200'
+        return 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
       case 'encouragement':
-        return 'bg-green-50 border-green-200'
+        return 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
       default:
-        return 'bg-blue-50 border-blue-200'
+        return 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
     }
   }
 
@@ -52,10 +58,10 @@ export const ContextualGuidance: React.FC<ContextualGuidanceProps> = ({
         <div className='flex items-start gap-3'>
           {getIcon(latestGuidance.type)}
           <div className='flex-1'>
-            <p className='text-sm text-gray-700 leading-relaxed'>
+            <p className='text-sm text-gray-700 dark:text-gray-300 leading-relaxed'>
               {latestGuidance.message}
             </p>
-            <p className='text-xs text-gray-500 mt-2'>
+            <p className='text-xs text-gray-500 dark:text-gray-400 mt-2'>
               {latestGuidance.timestamp.toLocaleTimeString([], {
                 hour: '2-digit',
                 minute: '2-digit',

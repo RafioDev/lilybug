@@ -43,26 +43,30 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
   }
 
   return (
-    <div className='min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 flex items-center justify-center p-4'>
+    <div className='min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4'>
       <div className='w-full max-w-md'>
         <div className='text-center mb-8'>
           <div className='inline-flex p-4 bg-blue-500 rounded-full mb-4'>
             <Baby size={48} className='text-white' />
           </div>
-          <h1 className='text-3xl font-bold text-gray-800 mb-2'>
+          <h1 className='text-3xl font-bold text-gray-800 dark:text-white mb-2'>
             Welcome to Lilybug
           </h1>
-          <p className='text-gray-600'>Your companion through the first year</p>
+          <p className='text-gray-600 dark:text-gray-300'>
+            Your companion through the first year
+          </p>
         </div>
 
         <Card padding='lg'>
           {step === 1 && (
             <div className='space-y-5'>
               <div>
-                <h2 className='text-xl font-semibold text-gray-800 mb-2'>
+                <h2 className='text-xl font-semibold text-gray-800 dark:text-white mb-2'>
                   Let's get started
                 </h2>
-                <p className='text-gray-600 text-sm'>Tell us about your baby</p>
+                <p className='text-gray-600 dark:text-gray-300 text-sm'>
+                  Tell us about your baby
+                </p>
               </div>
 
               <Input
@@ -97,10 +101,10 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
           {step === 2 && (
             <div className='space-y-5'>
               <div>
-                <h2 className='text-xl font-semibold text-gray-800 mb-2'>
+                <h2 className='text-xl font-semibold text-gray-800 dark:text-white mb-2'>
                   Parent Information
                 </h2>
-                <p className='text-gray-600 text-sm'>
+                <p className='text-gray-600 dark:text-gray-300 text-sm'>
                   Help us personalize your experience
                 </p>
               </div>
@@ -140,7 +144,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
           )}
         </Card>
 
-        <p className='text-center text-sm text-gray-500 mt-6'>
+        <p className='text-center text-sm text-gray-500 dark:text-gray-400 mt-6'>
           You can update this information anytime in settings
         </p>
       </div>

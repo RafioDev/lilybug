@@ -69,13 +69,15 @@ export const BabySelector: React.FC<BabySelectorProps> = ({
   if (babies.length === 1) {
     return (
       <div
-        className={`flex items-center gap-2 px-3 py-2 bg-blue-50 rounded-lg ${className}`}
+        className={`flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg ${className}`}
       >
-        <BabyIcon className='w-4 h-4 text-blue-600' />
+        <BabyIcon className='w-4 h-4 text-blue-600 dark:text-blue-400' />
         <div>
-          <span className='font-medium text-blue-900'>{activeBaby?.name}</span>
+          <span className='font-medium text-blue-900 dark:text-blue-100'>
+            {activeBaby?.name}
+          </span>
           {activeBaby && (
-            <span className='text-xs text-blue-600 ml-2'>
+            <span className='text-xs text-blue-600 dark:text-blue-400 ml-2'>
               {dateUtils.calculateAge(activeBaby.birthdate)}
             </span>
           )}
@@ -88,23 +90,23 @@ export const BabySelector: React.FC<BabySelectorProps> = ({
     <div className={`relative ${className}`}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className='flex items-center justify-between w-full px-3 py-2 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors'
+        className='flex items-center justify-between w-full px-3 py-2 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors'
       >
         <div className='flex items-center gap-2'>
-          <BabyIcon className='w-4 h-4 text-blue-600' />
+          <BabyIcon className='w-4 h-4 text-blue-600 dark:text-blue-400' />
           <div className='text-left'>
-            <span className='font-medium text-blue-900'>
+            <span className='font-medium text-blue-900 dark:text-blue-100'>
               {activeBaby?.name || 'Select Baby'}
             </span>
             {activeBaby && (
-              <span className='text-xs text-blue-600 ml-2'>
+              <span className='text-xs text-blue-600 dark:text-blue-400 ml-2'>
                 {dateUtils.calculateAge(activeBaby.birthdate)}
               </span>
             )}
           </div>
         </div>
         <ChevronDown
-          className={`w-4 h-4 text-blue-600 transition-transform ${
+          className={`w-4 h-4 text-blue-600 dark:text-blue-400 transition-transform ${
             isOpen ? 'rotate-180' : ''
           }`}
         />
@@ -116,32 +118,32 @@ export const BabySelector: React.FC<BabySelectorProps> = ({
             className='fixed inset-0 z-10'
             onClick={() => setIsOpen(false)}
           />
-          <div className='absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20'>
+          <div className='absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20'>
             {babies.map((baby) => (
               <button
                 key={baby.id}
                 onClick={() => handleBabySelect(baby)}
-                className={`w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-gray-50 transition-colors first:rounded-t-lg last:rounded-b-lg ${
+                className={`w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors first:rounded-t-lg last:rounded-b-lg ${
                   baby.id === activeBaby?.id
-                    ? 'bg-blue-50 text-blue-900'
-                    : 'text-gray-900'
+                    ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100'
+                    : 'text-gray-900 dark:text-gray-100'
                 }`}
               >
                 <BabyIcon
                   className={`w-4 h-4 ${
                     baby.id === activeBaby?.id
-                      ? 'text-blue-600'
-                      : 'text-gray-600'
+                      ? 'text-blue-600 dark:text-blue-400'
+                      : 'text-gray-600 dark:text-gray-400'
                   }`}
                 />
                 <div>
                   <span className='font-medium'>{baby.name}</span>
-                  <span className='text-xs text-gray-500 ml-2'>
+                  <span className='text-xs text-gray-500 dark:text-gray-400 ml-2'>
                     {dateUtils.calculateAge(baby.birthdate)}
                   </span>
                 </div>
                 {baby.id === activeBaby?.id && (
-                  <span className='ml-auto text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full'>
+                  <span className='ml-auto text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full'>
                     Active
                   </span>
                 )}
