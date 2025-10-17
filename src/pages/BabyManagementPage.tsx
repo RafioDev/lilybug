@@ -12,6 +12,8 @@ import { dateUtils } from '../utils/dateUtils'
 import { BabyModal } from '../components/LazyModals'
 import { LoadingState } from '../components/LoadingState'
 import { Button, IconButton } from '../components/Button'
+import { ConfirmationModal } from '../components/ConfirmationModal'
+import { useConfirmationModal } from '../hooks/useConfirmationModal'
 import {
   useBabies,
   useSetActiveBaby,
@@ -29,6 +31,9 @@ export const BabyManagementPage: React.FC = () => {
   const { data: babies = [], isLoading, refetch } = useBabies()
   const setActiveBabyMutation = useSetActiveBaby()
   const deleteBabyMutation = useDeleteBaby()
+
+  // Confirmation modal for baby deletion
+  const confirmationModal = useConfirmationModal()
 
   const checkMigrationNeeded = async () => {
     try {
@@ -51,20 +56,17 @@ export const BabyManagementPage: React.FC = () => {
     }
   }
 
-  const handleDelete = async (babyId: string) => {
-    if (
-      !confirm(
-        'Are you sure you want to delete this baby? This will also delete all associated tracking data.'
-      )
-    ) {
-      return
-    }
-
-    try {
-      await deleteBabyMutation.mutateAsync(babyId)
-    } catch (error) {
-      console.error('Error deleting baby:', error)
-    }
+  const handleDelete = (baby: Baby) => {
+    confirmationModal.open({
+      title: 'Delete Baby Profile',
+      message: `Are you sure you want to delete ${baby.name}? This will permanently remove all tracking data including feeding records, sleep logs, and other activities. This action cannot be undone.`,
+      confirmText: 'Delete Baby',
+      cancelText: 'Cancel',
+      variant: 'danger',
+      onConfirm: async () => {
+        await deleteBabyMutation.mutateAsync(baby.id)
+      },
+    })
   }
 
   const startEdit = (baby: Baby) => {
@@ -232,7 +234,7 @@ export const BabyManagementPage: React.FC = () => {
                       className='text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-600 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-300 dark:hover:border-blue-500'
                     />
                     <IconButton
-                      onClick={() => handleDelete(baby.id)}
+                      onClick={() => handleDelete(baby)}
                       variant='outline'
                       size='sm'
                       icon={<Trash2 />}
@@ -258,6 +260,21 @@ export const BabyManagementPage: React.FC = () => {
           isFirstBaby={babies.length === 0}
         />
       </Suspense>
+
+      {/* Confirmation Modal for Baby Deletion */}
+      {confirmationModal.config && (
+        <ConfirmationModal
+          isOpen={confirmationModal.isOpen}
+          onClose={confirmationModal.close}
+          onConfirm={confirmationModal.confirm}
+          title={confirmationModal.config.title}
+          message={confirmationModal.config.message}
+          confirmText={confirmationModal.config.confirmText}
+          cancelText={confirmationModal.config.cancelText}
+          isLoading={confirmationModal.isLoading}
+          variant={confirmationModal.config.variant}
+        />
+      )}
     </div>
   )
 }
