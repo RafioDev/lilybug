@@ -9,6 +9,7 @@ interface ButtonProps {
   disabled?: boolean
   type?: 'button' | 'submit' | 'reset'
   className?: string
+  rounded?: boolean // New prop for fully rounded buttons
 
   // Icon props
   leftIcon?: React.ReactNode
@@ -27,7 +28,12 @@ interface ButtonProps {
 
 // Pre-computed static CSS classes for better performance
 const BUTTON_BASE_CLASSES =
-  'font-medium rounded-xl transition-all duration-200 active:scale-95 disabled:opacity-50 dark:disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 disabled:shadow-none focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900 inline-flex items-center justify-center cursor-pointer'
+  'font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 dark:disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 disabled:shadow-none focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900 inline-flex items-center justify-center cursor-pointer'
+
+const BUTTON_ROUNDED_CLASSES = {
+  default: 'rounded-xl',
+  full: 'rounded-full',
+} as const
 
 const BUTTON_VARIANT_CLASSES = {
   primary:
