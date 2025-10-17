@@ -669,12 +669,12 @@ export const AIHomePage: React.FC = () => {
       >
         {selectedEntry && (
           <div className='space-y-4'>
-            <div className='flex items-center gap-3 p-3 bg-gray-100 rounded-lg'>
+            <div className='flex items-center gap-3 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg'>
               <span className='text-3xl'>
                 {activityUtils.getActivityIcon(selectedEntry.entry_type)}
               </span>
               <div>
-                <p className='font-medium text-gray-900 capitalize'>
+                <p className='font-medium text-gray-900 dark:text-gray-100 capitalize'>
                   {selectedEntry.entry_type}
                 </p>
                 <p className='text-sm text-gray-500 dark:text-gray-400'>
@@ -686,10 +686,10 @@ export const AIHomePage: React.FC = () => {
             <div className='space-y-3'>
               {selectedEntry.feeding_type && (
                 <div>
-                  <label className='text-sm font-medium text-gray-700'>
+                  <label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
                     Feeding Type
                   </label>
-                  <p className='text-gray-900 capitalize'>
+                  <p className='text-gray-900 dark:text-gray-100 capitalize'>
                     {selectedEntry.feeding_type.replace('_', ' ')}
                   </p>
                 </div>
@@ -697,10 +697,10 @@ export const AIHomePage: React.FC = () => {
 
               {selectedEntry.quantity && (
                 <div>
-                  <label className='text-sm font-medium text-gray-700'>
+                  <label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
                     Quantity
                   </label>
-                  <p className='text-gray-900'>
+                  <p className='text-gray-900 dark:text-gray-100'>
                     {selectedEntry.quantity}
                     {selectedEntry.entry_type === 'pumping' ? 'oz' : 'ml'}
                   </p>
@@ -709,10 +709,10 @@ export const AIHomePage: React.FC = () => {
 
               {selectedEntry.diaper_type && (
                 <div>
-                  <label className='text-sm font-medium text-gray-700'>
+                  <label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
                     Diaper Type
                   </label>
-                  <p className='text-gray-900 capitalize'>
+                  <p className='text-gray-900 dark:text-gray-100 capitalize'>
                     {selectedEntry.diaper_type}
                   </p>
                 </div>
@@ -720,10 +720,10 @@ export const AIHomePage: React.FC = () => {
 
               {selectedEntry.end_time && (
                 <div>
-                  <label className='text-sm font-medium text-gray-700'>
+                  <label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
                     Duration
                   </label>
-                  <p className='text-gray-900'>
+                  <p className='text-gray-900 dark:text-gray-100'>
                     {(() => {
                       const start = new Date(selectedEntry.start_time)
                       const end = new Date(selectedEntry.end_time!)
@@ -740,10 +740,12 @@ export const AIHomePage: React.FC = () => {
 
               {selectedEntry.notes && (
                 <div>
-                  <label className='text-sm font-medium text-gray-700'>
+                  <label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
                     Notes
                   </label>
-                  <p className='text-gray-900'>{selectedEntry.notes}</p>
+                  <p className='text-gray-900 dark:text-gray-100'>
+                    {selectedEntry.notes}
+                  </p>
                 </div>
               )}
             </div>
@@ -774,8 +776,8 @@ export const AIHomePage: React.FC = () => {
         title='Manual Entry'
       >
         <div className='space-y-4'>
-          <div className='p-3 bg-blue-50 rounded-lg'>
-            <p className='text-sm text-blue-800'>
+          <div className='p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg'>
+            <p className='text-sm text-blue-800 dark:text-blue-200'>
               💡 <strong>Tip:</strong> For faster tracking, try using the voice
               assistant above! Just say "Log a bottle feeding of 4 ounces" or
               similar.
@@ -784,7 +786,7 @@ export const AIHomePage: React.FC = () => {
 
           {/* Entry Type Selection */}
           <div>
-            <label className='text-sm font-medium text-gray-700 block mb-2'>
+            <label className='text-sm font-medium text-gray-700 dark:text-gray-300 block mb-2'>
               Activity Type
             </label>
             <div className='grid grid-cols-2 gap-2'>
@@ -797,8 +799,8 @@ export const AIHomePage: React.FC = () => {
                     }
                     className={`p-3 rounded-xl border-2 transition-all capitalize ${
                       formData.entryType === type
-                        ? 'border-blue-500 bg-blue-50 text-blue-700'
-                        : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300'
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                        : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500'
                     }`}
                   >
                     {activityUtils.getActivityIcon(type)} {type}
@@ -827,7 +829,7 @@ export const AIHomePage: React.FC = () => {
           {formData.entryType === 'feeding' && (
             <>
               <div>
-                <label className='text-sm font-medium text-gray-700 block mb-2'>
+                <label className='text-sm font-medium text-gray-700 dark:text-gray-300 block mb-2'>
                   Feeding Type
                 </label>
                 <div className='grid grid-cols-2 gap-2'>
@@ -846,8 +848,8 @@ export const AIHomePage: React.FC = () => {
                       }
                       className={`p-3 rounded-xl border-2 transition-all text-sm ${
                         formData.feedingType === type
-                          ? 'border-blue-500 bg-blue-50 text-blue-700'
-                          : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300'
+                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                          : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500'
                       }`}
                     >
                       {getFeedingTypeLabel(type)}
@@ -884,7 +886,7 @@ export const AIHomePage: React.FC = () => {
 
           {formData.entryType === 'diaper' && (
             <div>
-              <label className='text-sm font-medium text-gray-700 block mb-2'>
+              <label className='text-sm font-medium text-gray-700 dark:text-gray-300 block mb-2'>
                 Diaper Type
               </label>
               <div className='grid grid-cols-3 gap-2'>
@@ -896,8 +898,8 @@ export const AIHomePage: React.FC = () => {
                     }
                     className={`p-3 rounded-xl border-2 transition-all capitalize ${
                       formData.diaperType === type
-                        ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                        : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300'
+                        ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
+                        : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500'
                     }`}
                   >
                     {type}

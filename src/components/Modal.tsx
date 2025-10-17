@@ -40,15 +40,15 @@ export const Modal: React.FC<ModalProps> = ({
   return (
     <div className='fixed inset-0 z-50 flex items-end sm:items-center justify-center'>
       <div
-        className='absolute inset-0 bg-black/40 backdrop-blur-sm'
+        className='absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm'
         onClick={onClose}
       />
       <div
-        className={`relative bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-3xl shadow-2xl w-full ${sizeStyles[size]} max-h-[90vh] overflow-y-auto animate-slide-up`}
+        className={`relative bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-t-3xl sm:rounded-3xl shadow-2xl dark:shadow-gray-900/50 w-full ${sizeStyles[size]} max-h-[90vh] overflow-y-auto animate-slide-up`}
       >
         {title && (
-          <div className='flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 rounded-t-3xl'>
-            <h2 className='text-xl font-semibold text-gray-800 dark:text-gray-100'>
+          <div className='flex items-center justify-between p-5 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 rounded-t-3xl'>
+            <h2 className='text-xl font-semibold text-gray-900 dark:text-gray-100'>
               {title}
             </h2>
             <IconButton
@@ -57,11 +57,11 @@ export const Modal: React.FC<ModalProps> = ({
               variant='outline'
               size='md'
               aria-label='Close modal'
-              className='border-0 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700'
+              className='border-0 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors duration-200'
             />
           </div>
         )}
-        <div className='p-5'>{children}</div>
+        <div className='p-5 text-gray-900 dark:text-gray-100'>{children}</div>
       </div>
     </div>
   )

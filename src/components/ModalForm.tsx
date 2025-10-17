@@ -76,9 +76,9 @@ export const ModalForm: React.FC<ModalFormProps> = ({
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title={title} size={size}>
       <form onSubmit={onSubmit} className='space-y-4'>
-        {children}
+        <div className='space-y-4'>{children}</div>
 
-        <div className='flex gap-3 pt-4'>
+        <div className='flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700'>
           <Button
             type='button'
             onClick={handleClose}
