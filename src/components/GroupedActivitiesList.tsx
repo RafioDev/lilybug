@@ -7,7 +7,7 @@ import type { TrackerEntry } from '../types'
 interface GroupedActivitiesListProps {
   entries: TrackerEntry[]
   onEditEntry: (entry: TrackerEntry) => void
-  onDeleteEntry: (id: string) => void
+  onDeleteEntry: (entry: TrackerEntry) => void
   onViewDetails: (entry: TrackerEntry) => void
   isLoading?: boolean
   className?: string

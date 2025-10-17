@@ -23,6 +23,8 @@ import { activityUtils } from '../utils/activityUtils'
 import { Modal } from '../components/Modal'
 import { ActivityModal } from '../components/LazyModals'
 import { GroupedActivitiesList } from '../components/GroupedActivitiesList'
+import { ConfirmationModal } from '../components/ConfirmationModal'
+import { useConfirmationModal } from '../hooks/useConfirmationModal'
 import type { TrackerEntry, EntryType, FeedingType, DiaperType } from '../types'
 
 // Speech Recognition types
@@ -92,6 +94,9 @@ export const AIHomePage: React.FC = () => {
   const deleteEntryMutation = useDeleteEntry()
 
   const isLoading = babyLoading || entriesLoading
+
+  // Confirmation modal for deletions
+  const confirmationModal = useConfirmationModal()
 
   // Activities state
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
@@ -337,6 +342,21 @@ export const AIHomePage: React.FC = () => {
     } catch (error) {
       console.error('Error deleting entry:', error)
     }
+  }
+
+  const handleDeleteEntry = (entry: TrackerEntry) => {
+    const activityType = entry.entry_type
+
+    confirmationModal.open({
+      title: 'Delete Activity',
+      message: `Are you sure you want to delete this ${activityType}? This action cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      variant: 'danger',
+      onConfirm: async () => {
+        await deleteEntry(entry.id)
+      },
+    })
   }
 
   const openDetailsModal = (entry: TrackerEntry) => {
@@ -653,7 +673,7 @@ export const AIHomePage: React.FC = () => {
           <GroupedActivitiesList
             entries={entries.slice(0, 50)} // Show more entries with grouping
             onEditEntry={openEditModal}
-            onDeleteEntry={deleteEntry}
+            onDeleteEntry={handleDeleteEntry}
             onViewDetails={openDetailsModal}
             isLoading={entriesLoading}
             className='max-h-96 overflow-y-auto'
@@ -752,7 +772,10 @@ export const AIHomePage: React.FC = () => {
 
             <div className='flex gap-2 pt-4'>
               <Button
-                onClick={() => deleteEntry(selectedEntry.id)}
+                onClick={() => {
+                  setIsDetailsModalOpen(false)
+                  handleDeleteEntry(selectedEntry)
+                }}
                 variant='outline'
                 className='flex-1 text-red-600 border-red-200 hover:bg-red-50'
               >
@@ -943,6 +966,21 @@ export const AIHomePage: React.FC = () => {
           onError={handleEditError}
         />
       </Suspense>
+
+      {/* Confirmation Modal */}
+      {confirmationModal.config && (
+        <ConfirmationModal
+          isOpen={confirmationModal.isOpen}
+          onClose={confirmationModal.close}
+          onConfirm={confirmationModal.confirm}
+          title={confirmationModal.config.title}
+          message={confirmationModal.config.message}
+          confirmText={confirmationModal.config.confirmText}
+          cancelText={confirmationModal.config.cancelText}
+          isLoading={confirmationModal.isLoading}
+          variant={confirmationModal.config.variant}
+        />
+      )}
     </Layout>
   )
 }

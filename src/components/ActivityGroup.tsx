@@ -9,7 +9,7 @@ import type { TrackerEntry } from '../types'
 interface ActivityGroupProps {
   dateGroup: DateGroup
   onEditEntry: (entry: TrackerEntry) => void
-  onDeleteEntry: (id: string) => void
+  onDeleteEntry: (entry: TrackerEntry) => void
   onViewDetails: (entry: TrackerEntry) => void
 }
 
@@ -69,7 +69,7 @@ export const ActivityGroup: React.FC<ActivityGroupProps> = ({
               </div>
               <div onClick={(e) => e.stopPropagation()}>
                 <IconButton
-                  onClick={() => onDeleteEntry(entry.id)}
+                  onClick={() => onDeleteEntry(entry)}
                   variant='outline'
                   size='sm'
                   icon={<Trash2 />}
