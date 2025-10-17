@@ -24,3 +24,17 @@ Common pnpm scripts available in this project:
 - `pnpm typecheck` - Run TypeScript type checking
 - `pnpm lint` - Run ESLint
 - `pnpm test` - Run tests (if configured)
+
+## CSS Framework
+
+**Always use Tailwind CSS 4 syntax and features.**
+
+When writing CSS classes or styling components, follow Tailwind 4 conventions:
+
+- Reference the official Tailwind CSS documentation: https://tailwindcss.com/docs
+- Use modern Tailwind 4 syntax and avoid deprecated Tailwind 3 patterns
+- Prefer utility-first approach with Tailwind classes
+- Use Tailwind 4's improved color system and spacing scale
+- Leverage new Tailwind 4 features like improved container queries and modern CSS features
+
+**Avoid Tailwind 3 syntax** - always check the current documentation to ensure you're using the latest syntax and class names.

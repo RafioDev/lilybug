@@ -15,31 +15,32 @@ interface ThemeProviderProps {
   children: React.ReactNode
 }
 
-export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const [theme, setThemeState] = useState<Theme>('system')
-  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>('light')
-
-  // Get system preference
-  const getSystemTheme = (): ResolvedTheme => {
-    if (typeof window !== 'undefined' && window.matchMedia) {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light'
-    }
-    return 'light'
+// Get system preference
+const getSystemTheme = (): ResolvedTheme => {
+  if (typeof window !== 'undefined' && window.matchMedia) {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark'
+      : 'light'
   }
+  return 'light'
+}
 
-  // Load theme from localStorage on mount
-  useEffect(() => {
-    try {
-      const savedTheme = localStorage.getItem('lilybug-theme') as Theme
-      if (savedTheme && ['light', 'dark', 'system'].includes(savedTheme)) {
-        setThemeState(savedTheme)
-      }
-    } catch (error) {
-      console.warn('Failed to load theme from localStorage:', error)
+// Get initial theme from localStorage
+const getInitialTheme = (): Theme => {
+  try {
+    const savedTheme = localStorage.getItem('lilybug-theme') as Theme
+    if (savedTheme && ['light', 'dark', 'system'].includes(savedTheme)) {
+      return savedTheme
     }
-  }, [])
+  } catch (error) {
+    console.warn('Failed to load theme from localStorage:', error)
+  }
+  return 'system'
+}
+
+export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
+  const [theme, setThemeState] = useState<Theme>(getInitialTheme)
+  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>('light')
 
   // Update resolved theme when theme changes or system preference changes
   useEffect(() => {

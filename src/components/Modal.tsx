@@ -39,16 +39,18 @@ export const Modal: React.FC<ModalProps> = ({
 
   return (
     <div className='fixed inset-0 z-50 flex items-end sm:items-center justify-center'>
+      {/* Enhanced backdrop with better dark mode styling */}
       <div
-        className='absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm'
+        className='absolute inset-0 bg-black/50 dark:bg-black/75 backdrop-blur-sm transition-opacity duration-200'
         onClick={onClose}
       />
+      {/* Enhanced modal container with improved dark mode styling */}
       <div
-        className={`relative bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-t-3xl sm:rounded-3xl shadow-2xl dark:shadow-gray-900/50 w-full ${sizeStyles[size]} max-h-[90vh] overflow-y-auto animate-slide-up`}
+        className={`relative bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-t-3xl sm:rounded-3xl shadow-2xl dark:shadow-2xl dark:shadow-black/50 w-full ${sizeStyles[size]} max-h-[90vh] overflow-y-auto animate-slide-up`}
       >
         {title && (
-          <div className='flex items-center justify-between p-5 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 rounded-t-3xl'>
-            <h2 className='text-xl font-semibold text-gray-900 dark:text-gray-100'>
+          <div className='flex items-center justify-between p-5 border-b border-gray-200 dark:border-gray-600 sticky top-0 bg-white dark:bg-gray-800 rounded-t-3xl z-10'>
+            <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
               {title}
             </h2>
             <IconButton
@@ -57,10 +59,11 @@ export const Modal: React.FC<ModalProps> = ({
               variant='outline'
               size='md'
               aria-label='Close modal'
-              className='border-0 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors duration-200'
+              className='border-0 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700/80 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-all duration-200 rounded-lg'
             />
           </div>
         )}
+        {/* Enhanced content area with better text contrast */}
         <div className='p-5 text-gray-900 dark:text-gray-100'>{children}</div>
       </div>
     </div>

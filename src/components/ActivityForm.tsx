@@ -51,10 +51,10 @@ export const ActivityForm: React.FC<ActivityFormProps> = memo(
     return (
       <div className='space-y-4'>
         {/* Activity Type Display */}
-        <div className='flex items-center gap-3 p-3 bg-gray-50 rounded-lg'>
+        <div className='flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg'>
           <span className='text-2xl'>{getActivityIcon(values.entryType)}</span>
           <div>
-            <p className='font-medium text-gray-900 capitalize'>
+            <p className='font-medium text-gray-900 dark:text-gray-100 capitalize'>
               {values.entryType} Activity
             </p>
           </div>
@@ -62,7 +62,7 @@ export const ActivityForm: React.FC<ActivityFormProps> = memo(
 
         {/* Entry Type Selection */}
         <div>
-          <label className='text-sm font-medium text-gray-700 block mb-2'>
+          <label className='text-sm font-medium text-gray-700 dark:text-gray-300 block mb-2'>
             Activity Type
           </label>
           <div className='grid grid-cols-2 gap-2'>
@@ -74,8 +74,8 @@ export const ActivityForm: React.FC<ActivityFormProps> = memo(
                   onClick={() => onChange('entryType', type)}
                   className={`p-3 rounded-xl border-2 transition-all capitalize ${
                     values.entryType === type
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-200 text-gray-600'
+                      ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                      : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`}
                   disabled={disabled}
                 >
@@ -85,7 +85,9 @@ export const ActivityForm: React.FC<ActivityFormProps> = memo(
             )}
           </div>
           {errors.entryType && (
-            <p className='text-red-600 text-sm mt-1'>{errors.entryType}</p>
+            <p className='text-red-600 dark:text-red-400 text-sm mt-1'>
+              {errors.entryType}
+            </p>
           )}
         </div>
 
@@ -116,7 +118,7 @@ export const ActivityForm: React.FC<ActivityFormProps> = memo(
         {values.entryType === 'feeding' && (
           <>
             <div>
-              <label className='text-sm font-medium text-gray-700 block mb-2'>
+              <label className='text-sm font-medium text-gray-700 dark:text-gray-300 block mb-2'>
                 Feeding Type
               </label>
               <div className='grid grid-cols-2 gap-2'>
@@ -134,8 +136,8 @@ export const ActivityForm: React.FC<ActivityFormProps> = memo(
                     onClick={() => onChange('feedingType', type)}
                     className={`p-3 rounded-xl border-2 transition-all text-sm ${
                       values.feedingType === type
-                        ? 'border-blue-500 bg-blue-50 text-blue-700'
-                        : 'border-gray-200 text-gray-600'
+                        ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                        : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'
                     }`}
                     disabled={disabled}
                   >
@@ -144,7 +146,7 @@ export const ActivityForm: React.FC<ActivityFormProps> = memo(
                 ))}
               </div>
               {errors.feedingType && (
-                <p className='text-red-600 text-sm mt-1'>
+                <p className='text-red-600 dark:text-red-400 text-sm mt-1'>
                   {errors.feedingType}
                 </p>
               )}
@@ -182,7 +184,7 @@ export const ActivityForm: React.FC<ActivityFormProps> = memo(
         {/* Diaper-specific fields */}
         {values.entryType === 'diaper' && (
           <div>
-            <label className='text-sm font-medium text-gray-700 block mb-2'>
+            <label className='text-sm font-medium text-gray-700 dark:text-gray-300 block mb-2'>
               Diaper Type
             </label>
             <div className='grid grid-cols-3 gap-2'>
@@ -193,8 +195,8 @@ export const ActivityForm: React.FC<ActivityFormProps> = memo(
                   onClick={() => onChange('diaperType', type)}
                   className={`p-3 rounded-xl border-2 transition-all capitalize ${
                     values.diaperType === type
-                      ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                      : 'border-gray-200 text-gray-600'
+                      ? 'border-emerald-500 dark:border-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
+                      : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`}
                   disabled={disabled}
                 >
@@ -203,7 +205,9 @@ export const ActivityForm: React.FC<ActivityFormProps> = memo(
               ))}
             </div>
             {errors.diaperType && (
-              <p className='text-red-600 text-sm mt-1'>{errors.diaperType}</p>
+              <p className='text-red-600 dark:text-red-400 text-sm mt-1'>
+                {errors.diaperType}
+              </p>
             )}
           </div>
         )}

@@ -75,21 +75,28 @@ export const ModalForm: React.FC<ModalFormProps> = ({
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title={title} size={size}>
-      <form onSubmit={onSubmit} className='space-y-4'>
-        <div className='space-y-4'>{children}</div>
+      {/* Enhanced form container with consistent dark mode styling */}
+      <form onSubmit={onSubmit} className='space-y-6'>
+        {/* Form content area with improved spacing and visual hierarchy */}
+        <div className='space-y-5 text-gray-900 dark:text-gray-100'>
+          {children}
+        </div>
 
-        <div className='flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700'>
+        {/* Enhanced form actions with better dark mode styling and spacing */}
+        <div className='flex gap-3 pt-6 mt-6 border-t border-gray-200 dark:border-gray-600'>
           <Button
             type='button'
             onClick={handleClose}
             variant='outline'
             fullWidth
             disabled={isSubmitting}
+            className='text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:border-gray-400 dark:hover:border-gray-400'
           >
             {cancelText}
           </Button>
           <Button
             type='submit'
+            variant='primary'
             fullWidth
             disabled={isSubmitting || submitDisabled}
           >
