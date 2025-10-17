@@ -132,7 +132,9 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
     <ModalForm
       isOpen={isOpen}
       onClose={onClose}
-      title={`Edit ${entry.entry_type} Activity`}
+      title={`Edit ${
+        entry.entry_type.charAt(0).toUpperCase() + entry.entry_type.slice(1)
+      } Activity`}
       onSubmit={form.handleSubmit}
       isSubmitting={isSubmitting}
       submitText='Save Changes'

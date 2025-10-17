@@ -1,6 +1,7 @@
 import React from 'react'
 import { Edit3, Trash2 } from 'lucide-react'
 import { DateHeader } from './DateHeader'
+import { IconButton } from './Button'
 import { activityUtils } from '../utils/activityUtils'
 import type { DateGroup } from '../utils/activityUtils'
 import type { TrackerEntry } from '../types'
@@ -55,27 +56,27 @@ export const ActivityGroup: React.FC<ActivityGroupProps> = ({
             </div>
 
             {/* Action buttons */}
-            <div className='flex items-center gap-1'>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onEditEntry(entry)
-                }}
-                className='p-1 text-gray-400 dark:text-gray-500 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors'
-                title='Edit entry'
-              >
-                <Edit3 className='w-4 h-4' />
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onDeleteEntry(entry.id)
-                }}
-                className='p-1 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors'
-                title='Delete entry'
-              >
-                <Trash2 className='w-4 h-4' />
-              </button>
+            <div className='flex items-center gap-2'>
+              <div onClick={(e) => e.stopPropagation()}>
+                <IconButton
+                  onClick={() => onEditEntry(entry)}
+                  variant='outline'
+                  size='sm'
+                  icon={<Edit3 />}
+                  aria-label={`Edit ${entry.entry_type} entry`}
+                  className='text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-600 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-300 dark:hover:border-blue-500'
+                />
+              </div>
+              <div onClick={(e) => e.stopPropagation()}>
+                <IconButton
+                  onClick={() => onDeleteEntry(entry.id)}
+                  variant='outline'
+                  size='sm'
+                  icon={<Trash2 />}
+                  aria-label={`Delete ${entry.entry_type} entry`}
+                  className='text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-600 hover:text-red-600 dark:hover:text-red-400 hover:border-red-300 dark:hover:border-red-500'
+                />
+              </div>
             </div>
           </div>
         ))}

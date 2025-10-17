@@ -551,6 +551,7 @@ export const AIHomePage: React.FC = () => {
               disabled={isProcessing || isLoading}
               variant={isListening ? 'danger' : 'primary'}
               size='lg'
+              iconSize='2xl'
               aria-label={isListening ? 'Stop listening' : 'Start voice input'}
               className={`w-24 h-24 rounded-full transition-all duration-200 ${
                 isListening
