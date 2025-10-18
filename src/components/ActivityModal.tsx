@@ -3,6 +3,7 @@ import { ModalForm } from './ModalForm'
 import { ActivityForm, type ActivityFormData } from './ActivityForm'
 import { useForm } from '../hooks/useForm'
 import { useActivityOperations } from '../hooks/useActivityOperations'
+import { dateUtils } from '../utils/dateUtils'
 import type { TrackerEntry, UpdateTrackerEntry } from '../types'
 
 interface ActivityModalProps {
@@ -103,9 +104,9 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
     if (entry) {
       form.setValues({
         entryType: entry.entry_type,
-        startTime: new Date(entry.start_time).toISOString().slice(0, 16),
+        startTime: dateUtils.toLocalDateTimeString(entry.start_time),
         endTime: entry.end_time
-          ? new Date(entry.end_time).toISOString().slice(0, 16)
+          ? dateUtils.toLocalDateTimeString(entry.end_time)
           : '',
         quantity: entry.quantity?.toString() || '',
         feedingType: entry.feeding_type || 'bottle',

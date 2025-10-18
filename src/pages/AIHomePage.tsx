@@ -20,6 +20,7 @@ import {
   useDeleteEntry,
 } from '../hooks/queries/useTrackerQueries'
 import { activityUtils } from '../utils/activityUtils'
+import { dateUtils } from '../utils/dateUtils'
 import { Modal } from '../components/Modal'
 import { ActivityModal } from '../components/LazyModals'
 import { GroupedActivitiesList } from '../components/GroupedActivitiesList'
@@ -105,7 +106,7 @@ export const AIHomePage: React.FC = () => {
   const [selectedEntry, setSelectedEntry] = useState<TrackerEntry | null>(null)
   const [formData, setFormData] = useState({
     entryType: 'feeding' as EntryType,
-    startTime: new Date().toISOString().slice(0, 16),
+    startTime: dateUtils.getCurrentLocalDateTime(),
     endTime: '',
     quantity: '',
     feedingType: 'bottle' as FeedingType,
@@ -382,7 +383,7 @@ export const AIHomePage: React.FC = () => {
   const openManualEntryModal = () => {
     setFormData({
       entryType: 'feeding',
-      startTime: new Date().toISOString().slice(0, 16),
+      startTime: dateUtils.getCurrentLocalDateTime(),
       endTime: '',
       quantity: '',
       feedingType: 'bottle',
