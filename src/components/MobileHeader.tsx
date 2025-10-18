@@ -34,10 +34,10 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ userProfile }) => {
   const pageTitle = getPageTitle(location.pathname)
 
   return (
-    <header className='lg:hidden bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between sticky top-0 z-30'>
+    <header className='sticky top-0 z-30 flex items-center justify-between border-b border-gray-200 bg-white px-4 py-3 lg:hidden dark:border-gray-700 dark:bg-gray-800'>
       {/* Logo and Page Title */}
       <div className='flex items-center gap-3'>
-        <div className='w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center'>
+        <div className='flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r from-blue-500 to-purple-600'>
           <Sparkles size={20} className='text-white' />
         </div>
         <span className='text-xl font-bold text-gray-800 dark:text-gray-100'>

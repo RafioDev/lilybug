@@ -122,10 +122,10 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
             action.feedingType === 'breast_left'
               ? 'left breast'
               : action.feedingType === 'breast_right'
-              ? 'right breast'
-              : action.feedingType === 'both'
-              ? 'both breasts'
-              : 'bottle'
+                ? 'right breast'
+                : action.feedingType === 'both'
+                  ? 'both breasts'
+                  : 'bottle'
 
           responseContent = `I can't start live timers, but I can log completed feedings! Try saying "Log a ${feedingTypeText} feeding of 120ml" or just "Log ${feedingTypeText} feeding".`
         } else {
@@ -291,15 +291,15 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
   // Floating action button when closed
   if (!isOpen) {
     return (
-      <div className='fixed bottom-24 lg:bottom-6 right-6 z-50'>
+      <div className='fixed right-6 bottom-24 z-50 lg:bottom-6'>
         <IconButton
-          icon={<Sparkles className='w-6 h-6' />}
+          icon={<Sparkles className='h-6 w-6' />}
           onClick={() => setIsOpen(true)}
           variant='primary'
           size='lg'
           fullRounded
           aria-label='Open AI Assistant'
-          className='w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg hover:shadow-xl hover:scale-105'
+          className='h-14 w-14 bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg hover:scale-105 hover:shadow-xl'
         />
       </div>
     )
@@ -307,24 +307,24 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
 
   return (
     <div
-      className={`fixed bottom-24 lg:bottom-6 right-6 z-50 transition-all duration-200 ${
-        isMinimized ? 'w-80 h-16' : 'w-80 h-96'
+      className={`fixed right-6 bottom-24 z-50 transition-all duration-200 lg:bottom-6 ${
+        isMinimized ? 'h-16 w-80' : 'h-96 w-80'
       }`}
     >
-      <div className='bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col h-full'>
+      <div className='flex h-full flex-col rounded-lg border border-gray-200 bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-800'>
         {/* Header */}
-        <div className='flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg'>
+        <div className='flex items-center justify-between rounded-t-lg border-b border-gray-200 bg-gradient-to-r from-blue-500 to-purple-600 p-4 text-white dark:border-gray-700'>
           <div className='flex items-center gap-2'>
-            <Sparkles className='w-5 h-5' />
-            <span className='font-medium text-sm'>Assistant</span>
+            <Sparkles className='h-5 w-5' />
+            <span className='text-sm font-medium'>Assistant</span>
           </div>
           <div className='flex items-center gap-1'>
             <IconButton
               icon={
                 isMinimized ? (
-                  <Maximize2 className='w-4 h-4' />
+                  <Maximize2 className='h-4 w-4' />
                 ) : (
-                  <Minimize2 className='w-4 h-4' />
+                  <Minimize2 className='h-4 w-4' />
                 )
               }
               onClick={() => setIsMinimized(!isMinimized)}
@@ -333,15 +333,15 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
               aria-label={
                 isMinimized ? 'Maximize assistant' : 'Minimize assistant'
               }
-              className='p-1 hover:bg-white/20 bg-transparent border-none shadow-none min-h-auto min-w-auto'
+              className='min-h-auto min-w-auto border-none bg-transparent p-1 shadow-none hover:bg-white/20'
             />
             <IconButton
-              icon={<X className='w-4 h-4' />}
+              icon={<X className='h-4 w-4' />}
               onClick={() => setIsOpen(false)}
               variant='primary'
               size='sm'
               aria-label='Close assistant'
-              className='p-1 hover:bg-white/20 bg-transparent border-none shadow-none min-h-auto min-w-auto'
+              className='min-h-auto min-w-auto border-none bg-transparent p-1 shadow-none hover:bg-white/20'
             />
           </div>
         </div>
@@ -349,7 +349,7 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
         {!isMinimized && (
           <>
             {/* Messages */}
-            <div className='flex-1 overflow-y-auto p-3 space-y-3 bg-white dark:bg-gray-800'>
+            <div className='flex-1 space-y-3 overflow-y-auto bg-white p-3 dark:bg-gray-800'>
               {messages.map((message) => (
                 <div
                   key={message.id}
@@ -358,15 +358,15 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
                   }`}
                 >
                   <div
-                    className={`max-w-[80%] p-2 rounded-lg text-sm ${
+                    className={`max-w-[80%] rounded-lg p-2 text-sm ${
                       message.type === 'user'
                         ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                        : 'bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-gray-100'
                     }`}
                   >
                     <p className='whitespace-pre-line'>{message.content}</p>
                     <div
-                      className={`text-xs mt-1 ${
+                      className={`mt-1 text-xs ${
                         message.type === 'user'
                           ? 'text-blue-100'
                           : 'text-gray-500 dark:text-gray-400'
@@ -381,15 +381,15 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
 
               {isProcessing && (
                 <div className='flex justify-start'>
-                  <div className='bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 p-2 rounded-lg'>
+                  <div className='rounded-lg bg-gray-100 p-2 text-gray-900 dark:bg-gray-700 dark:text-gray-100'>
                     <div className='flex space-x-1'>
-                      <div className='w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce'></div>
+                      <div className='h-2 w-2 animate-bounce rounded-full bg-gray-400 dark:bg-gray-500'></div>
                       <div
-                        className='w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce'
+                        className='h-2 w-2 animate-bounce rounded-full bg-gray-400 dark:bg-gray-500'
                         style={{ animationDelay: '0.1s' }}
                       ></div>
                       <div
-                        className='w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce'
+                        className='h-2 w-2 animate-bounce rounded-full bg-gray-400 dark:bg-gray-500'
                         style={{ animationDelay: '0.2s' }}
                       ></div>
                     </div>
@@ -401,8 +401,8 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
             </div>
 
             {/* Input */}
-            <div className='p-3 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'>
-              <div className='flex gap-2 mb-2'>
+            <div className='border-t border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800'>
+              <div className='mb-2 flex gap-2'>
                 <Input
                   type='text'
                   value={inputText}
@@ -412,22 +412,22 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
                 />
 
                 <IconButton
-                  icon={<Send className='w-4 h-4' />}
+                  icon={<Send className='h-4 w-4' />}
                   onClick={handleTextInput}
                   disabled={!inputText.trim() || isProcessing}
                   variant='primary'
                   size='sm'
                   fullRounded
                   aria-label='Send message'
-                  className='p-2 flex-shrink-0'
+                  className='flex-shrink-0 p-2'
                 />
 
                 <IconButton
                   icon={
                     isListening ? (
-                      <MicOff className='w-4 h-4' />
+                      <MicOff className='h-4 w-4' />
                     ) : (
-                      <Mic className='w-4 h-4' />
+                      <Mic className='h-4 w-4' />
                     )
                   }
                   onClick={isListening ? stopListening : startListening}
@@ -438,14 +438,14 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
                   aria-label={
                     isListening ? 'Stop listening' : 'Start voice input'
                   }
-                  className={`p-2 flex-shrink-0 ${
+                  className={`flex-shrink-0 p-2 ${
                     isListening ? 'animate-pulse' : ''
                   }`}
                 />
               </div>
 
               {isListening && (
-                <div className='text-center text-xs text-blue-600 dark:text-blue-400 animate-pulse'>
+                <div className='animate-pulse text-center text-xs text-blue-600 dark:text-blue-400'>
                   🎤 Listening... Speak now!
                 </div>
               )}

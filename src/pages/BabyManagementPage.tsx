@@ -114,7 +114,7 @@ export const BabyManagementPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className='min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center'>
+      <div className='flex min-h-screen items-center justify-center bg-gradient-to-b from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900'>
         <LoadingState message='Loading babies...' size='lg' />
       </div>
     )
@@ -122,10 +122,10 @@ export const BabyManagementPage: React.FC = () => {
 
   return (
     <div className='min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900'>
-      <div className='max-w-4xl mx-auto px-4 py-8'>
-        <div className='flex items-center justify-between mb-8'>
+      <div className='mx-auto max-w-4xl px-4 py-8'>
+        <div className='mb-8 flex items-center justify-between'>
           <div>
-            <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2'>
+            <h1 className='mb-2 text-3xl font-bold text-gray-900 dark:text-gray-100'>
               Manage Babies
             </h1>
             <p className='text-gray-600 dark:text-gray-400'>
@@ -155,12 +155,12 @@ export const BabyManagementPage: React.FC = () => {
         {/* Babies List */}
         <div className='space-y-4'>
           {babies.length === 0 ? (
-            <div className='text-center py-12'>
-              <BabyIcon className='w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4' />
-              <h3 className='text-lg font-medium text-gray-900 dark:text-gray-100 mb-2'>
+            <div className='py-12 text-center'>
+              <BabyIcon className='mx-auto mb-4 h-16 w-16 text-gray-300 dark:text-gray-600' />
+              <h3 className='mb-2 text-lg font-medium text-gray-900 dark:text-gray-100'>
                 No babies added yet
               </h3>
-              <p className='text-gray-500 dark:text-gray-400 mb-4'>
+              <p className='mb-4 text-gray-500 dark:text-gray-400'>
                 Add your first baby to start tracking
               </p>
               <Button onClick={startAdd} variant='primary'>
@@ -171,23 +171,23 @@ export const BabyManagementPage: React.FC = () => {
             babies.map((baby) => (
               <div
                 key={baby.id}
-                className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm border p-6 transition-all ${
+                className={`rounded-xl border bg-white p-6 shadow-sm transition-all dark:bg-gray-800 ${
                   baby.is_active
-                    ? 'border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20'
+                    ? 'border-blue-200 bg-blue-50 dark:border-blue-700 dark:bg-blue-900/20'
                     : 'border-gray-200 dark:border-gray-700'
                 }`}
               >
                 <div className='flex items-center justify-between'>
                   <div className='flex items-center gap-4'>
                     <div
-                      className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                      className={`flex h-12 w-12 items-center justify-center rounded-full ${
                         baby.is_active
                           ? 'bg-blue-100 dark:bg-blue-900/40'
                           : 'bg-gray-100 dark:bg-gray-700'
                       }`}
                     >
                       <BabyIcon
-                        className={`w-6 h-6 ${
+                        className={`h-6 w-6 ${
                           baby.is_active
                             ? 'text-blue-600 dark:text-blue-400'
                             : 'text-gray-600 dark:text-gray-400'
@@ -200,7 +200,7 @@ export const BabyManagementPage: React.FC = () => {
                           {baby.name}
                         </h3>
                         {baby.is_active && (
-                          <span className='bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 text-xs px-2 py-1 rounded-full font-medium'>
+                          <span className='rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900/40 dark:text-blue-300'>
                             Active
                           </span>
                         )}
@@ -220,7 +220,7 @@ export const BabyManagementPage: React.FC = () => {
                         variant='outline'
                         size='sm'
                         leftIcon={<Check />}
-                        className='bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 border-green-200 dark:border-green-700 hover:bg-green-200 dark:hover:bg-green-900/60'
+                        className='border-green-200 bg-green-100 text-green-700 hover:bg-green-200 dark:border-green-700 dark:bg-green-900/40 dark:text-green-300 dark:hover:bg-green-900/60'
                       >
                         Set Active
                       </Button>
@@ -231,7 +231,7 @@ export const BabyManagementPage: React.FC = () => {
                       size='sm'
                       icon={<Edit2 />}
                       aria-label={`Edit ${baby.name}`}
-                      className='text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-600 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-300 dark:hover:border-blue-500'
+                      className='border-gray-300 text-gray-600 hover:border-blue-300 hover:text-blue-600 dark:border-gray-600 dark:text-gray-400 dark:hover:border-blue-500 dark:hover:text-blue-400'
                     />
                     <IconButton
                       onClick={() => handleDelete(baby)}
@@ -239,7 +239,7 @@ export const BabyManagementPage: React.FC = () => {
                       size='sm'
                       icon={<Trash2 />}
                       aria-label={`Delete ${baby.name}`}
-                      className='text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-600 hover:text-red-600 dark:hover:text-red-400 hover:border-red-300 dark:hover:border-red-500'
+                      className='border-gray-300 text-gray-600 hover:border-red-300 hover:text-red-600 dark:border-gray-600 dark:text-gray-400 dark:hover:border-red-500 dark:hover:text-red-400'
                     />
                   </div>
                 </div>

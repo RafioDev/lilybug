@@ -27,7 +27,7 @@ export const Card: React.FC<CardProps> = ({
   return (
     <div
       onClick={onClick}
-      className={`bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 ${paddingStyles[padding]} ${interactiveStyles} ${className}`}
+      className={`rounded-2xl border border-gray-100 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800 ${paddingStyles[padding]} ${interactiveStyles} ${className}`}
     >
       {children}
     </div>

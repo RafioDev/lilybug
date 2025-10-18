@@ -1,4 +1,5 @@
 import React from 'react'
+import { cn } from '../utils/cn'
 
 interface ButtonProps {
   children?: React.ReactNode
@@ -192,21 +193,19 @@ export const Button = React.memo<ButtonProps>(
       const sizeClass = iconOnly
         ? BUTTON_SIZE_CLASSES[size].iconOnly
         : BUTTON_SIZE_CLASSES[size].default
-      const widthClass = fullWidth ? 'w-full' : ''
-
-      // Pre-compute final className to avoid string concatenation on every render
-      const finalClassName = [
+      // Use cn function to merge classes and resolve conflicts
+      const finalClassName = cn(
         BUTTON_BASE_CLASSES,
         BUTTON_VARIANT_CLASSES[variant],
         sizeClass,
-        widthClass,
+        {
+          'w-full': fullWidth,
+        },
         fullRounded
           ? BUTTON_ROUNDED_CLASSES.full
           : BUTTON_ROUNDED_CLASSES.default,
-        className,
-      ]
-        .filter(Boolean)
-        .join(' ')
+        className
+      )
 
       return {
         isDisabled,
@@ -214,10 +213,10 @@ export const Button = React.memo<ButtonProps>(
         ariaLabel: iconOnly
           ? ariaLabel
           : loading && loadingText
-          ? loadingText
-          : loading
-          ? 'Loading'
-          : undefined,
+            ? loadingText
+            : loading
+              ? 'Loading'
+              : undefined,
         ariaDisabled: isDisabled ? true : undefined,
       }
     }, [
@@ -274,7 +273,7 @@ export const Button = React.memo<ButtonProps>(
 
       if (iconOnly) {
         return (
-          <span className='inline-flex items-center justify-center w-full h-full'>
+          <span className='inline-flex h-full w-full items-center justify-center'>
             {renderIcon(leftIcon || rightIcon)}
           </span>
         )

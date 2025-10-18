@@ -148,11 +148,14 @@ export const aiPatternService = {
         : 0
 
     // Find most common feeding type
-    const typeCounts = feedingEntries.reduce((counts, entry) => {
-      const type = entry.feeding_type || 'bottle'
-      counts[type] = (counts[type] || 0) + 1
-      return counts
-    }, {} as Record<string, number>)
+    const typeCounts = feedingEntries.reduce(
+      (counts, entry) => {
+        const type = entry.feeding_type || 'bottle'
+        counts[type] = (counts[type] || 0) + 1
+        return counts
+      },
+      {} as Record<string, number>
+    )
 
     const mostCommonType =
       Object.entries(typeCounts).sort(([, a], [, b]) => b - a)[0]?.[0] ||

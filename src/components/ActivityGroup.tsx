@@ -29,7 +29,7 @@ export const ActivityGroup: React.FC<ActivityGroupProps> = ({
         {dateGroup.entries.map((entry) => (
           <div
             key={entry.id}
-            className='flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer'
+            className='flex cursor-pointer items-center justify-between rounded-lg bg-gray-50 p-3 transition-colors hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600'
             onClick={() => onViewDetails(entry)}
           >
             <div className='flex items-center gap-3'>
@@ -37,7 +37,7 @@ export const ActivityGroup: React.FC<ActivityGroupProps> = ({
                 {activityUtils.getActivityIcon(entry.entry_type)}
               </span>
               <div>
-                <p className='font-medium text-gray-900 dark:text-gray-100 text-sm'>
+                <p className='text-sm font-medium text-gray-900 dark:text-gray-100'>
                   {activityUtils.getEntryDetails(entry)}
                 </p>
                 <p className='text-xs text-gray-500 dark:text-gray-400'>
@@ -48,7 +48,7 @@ export const ActivityGroup: React.FC<ActivityGroupProps> = ({
                   })}
                 </p>
                 {entry.notes && (
-                  <p className='text-xs text-gray-400 dark:text-gray-500 mt-1 italic'>
+                  <p className='mt-1 text-xs text-gray-400 italic dark:text-gray-500'>
                     "{entry.notes}"
                   </p>
                 )}
@@ -64,7 +64,7 @@ export const ActivityGroup: React.FC<ActivityGroupProps> = ({
                   size='sm'
                   icon={<Edit3 />}
                   aria-label={`Edit ${entry.entry_type} entry`}
-                  className='text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-600 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-300 dark:hover:border-blue-500'
+                  className='border-gray-300 text-gray-600 hover:border-blue-300 hover:text-blue-600 dark:border-gray-600 dark:text-gray-400 dark:hover:border-blue-500 dark:hover:text-blue-400'
                 />
               </div>
               <div onClick={(e) => e.stopPropagation()}>
@@ -74,7 +74,7 @@ export const ActivityGroup: React.FC<ActivityGroupProps> = ({
                   size='sm'
                   icon={<Trash2 />}
                   aria-label={`Delete ${entry.entry_type} entry`}
-                  className='text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-600 hover:text-red-600 dark:hover:text-red-400 hover:border-red-300 dark:hover:border-red-500'
+                  className='border-gray-300 text-gray-600 hover:border-red-300 hover:text-red-600 dark:border-gray-600 dark:text-gray-400 dark:hover:border-red-500 dark:hover:text-red-400'
                 />
               </div>
             </div>

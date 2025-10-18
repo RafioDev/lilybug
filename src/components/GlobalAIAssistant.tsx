@@ -127,10 +127,10 @@ export const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
             action.feedingType === 'breast_left'
               ? 'left breast'
               : action.feedingType === 'breast_right'
-              ? 'right breast'
-              : action.feedingType === 'both'
-              ? 'both breasts'
-              : 'bottle'
+                ? 'right breast'
+                : action.feedingType === 'both'
+                  ? 'both breasts'
+                  : 'bottle'
 
           responseContent = `I can't start live timers, but I can log completed feedings! Try saying "Log a ${feedingTypeText} feeding of 120ml" or just "Log ${feedingTypeText} feeding".`
         } else {
@@ -294,46 +294,46 @@ export const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
   if (!isOpen) {
     return (
       <IconButton
-        icon={<MessageCircle className='w-6 h-6' />}
+        icon={<MessageCircle className='h-6 w-6' />}
         onClick={() => setIsOpen(true)}
         variant='primary'
         size='lg'
         fullRounded
         aria-label='Open AI Assistant'
-        className='fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg hover:shadow-xl transition-all duration-200 z-50'
+        className='fixed right-6 bottom-6 z-50 h-14 w-14 bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg transition-all duration-200 hover:shadow-xl'
       />
     )
   }
 
   return (
     <div
-      className={`fixed bottom-6 right-6 z-50 transition-all duration-200 ${
-        isMinimized ? 'w-80 h-16' : 'w-80 h-96'
+      className={`fixed right-6 bottom-6 z-50 transition-all duration-200 ${
+        isMinimized ? 'h-16 w-80' : 'h-96 w-80'
       }`}
     >
-      <div className='bg-white rounded-lg shadow-2xl border border-gray-200 flex flex-col h-full'>
+      <div className='flex h-full flex-col rounded-lg border border-gray-200 bg-white shadow-2xl'>
         {/* Header */}
-        <div className='flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg'>
+        <div className='flex items-center justify-between rounded-t-lg border-b border-gray-200 bg-gradient-to-r from-blue-500 to-purple-600 p-4 text-white'>
           <div className='flex items-center gap-2'>
-            <MessageCircle className='w-5 h-5' />
-            <span className='font-medium text-sm'>Assistant</span>
+            <MessageCircle className='h-5 w-5' />
+            <span className='text-sm font-medium'>Assistant</span>
           </div>
           <div className='flex items-center gap-1'>
             <button
               onClick={() => setIsMinimized(!isMinimized)}
-              className='p-1 hover:bg-white/20 rounded'
+              className='rounded p-1 hover:bg-white/20'
             >
               {isMinimized ? (
-                <Maximize2 className='w-4 h-4' />
+                <Maximize2 className='h-4 w-4' />
               ) : (
-                <Minimize2 className='w-4 h-4' />
+                <Minimize2 className='h-4 w-4' />
               )}
             </button>
             <button
               onClick={() => setIsOpen(false)}
-              className='p-1 hover:bg-white/20 rounded'
+              className='rounded p-1 hover:bg-white/20'
             >
-              <X className='w-4 h-4' />
+              <X className='h-4 w-4' />
             </button>
           </div>
         </div>
@@ -341,12 +341,12 @@ export const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
         {!isMinimized && (
           <>
             {/* Messages */}
-            <div className='flex-1 overflow-y-auto p-3 space-y-3'>
+            <div className='flex-1 space-y-3 overflow-y-auto p-3'>
               {messages.length === 0 && (
-                <div className='text-center text-gray-500 text-sm py-4'>
-                  <MessageCircle className='w-8 h-8 mx-auto mb-2 opacity-50' />
+                <div className='py-4 text-center text-sm text-gray-500'>
+                  <MessageCircle className='mx-auto mb-2 h-8 w-8 opacity-50' />
                   <p>Hi! I'm your assistant.</p>
-                  <p className='text-xs mt-1'>
+                  <p className='mt-1 text-xs'>
                     Try saying "Log a bottle feeding" or click the mic!
                   </p>
                 </div>
@@ -360,7 +360,7 @@ export const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
                   }`}
                 >
                   <div
-                    className={`max-w-[80%] p-2 rounded-lg text-sm ${
+                    className={`max-w-[80%] rounded-lg p-2 text-sm ${
                       message.type === 'user'
                         ? 'bg-blue-600 text-white'
                         : 'bg-gray-100 text-gray-900'
@@ -368,7 +368,7 @@ export const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
                   >
                     <p className='whitespace-pre-line'>{message.content}</p>
                     <div
-                      className={`text-xs mt-1 ${
+                      className={`mt-1 text-xs ${
                         message.type === 'user'
                           ? 'text-blue-100'
                           : 'text-gray-500'
@@ -383,15 +383,15 @@ export const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
 
               {isProcessing && (
                 <div className='flex justify-start'>
-                  <div className='bg-gray-100 text-gray-900 p-2 rounded-lg'>
+                  <div className='rounded-lg bg-gray-100 p-2 text-gray-900'>
                     <div className='flex space-x-1'>
-                      <div className='w-2 h-2 bg-gray-400 rounded-full animate-bounce'></div>
+                      <div className='h-2 w-2 animate-bounce rounded-full bg-gray-400'></div>
                       <div
-                        className='w-2 h-2 bg-gray-400 rounded-full animate-bounce'
+                        className='h-2 w-2 animate-bounce rounded-full bg-gray-400'
                         style={{ animationDelay: '0.1s' }}
                       ></div>
                       <div
-                        className='w-2 h-2 bg-gray-400 rounded-full animate-bounce'
+                        className='h-2 w-2 animate-bounce rounded-full bg-gray-400'
                         style={{ animationDelay: '0.2s' }}
                       ></div>
                     </div>
@@ -403,14 +403,14 @@ export const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
             </div>
 
             {/* Input */}
-            <div className='p-3 border-t border-gray-200'>
+            <div className='border-t border-gray-200 p-3'>
               <div className='flex gap-2'>
                 <IconButton
                   icon={
                     isListening ? (
-                      <MicOff className='w-4 h-4' />
+                      <MicOff className='h-4 w-4' />
                     ) : (
-                      <Mic className='w-4 h-4' />
+                      <Mic className='h-4 w-4' />
                     )
                   }
                   onClick={isListening ? stopListening : startListening}
@@ -433,7 +433,7 @@ export const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
                 />
 
                 <IconButton
-                  icon={<Send className='w-4 h-4' />}
+                  icon={<Send className='h-4 w-4' />}
                   onClick={handleTextInput}
                   disabled={!inputText.trim() || isProcessing}
                   variant='primary'
@@ -444,7 +444,7 @@ export const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
               </div>
 
               {isListening && (
-                <div className='text-center text-xs text-blue-600 mt-2 animate-pulse'>
+                <div className='mt-2 animate-pulse text-center text-xs text-blue-600'>
                   🎤 Listening... Speak now!
                 </div>
               )}

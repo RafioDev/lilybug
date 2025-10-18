@@ -70,10 +70,10 @@ export const smartSearchService = {
         durationMatch[1].includes('above')
           ? 'greater'
           : durationMatch[1].includes('less') ||
-            durationMatch[1].includes('under') ||
-            durationMatch[1].includes('below')
-          ? 'less'
-          : 'equal'
+              durationMatch[1].includes('under') ||
+              durationMatch[1].includes('below')
+            ? 'less'
+            : 'equal'
 
       const value = parseFloat(durationMatch[2])
       const unit =
@@ -97,10 +97,10 @@ export const smartSearchService = {
         quantityMatch[1].includes('above')
           ? 'greater'
           : quantityMatch[1].includes('less') ||
-            quantityMatch[1].includes('under') ||
-            quantityMatch[1].includes('below')
-          ? 'less'
-          : 'equal'
+              quantityMatch[1].includes('under') ||
+              quantityMatch[1].includes('below')
+            ? 'less'
+            : 'equal'
 
       const value = parseFloat(quantityMatch[2])
       searchQuery.quantity = { operator, value }

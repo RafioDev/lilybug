@@ -25,12 +25,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ userProfile }) => {
   ]
 
   return (
-    <aside className='hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:bg-white lg:dark:bg-gray-800 lg:border-r lg:border-gray-200 lg:dark:border-gray-700 lg:shadow-sm'>
-      <div className='flex flex-col flex-1 min-h-0'>
+    <aside className='hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-gray-200 lg:bg-white lg:shadow-sm lg:dark:border-gray-700 lg:dark:bg-gray-800'>
+      <div className='flex min-h-0 flex-1 flex-col'>
         {/* Logo/Brand */}
-        <div className='flex items-center h-16 px-6 border-b border-gray-200 dark:border-gray-700'>
+        <div className='flex h-16 items-center border-b border-gray-200 px-6 dark:border-gray-700'>
           <div className='flex items-center gap-3'>
-            <div className='w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center'>
+            <div className='flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r from-blue-500 to-purple-600'>
               <Sparkles size={20} className='text-white' />
             </div>
             <span className='text-xl font-bold text-gray-800 dark:text-gray-100'>
@@ -40,7 +40,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ userProfile }) => {
         </div>
 
         {/* Navigation */}
-        <nav className='flex-1 px-4 py-6 space-y-2'>
+        <nav className='flex-1 space-y-2 px-4 py-6'>
           {navItems.map((item) => {
             const Icon = item.icon
 
@@ -49,10 +49,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ userProfile }) => {
                 key={item.path}
                 to={item.path}
                 className={({ isActive }) =>
-                  `w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left ${
+                  `flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left transition-all ${
                     isActive
-                      ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
+                      ? 'border border-blue-200 bg-blue-50 text-blue-600 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200'
                   }`
                 }
               >

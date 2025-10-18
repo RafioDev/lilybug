@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import { X } from 'lucide-react'
 import { IconButton } from './Button'
+import { cn } from '../utils/cn'
 
 interface ModalProps {
   isOpen: boolean
@@ -38,18 +39,23 @@ export const Modal: React.FC<ModalProps> = ({
   }
 
   return (
-    <div className='fixed inset-0 z-50 flex items-end sm:items-center justify-center'>
+    <div className='fixed inset-0 z-50 flex items-end justify-center sm:items-center'>
       {/* Enhanced backdrop with better dark mode styling */}
       <div
-        className='absolute inset-0 bg-black/50 dark:bg-black/75 backdrop-blur-sm transition-opacity duration-200'
+        className='absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-200 dark:bg-black/75'
         onClick={onClose}
       />
       {/* Enhanced modal container with improved dark mode styling */}
       <div
-        className={`relative bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-t-3xl sm:rounded-3xl shadow-2xl dark:shadow-2xl dark:shadow-black/50 w-full ${sizeStyles[size]} max-h-[90vh] overflow-y-auto animate-slide-up`}
+        className={cn(
+          'relative border border-gray-200 bg-white dark:border-gray-600 dark:bg-gray-800',
+          'rounded-t-3xl shadow-2xl sm:rounded-3xl dark:shadow-2xl dark:shadow-black/50',
+          'animate-slide-up max-h-[90vh] w-full overflow-y-auto',
+          sizeStyles[size]
+        )}
       >
         {title && (
-          <div className='flex items-center justify-between p-5 border-b border-gray-200 dark:border-gray-600 sticky top-0 bg-white dark:bg-gray-800 rounded-t-3xl z-10'>
+          <div className='sticky top-0 z-10 flex items-center justify-between rounded-t-3xl border-b border-gray-200 bg-white p-5 dark:border-gray-600 dark:bg-gray-800'>
             <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>
               {title}
             </h2>
@@ -59,7 +65,7 @@ export const Modal: React.FC<ModalProps> = ({
               variant='outline'
               size='md'
               aria-label='Close modal'
-              className='border-0 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700/80 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-all duration-200 rounded-lg'
+              className='rounded-lg border-0 bg-transparent text-gray-500 transition-all duration-200 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700/80 dark:hover:text-gray-200'
             />
           </div>
         )}

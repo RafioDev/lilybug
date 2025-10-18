@@ -25,9 +25,9 @@ export const GroupedActivitiesList: React.FC<GroupedActivitiesListProps> = ({
 
   if (entries.length === 0) {
     return (
-      <div className={`text-center py-8 ${className}`}>
-        <Clock className='w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4' />
-        <p className='text-gray-500 dark:text-gray-400 mb-2'>
+      <div className={`py-8 text-center ${className}`}>
+        <Clock className='mx-auto mb-4 h-12 w-12 text-gray-300 dark:text-gray-600' />
+        <p className='mb-2 text-gray-500 dark:text-gray-400'>
           No activities tracked yet
         </p>
         <p className='text-sm text-gray-400 dark:text-gray-500'>

@@ -42,9 +42,9 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
         <button
           onClick={() => setIsOpen(!isOpen)}
           aria-label={`User menu for ${userName}`}
-          className='p-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors'
+          className='rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-gray-100'
         >
-          <User className='w-5 h-5' />
+          <User className='h-5 w-5' />
         </button>
 
         {isOpen && (
@@ -53,18 +53,18 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
               className='fixed inset-0 z-10'
               onClick={() => setIsOpen(false)}
             />
-            <div className='absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20'>
-              <div className='px-4 py-3 border-b border-gray-100 dark:border-gray-700'>
-                <p className='text-sm font-medium text-gray-900 dark:text-gray-100 truncate'>
+            <div className='absolute top-full right-0 z-20 mt-2 w-48 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800'>
+              <div className='border-b border-gray-100 px-4 py-3 dark:border-gray-700'>
+                <p className='truncate text-sm font-medium text-gray-900 dark:text-gray-100'>
                   {userName}
                 </p>
               </div>
               <ThemeToggleDropdown />
               <button
                 onClick={handleSignOut}
-                className='w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-b-lg transition-colors'
+                className='flex w-full items-center gap-2 rounded-b-lg px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'
               >
-                <LogOut className='w-4 h-4' />
+                <LogOut className='h-4 w-4' />
                 Sign Out
               </button>
             </div>
@@ -79,14 +79,14 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
     <div className={`relative ${className}`} ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className='w-full flex items-center justify-between gap-2 px-3 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors'
+        className='flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-gray-100'
       >
         <div className='flex items-center gap-2'>
-          <User className='w-4 h-4' />
-          <span className='font-medium truncate'>{userName}</span>
+          <User className='h-4 w-4' />
+          <span className='truncate font-medium'>{userName}</span>
         </div>
         <ChevronDown
-          className={`w-4 h-4 transition-transform ${
+          className={`h-4 w-4 transition-transform ${
             isOpen ? 'rotate-180' : ''
           }`}
         />
@@ -98,13 +98,13 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
             className='fixed inset-0 z-10'
             onClick={() => setIsOpen(false)}
           />
-          <div className='absolute left-0 bottom-full mb-2 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20'>
+          <div className='absolute bottom-full left-0 z-20 mb-2 w-full rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800'>
             <ThemeToggleDropdown />
             <button
               onClick={handleSignOut}
-              className='w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-b-lg transition-colors'
+              className='flex w-full items-center gap-2 rounded-b-lg px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'
             >
-              <LogOut className='w-4 h-4' />
+              <LogOut className='h-4 w-4' />
               Sign Out
             </button>
           </div>

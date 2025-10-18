@@ -69,16 +69,16 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
     <Modal isOpen={isOpen} onClose={onClose} size='sm'>
       <div className='text-center'>
         {/* Icon */}
-        <div className='mx-auto flex items-center justify-center w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 mb-4'>
+        <div className='mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30'>
           <AlertTriangle
-            className={`w-6 h-6 ${iconColor}`}
+            className={`h-6 w-6 ${iconColor}`}
             aria-hidden='true'
           />
         </div>
 
         {/* Title */}
         <h3
-          className='text-lg font-semibold text-gray-900 dark:text-white mb-2'
+          className='mb-2 text-lg font-semibold text-gray-900 dark:text-white'
           id='confirmation-modal-title'
         >
           {title}
@@ -86,14 +86,14 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
         {/* Message */}
         <p
-          className='text-sm text-gray-600 dark:text-gray-300 mb-6'
+          className='mb-6 text-sm text-gray-600 dark:text-gray-300'
           id='confirmation-modal-description'
         >
           {message}
         </p>
 
         {/* Action Buttons */}
-        <div className='flex flex-col-reverse sm:flex-row sm:justify-center gap-3'>
+        <div className='flex flex-col-reverse gap-3 sm:flex-row sm:justify-center'>
           <Button
             variant='outline'
             onClick={onClose}

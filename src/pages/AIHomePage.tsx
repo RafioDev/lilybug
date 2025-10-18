@@ -176,10 +176,10 @@ export const AIHomePage: React.FC = () => {
             action.feedingType === 'breast_left'
               ? 'left breast'
               : action.feedingType === 'breast_right'
-              ? 'right breast'
-              : action.feedingType === 'both'
-              ? 'both breasts'
-              : 'bottle'
+                ? 'right breast'
+                : action.feedingType === 'both'
+                  ? 'both breasts'
+                  : 'bottle'
 
           responseContent = `I can't start live timers, but I can log completed feedings! Try saying "Log a ${feedingTypeText} feeding of 120ml" or just "Log ${feedingTypeText} feeding".`
         } else {
@@ -436,12 +436,12 @@ export const AIHomePage: React.FC = () => {
   if (isLoading) {
     return (
       <Layout>
-        <div className='max-w-4xl mx-auto space-y-6'>
+        <div className='mx-auto max-w-4xl space-y-6'>
           {/* Header */}
-          <div className='text-center space-y-2'>
+          <div className='space-y-2 text-center'>
             <div className='flex items-center justify-center gap-3'>
-              <div className='p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full'>
-                <Sparkles className='w-8 h-8 text-white' />
+              <div className='rounded-full bg-gradient-to-r from-blue-500 to-purple-600 p-3'>
+                <Sparkles className='h-8 w-8 text-white' />
               </div>
               <h1 className='text-3xl font-bold text-gray-800 dark:text-gray-100'>
                 Lilybug
@@ -453,19 +453,19 @@ export const AIHomePage: React.FC = () => {
           {/* Loading Stats */}
           <div className='grid grid-cols-3 gap-4'>
             <Card className='text-center'>
-              <div className='w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded mx-auto mb-2 animate-pulse'></div>
+              <div className='mx-auto mb-2 h-8 w-8 animate-pulse rounded bg-gray-200 dark:bg-gray-700'></div>
               <div className='text-sm text-gray-400 dark:text-gray-500'>
                 Loading...
               </div>
             </Card>
             <Card className='text-center'>
-              <div className='w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded mx-auto mb-2 animate-pulse'></div>
+              <div className='mx-auto mb-2 h-8 w-8 animate-pulse rounded bg-gray-200 dark:bg-gray-700'></div>
               <div className='text-sm text-gray-400 dark:text-gray-500'>
                 Loading...
               </div>
             </Card>
             <Card className='text-center'>
-              <div className='w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded mx-auto mb-2 animate-pulse'></div>
+              <div className='mx-auto mb-2 h-8 w-8 animate-pulse rounded bg-gray-200 dark:bg-gray-700'></div>
               <div className='text-sm text-gray-400 dark:text-gray-500'>
                 Loading...
               </div>
@@ -475,32 +475,32 @@ export const AIHomePage: React.FC = () => {
           {/* Loading Voice Interface */}
           <Card className='p-8'>
             <div className='flex flex-col items-center space-y-6'>
-              <div className='w-24 h-24 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse'></div>
+              <div className='h-24 w-24 animate-pulse rounded-full bg-gray-200 dark:bg-gray-700'></div>
               <div className='text-center'>
-                <div className='w-32 h-6 bg-gray-200 dark:bg-gray-700 rounded mx-auto mb-2 animate-pulse'></div>
-                <div className='w-48 h-4 bg-gray-200 dark:bg-gray-700 rounded mx-auto animate-pulse'></div>
+                <div className='mx-auto mb-2 h-6 w-32 animate-pulse rounded bg-gray-200 dark:bg-gray-700'></div>
+                <div className='mx-auto h-4 w-48 animate-pulse rounded bg-gray-200 dark:bg-gray-700'></div>
               </div>
             </div>
           </Card>
 
           {/* Loading Activities */}
           <Card>
-            <div className='flex items-center justify-between mb-4'>
+            <div className='mb-4 flex items-center justify-between'>
               <div className='flex items-center gap-3'>
-                <Clock className='w-5 h-5 text-gray-400 dark:text-gray-500' />
-                <div className='w-32 h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse'></div>
+                <Clock className='h-5 w-5 text-gray-400 dark:text-gray-500' />
+                <div className='h-5 w-32 animate-pulse rounded bg-gray-200 dark:bg-gray-700'></div>
               </div>
             </div>
             <div className='space-y-3'>
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className='flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg'
+                  className='flex items-center gap-3 rounded-lg bg-gray-50 p-3 dark:bg-gray-700'
                 >
-                  <div className='w-8 h-8 bg-gray-200 dark:bg-gray-600 rounded animate-pulse'></div>
+                  <div className='h-8 w-8 animate-pulse rounded bg-gray-200 dark:bg-gray-600'></div>
                   <div className='flex-1'>
-                    <div className='w-48 h-4 bg-gray-200 dark:bg-gray-600 rounded mb-1 animate-pulse'></div>
-                    <div className='w-24 h-3 bg-gray-200 dark:bg-gray-600 rounded animate-pulse'></div>
+                    <div className='mb-1 h-4 w-48 animate-pulse rounded bg-gray-200 dark:bg-gray-600'></div>
+                    <div className='h-3 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-600'></div>
                   </div>
                 </div>
               ))}
@@ -513,12 +513,12 @@ export const AIHomePage: React.FC = () => {
 
   return (
     <Layout>
-      <div className='max-w-4xl mx-auto space-y-6'>
+      <div className='mx-auto max-w-4xl space-y-6'>
         {/* Header */}
-        <div className='text-center space-y-2'>
+        <div className='space-y-2 text-center'>
           <div className='flex items-center justify-center gap-3'>
-            <div className='p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full'>
-              <Sparkles className='w-8 h-8 text-white' />
+            <div className='rounded-full bg-gradient-to-r from-blue-500 to-purple-600 p-3'>
+              <Sparkles className='h-8 w-8 text-white' />
             </div>
             <h1 className='text-3xl font-bold text-gray-800 dark:text-gray-100'>
               Lilybug
@@ -574,17 +574,17 @@ export const AIHomePage: React.FC = () => {
               iconSize='2xl'
               fullRounded
               aria-label={isListening ? 'Stop listening' : 'Start voice input'}
-              className={`w-24 h-24 transition-all duration-200 ${
+              className={`h-24 w-24 transition-all duration-200 ${
                 isListening
-                  ? 'animate-pulse shadow-lg scale-110 !bg-red-500 hover:!bg-red-600'
-                  : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:shadow-lg hover:scale-105'
+                  ? 'scale-110 animate-pulse !bg-red-500 shadow-lg hover:!bg-red-600'
+                  : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 hover:shadow-lg'
               }`}
             />
 
             {/* Status Text */}
             {isListening ? (
               <div className='text-center'>
-                <div className='text-blue-600 dark:text-blue-400 font-medium animate-pulse text-lg'>
+                <div className='animate-pulse text-lg font-medium text-blue-600 dark:text-blue-400'>
                   🎤 Listening...
                 </div>
                 <div className='text-sm text-gray-500 dark:text-gray-400'>
@@ -595,29 +595,29 @@ export const AIHomePage: React.FC = () => {
               </div>
             ) : isProcessing ? (
               <div className='text-center'>
-                <div className='text-blue-600 dark:text-blue-400 font-medium text-lg'>
+                <div className='text-lg font-medium text-blue-600 dark:text-blue-400'>
                   {aiService.isConfigured()
                     ? '🤖 AI Processing...'
                     : 'Processing...'}
                 </div>
-                <div className='flex justify-center space-x-1 mt-2'>
-                  <div className='w-2 h-2 bg-blue-400 rounded-full animate-bounce'></div>
+                <div className='mt-2 flex justify-center space-x-1'>
+                  <div className='h-2 w-2 animate-bounce rounded-full bg-blue-400'></div>
                   <div
-                    className='w-2 h-2 bg-blue-400 rounded-full animate-bounce'
+                    className='h-2 w-2 animate-bounce rounded-full bg-blue-400'
                     style={{ animationDelay: '0.1s' }}
                   ></div>
                   <div
-                    className='w-2 h-2 bg-blue-400 rounded-full animate-bounce'
+                    className='h-2 w-2 animate-bounce rounded-full bg-blue-400'
                     style={{ animationDelay: '0.2s' }}
                   ></div>
                 </div>
               </div>
             ) : (
               <div className='text-center'>
-                <div className='text-gray-700 dark:text-gray-200 font-medium text-lg'>
+                <div className='text-lg font-medium text-gray-700 dark:text-gray-200'>
                   Tap to speak
                   {aiService.isConfigured() && (
-                    <span className='text-green-600 dark:text-green-400 ml-2'>
+                    <span className='ml-2 text-green-600 dark:text-green-400'>
                       🤖 AI Ready
                     </span>
                   )}
@@ -631,7 +631,7 @@ export const AIHomePage: React.FC = () => {
             )}
 
             {/* Secondary Text Input */}
-            <div className='w-full max-w-md flex gap-2'>
+            <div className='flex w-full max-w-md gap-2'>
               <Input
                 type='text'
                 value={inputText}
@@ -653,9 +653,9 @@ export const AIHomePage: React.FC = () => {
 
         {/* Activities List */}
         <Card>
-          <div className='flex items-center justify-between mb-4'>
+          <div className='mb-4 flex items-center justify-between'>
             <div className='flex items-center gap-3'>
-              <Clock className='w-5 h-5 text-gray-600 dark:text-gray-400' />
+              <Clock className='h-5 w-5 text-gray-600 dark:text-gray-400' />
               <h3 className='font-semibold text-gray-800 dark:text-gray-200'>
                 Recent Activities
               </h3>
@@ -689,12 +689,12 @@ export const AIHomePage: React.FC = () => {
       >
         {selectedEntry && (
           <div className='space-y-4'>
-            <div className='flex items-center gap-3 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg'>
+            <div className='flex items-center gap-3 rounded-lg bg-gray-100 p-3 dark:bg-gray-700'>
               <span className='text-3xl'>
                 {activityUtils.getActivityIcon(selectedEntry.entry_type)}
               </span>
               <div>
-                <p className='font-medium text-gray-900 dark:text-gray-100 capitalize'>
+                <p className='font-medium text-gray-900 capitalize dark:text-gray-100'>
                   {selectedEntry.entry_type}
                 </p>
                 <p className='text-sm text-gray-500 dark:text-gray-400'>
@@ -709,7 +709,7 @@ export const AIHomePage: React.FC = () => {
                   <label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
                     Feeding Type
                   </label>
-                  <p className='text-gray-900 dark:text-gray-100 capitalize'>
+                  <p className='text-gray-900 capitalize dark:text-gray-100'>
                     {selectedEntry.feeding_type.replace('_', ' ')}
                   </p>
                 </div>
@@ -732,7 +732,7 @@ export const AIHomePage: React.FC = () => {
                   <label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
                     Diaper Type
                   </label>
-                  <p className='text-gray-900 dark:text-gray-100 capitalize'>
+                  <p className='text-gray-900 capitalize dark:text-gray-100'>
                     {selectedEntry.diaper_type}
                   </p>
                 </div>
@@ -777,7 +777,7 @@ export const AIHomePage: React.FC = () => {
                   handleDeleteEntry(selectedEntry)
                 }}
                 variant='outline'
-                className='flex-1 text-red-600 border-red-200 hover:bg-red-50'
+                className='flex-1 border-red-200 text-red-600 hover:bg-red-50'
               >
                 Delete Entry
               </Button>
@@ -799,7 +799,7 @@ export const AIHomePage: React.FC = () => {
         title='Manual Entry'
       >
         <div className='space-y-4'>
-          <div className='p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg'>
+          <div className='rounded-lg bg-blue-50 p-3 dark:bg-blue-900/30'>
             <p className='text-sm text-blue-800 dark:text-blue-200'>
               💡 <strong>Tip:</strong> For faster tracking, try using the voice
               assistant above! Just say "Log a bottle feeding of 4 ounces" or
@@ -809,7 +809,7 @@ export const AIHomePage: React.FC = () => {
 
           {/* Entry Type Selection */}
           <div>
-            <label className='text-sm font-medium text-gray-700 dark:text-gray-300 block mb-2'>
+            <label className='mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300'>
               Activity Type
             </label>
             <div className='grid grid-cols-2 gap-2'>
@@ -820,10 +820,10 @@ export const AIHomePage: React.FC = () => {
                     onClick={() =>
                       setFormData({ ...formData, entryType: type })
                     }
-                    className={`p-3 rounded-xl border-2 transition-all capitalize ${
+                    className={`rounded-xl border-2 p-3 capitalize transition-all ${
                       formData.entryType === type
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                        : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500'
+                        ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                        : 'border-gray-200 text-gray-600 hover:border-gray-300 dark:border-gray-600 dark:text-gray-300 dark:hover:border-gray-500'
                     }`}
                   >
                     {activityUtils.getActivityIcon(type)} {type}
@@ -852,7 +852,7 @@ export const AIHomePage: React.FC = () => {
           {formData.entryType === 'feeding' && (
             <>
               <div>
-                <label className='text-sm font-medium text-gray-700 dark:text-gray-300 block mb-2'>
+                <label className='mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300'>
                   Feeding Type
                 </label>
                 <div className='grid grid-cols-2 gap-2'>
@@ -869,10 +869,10 @@ export const AIHomePage: React.FC = () => {
                       onClick={() =>
                         setFormData({ ...formData, feedingType: type })
                       }
-                      className={`p-3 rounded-xl border-2 transition-all text-sm ${
+                      className={`rounded-xl border-2 p-3 text-sm transition-all ${
                         formData.feedingType === type
-                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                          : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500'
+                          ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                          : 'border-gray-200 text-gray-600 hover:border-gray-300 dark:border-gray-600 dark:text-gray-300 dark:hover:border-gray-500'
                       }`}
                     >
                       {getFeedingTypeLabel(type)}
@@ -909,7 +909,7 @@ export const AIHomePage: React.FC = () => {
 
           {formData.entryType === 'diaper' && (
             <div>
-              <label className='text-sm font-medium text-gray-700 dark:text-gray-300 block mb-2'>
+              <label className='mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300'>
                 Diaper Type
               </label>
               <div className='grid grid-cols-3 gap-2'>
@@ -919,10 +919,10 @@ export const AIHomePage: React.FC = () => {
                     onClick={() =>
                       setFormData({ ...formData, diaperType: type })
                     }
-                    className={`p-3 rounded-xl border-2 transition-all capitalize ${
+                    className={`rounded-xl border-2 p-3 capitalize transition-all ${
                       formData.diaperType === type
-                        ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
-                        : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500'
+                        ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                        : 'border-gray-200 text-gray-600 hover:border-gray-300 dark:border-gray-600 dark:text-gray-300 dark:hover:border-gray-500'
                     }`}
                   >
                     {type}

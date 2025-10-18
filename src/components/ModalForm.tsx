@@ -83,14 +83,14 @@ export const ModalForm: React.FC<ModalFormProps> = ({
         </div>
 
         {/* Enhanced form actions with better dark mode styling and spacing */}
-        <div className='flex gap-3 pt-6 mt-6 border-t border-gray-200 dark:border-gray-600'>
+        <div className='mt-6 flex gap-3 border-t border-gray-200 pt-6 dark:border-gray-600'>
           <Button
             type='button'
             onClick={handleClose}
             variant='outline'
             fullWidth
             disabled={isSubmitting}
-            className='text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:border-gray-400 dark:hover:border-gray-400'
+            className='border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50 dark:border-gray-500 dark:text-gray-300 dark:hover:border-gray-400 dark:hover:bg-gray-700/50'
           >
             {cancelText}
           </Button>

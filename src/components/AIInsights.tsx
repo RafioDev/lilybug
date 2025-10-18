@@ -43,16 +43,16 @@ export const AIInsights: React.FC<AIInsightsProps> = ({
       case 'improving':
       case 'increasing':
         return (
-          <TrendingUp className='w-4 h-4 text-green-500 dark:text-green-400' />
+          <TrendingUp className='h-4 w-4 text-green-500 dark:text-green-400' />
         )
       case 'declining':
       case 'decreasing':
         return (
-          <TrendingDown className='w-4 h-4 text-red-500 dark:text-red-400' />
+          <TrendingDown className='h-4 w-4 text-red-500 dark:text-red-400' />
         )
       default:
         return (
-          <div className='w-4 h-4 bg-gray-300 dark:bg-gray-600 rounded-full' />
+          <div className='h-4 w-4 rounded-full bg-gray-300 dark:bg-gray-600' />
         )
     }
   }
@@ -73,18 +73,18 @@ export const AIInsights: React.FC<AIInsightsProps> = ({
   return (
     <div className='space-y-6'>
       {/* Header */}
-      <div className='flex items-center gap-2 mb-4'>
-        <Brain className='w-5 h-5 text-purple-600 dark:text-purple-400' />
+      <div className='mb-4 flex items-center gap-2'>
+        <Brain className='h-5 w-5 text-purple-600 dark:text-purple-400' />
         <h2 className='text-lg font-semibold text-gray-900 dark:text-gray-100'>
           AI Insights
         </h2>
       </div>
 
       {/* Pattern Analysis */}
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+      <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
         {/* Sleep Patterns */}
-        <div className='bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4'>
-          <div className='flex items-center justify-between mb-3'>
+        <div className='rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800'>
+          <div className='mb-3 flex items-center justify-between'>
             <h3 className='font-medium text-gray-900 dark:text-gray-100'>
               Sleep Patterns
             </h3>
@@ -119,8 +119,8 @@ export const AIInsights: React.FC<AIInsightsProps> = ({
         </div>
 
         {/* Feeding Patterns */}
-        <div className='bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4'>
-          <div className='flex items-center justify-between mb-3'>
+        <div className='rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800'>
+          <div className='mb-3 flex items-center justify-between'>
             <h3 className='font-medium text-gray-900 dark:text-gray-100'>
               Feeding Patterns
             </h3>
@@ -147,7 +147,7 @@ export const AIInsights: React.FC<AIInsightsProps> = ({
               <span className='text-gray-600 dark:text-gray-400'>
                 Preferred Type:
               </span>
-              <span className='font-medium capitalize text-gray-900 dark:text-gray-100'>
+              <span className='font-medium text-gray-900 capitalize dark:text-gray-100'>
                 {insights.feedingPattern.mostCommonType.replace('_', ' ')}
               </span>
             </div>
@@ -157,9 +157,9 @@ export const AIInsights: React.FC<AIInsightsProps> = ({
 
       {/* Next Activity Prediction */}
       {nextActivityPrediction && (
-        <div className='bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg border border-purple-200 dark:border-purple-700 p-4'>
-          <div className='flex items-center gap-2 mb-2'>
-            <Clock className='w-4 h-4 text-purple-600 dark:text-purple-400' />
+        <div className='rounded-lg border border-purple-200 bg-gradient-to-r from-purple-50 to-blue-50 p-4 dark:border-purple-700 dark:from-purple-900/20 dark:to-blue-900/20'>
+          <div className='mb-2 flex items-center gap-2'>
+            <Clock className='h-4 w-4 text-purple-600 dark:text-purple-400' />
             <h3 className='font-medium text-gray-900 dark:text-gray-100'>
               Next Activity Prediction
             </h3>
@@ -169,7 +169,7 @@ export const AIInsights: React.FC<AIInsightsProps> = ({
             <span className='font-medium text-gray-900 dark:text-gray-100'>
               {formatTime(nextActivityPrediction.estimatedTime)}
             </span>
-            <span className='text-xs text-gray-500 dark:text-gray-400 ml-2'>
+            <span className='ml-2 text-xs text-gray-500 dark:text-gray-400'>
               ({Math.round(nextActivityPrediction.confidence * 100)}%
               confidence)
             </span>
@@ -179,15 +179,15 @@ export const AIInsights: React.FC<AIInsightsProps> = ({
 
       {/* Contextual Guidance */}
       {contextualGuidance.length > 0 && (
-        <div className='bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4'>
-          <h3 className='font-medium text-gray-900 dark:text-gray-100 mb-3'>
+        <div className='rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800'>
+          <h3 className='mb-3 font-medium text-gray-900 dark:text-gray-100'>
             Recent Insights
           </h3>
           <div className='space-y-3'>
             {contextualGuidance.slice(0, 3).map((guidance, index) => (
               <div
                 key={index}
-                className='flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg'
+                className='flex items-start gap-3 rounded-lg bg-gray-50 p-3 dark:bg-gray-700'
               >
                 <span className='text-lg'>
                   {getGuidanceIcon(guidance.type)}
@@ -196,7 +196,7 @@ export const AIInsights: React.FC<AIInsightsProps> = ({
                   <p className='text-sm text-gray-700 dark:text-gray-300'>
                     {guidance.message}
                   </p>
-                  <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
+                  <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
                     {guidance.timestamp.toLocaleTimeString([], {
                       hour: '2-digit',
                       minute: '2-digit',
@@ -211,9 +211,9 @@ export const AIInsights: React.FC<AIInsightsProps> = ({
 
       {/* Alerts */}
       {insights.alerts.length > 0 && (
-        <div className='bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4'>
-          <div className='flex items-center gap-2 mb-2'>
-            <AlertCircle className='w-4 h-4 text-red-600 dark:text-red-400' />
+        <div className='rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20'>
+          <div className='mb-2 flex items-center gap-2'>
+            <AlertCircle className='h-4 w-4 text-red-600 dark:text-red-400' />
             <h3 className='font-medium text-red-900 dark:text-red-100'>
               Alerts
             </h3>
@@ -230,9 +230,9 @@ export const AIInsights: React.FC<AIInsightsProps> = ({
 
       {/* Recommendations */}
       {insights.recommendations.length > 0 && (
-        <div className='bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4'>
-          <div className='flex items-center gap-2 mb-2'>
-            <Heart className='w-4 h-4 text-blue-600 dark:text-blue-400' />
+        <div className='rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20'>
+          <div className='mb-2 flex items-center gap-2'>
+            <Heart className='h-4 w-4 text-blue-600 dark:text-blue-400' />
             <h3 className='font-medium text-blue-900 dark:text-blue-100'>
               Recommendations
             </h3>
