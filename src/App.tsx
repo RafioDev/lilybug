@@ -4,15 +4,22 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { router } from './router'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { queryClient } from './lib/queryClient'
+import { AppErrorBoundary } from './components/AppErrorBoundary'
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <RouterProvider router={router} />
-      </ThemeProvider>
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
+    <AppErrorBoundary level='app' name='Application Root'>
+      <QueryClientProvider client={queryClient}>
+        <AppErrorBoundary level='app' name='Query Provider'>
+          <ThemeProvider>
+            <AppErrorBoundary level='app' name='Router'>
+              <RouterProvider router={router} />
+            </AppErrorBoundary>
+          </ThemeProvider>
+        </AppErrorBoundary>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
+    </AppErrorBoundary>
   )
 }
 

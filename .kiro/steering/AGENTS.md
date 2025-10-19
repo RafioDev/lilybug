@@ -38,3 +38,47 @@ When writing CSS classes or styling components, follow Tailwind 4 conventions:
 - Leverage new Tailwind 4 features like improved container queries and modern CSS features
 
 **Avoid Tailwind 3 syntax** - always check the current documentation to ensure you're using the latest syntax and class names.
+
+## TypeScript Best Practices
+
+**Never use the `any` type in TypeScript code.**
+
+When writing TypeScript code, always use proper typing:
+
+- Use specific types instead of `any` (e.g., `string`, `number`, `boolean`)
+- Use union types when multiple types are acceptable (e.g., `string | number`)
+- Use generic types for reusable components (e.g., `<T>`, `<K extends keyof T>`)
+- Use `unknown` instead of `any` when the type is truly unknown
+- Use type assertions sparingly and only when absolutely necessary
+- Define proper interfaces and types for all data structures
+- Use `Record<string, unknown>` instead of `any` for object types with unknown properties
+- Use function parameter types and return types explicitly
+
+**Examples of proper typing:**
+
+```typescript
+// ❌ Avoid
+function processData(data: any): any {
+  return data.map((item: any) => item.value)
+}
+
+// ✅ Preferred
+interface DataItem {
+  value: string
+  id: number
+}
+
+function processData(data: DataItem[]): string[] {
+  return data.map((item) => item.value)
+}
+
+// ✅ For truly unknown data
+function handleUnknownData(data: unknown): string {
+  if (typeof data === 'string') {
+    return data
+  }
+  return String(data)
+}
+```
+
+This ensures better type safety, improved IDE support, and fewer runtime errors.

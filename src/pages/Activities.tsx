@@ -10,6 +10,7 @@ import { Layout } from '../components/Layout'
 import { Card } from '../components/Card'
 import { Button, IconButton } from '../components/Button'
 import { Input } from '../components/Input'
+import { AppErrorBoundary } from '../components/AppErrorBoundary'
 
 import { chatActionService } from '../services/chatActionService'
 import { smartSearchService } from '../services/smartSearchService'
@@ -27,6 +28,7 @@ import { ActivityModal } from '../components/LazyModals'
 import { GroupedActivitiesList } from '../components/GroupedActivitiesList'
 import { ConfirmationModal } from '../components/ConfirmationModal'
 import { useConfirmationModal } from '../hooks/useConfirmationModal'
+import { reportError } from '../utils/errorHandler'
 import type { TrackerEntry, EntryType, FeedingType, DiaperType } from '../types'
 
 // Speech Recognition types
@@ -217,6 +219,11 @@ export const Activities: React.FC = () => {
         setMessages((prev) => [...prev, assistantMessage])
       } catch (error) {
         console.error('Error processing message:', error)
+        reportError(error instanceof Error ? error : new Error(String(error)), {
+          context: 'processMessage',
+          message,
+          babyId: activeBaby?.id,
+        })
 
         const errorMessage: AIMessage = {
           id: Date.now().toString() + '_error',
@@ -343,6 +350,10 @@ export const Activities: React.FC = () => {
       await deleteEntryMutation.mutateAsync(id)
     } catch (error) {
       console.error('Error deleting entry:', error)
+      reportError(error instanceof Error ? error : new Error(String(error)), {
+        context: 'deleteEntry',
+        entryId: id,
+      })
     }
   }
 
@@ -400,24 +411,28 @@ export const Activities: React.FC = () => {
       return
     }
 
-    try {
-      const entry = {
-        entry_type: formData.entryType,
-        start_time: formData.startTime,
-        end_time: formData.endTime || null,
-        quantity: formData.quantity ? parseFloat(formData.quantity) : null,
-        feeding_type:
-          formData.entryType === 'feeding' ? formData.feedingType : null,
-        diaper_type:
-          formData.entryType === 'diaper' ? formData.diaperType : null,
-        notes: formData.notes || null,
-        baby_id: activeBaby.id,
-      }
+    // Prepare entry object outside try block so it's accessible in catch
+    const entry = {
+      entry_type: formData.entryType,
+      start_time: formData.startTime,
+      end_time: formData.endTime || null,
+      quantity: formData.quantity ? parseFloat(formData.quantity) : null,
+      feeding_type:
+        formData.entryType === 'feeding' ? formData.feedingType : null,
+      diaper_type: formData.entryType === 'diaper' ? formData.diaperType : null,
+      notes: formData.notes || null,
+      baby_id: activeBaby.id,
+    }
 
+    try {
       await createEntryMutation.mutateAsync(entry)
       setIsManualEntryModalOpen(false)
     } catch (error) {
       console.error('Error creating manual entry:', error)
+      reportError(error instanceof Error ? error : new Error(String(error)), {
+        context: 'createManualEntry',
+        entryData: entry,
+      })
     }
   }
 
@@ -505,152 +520,160 @@ export const Activities: React.FC = () => {
       <div className='mx-auto max-w-4xl space-y-6'>
         {/* Today's Summary */}
         {activeBaby && (
-          <div className='grid grid-cols-3 gap-4'>
-            <Card className='text-center'>
-              <div className='text-2xl font-bold text-blue-600'>
-                {todayStats.feedings}
-              </div>
-              <div className='text-sm text-gray-600 dark:text-gray-300'>
-                Feedings Today
-              </div>
-            </Card>
-            <Card className='text-center'>
-              <div className='text-2xl font-bold text-cyan-600'>
-                {`${todayStats.sleepHours.toFixed(1)}h`}
-              </div>
-              <div className='text-sm text-gray-600 dark:text-gray-300'>
-                Sleep Today
-              </div>
-            </Card>
-            <Card className='text-center'>
-              <div className='text-2xl font-bold text-emerald-600'>
-                {todayStats.diapers}
-              </div>
-              <div className='text-sm text-gray-600 dark:text-gray-300'>
-                Diapers Today
-              </div>
-            </Card>
-          </div>
+          <AppErrorBoundary level='component' name="Today's Stats">
+            <div className='grid grid-cols-3 gap-4'>
+              <Card className='text-center'>
+                <div className='text-2xl font-bold text-blue-600'>
+                  {todayStats.feedings}
+                </div>
+                <div className='text-sm text-gray-600 dark:text-gray-300'>
+                  Feedings Today
+                </div>
+              </Card>
+              <Card className='text-center'>
+                <div className='text-2xl font-bold text-cyan-600'>
+                  {`${todayStats.sleepHours.toFixed(1)}h`}
+                </div>
+                <div className='text-sm text-gray-600 dark:text-gray-300'>
+                  Sleep Today
+                </div>
+              </Card>
+              <Card className='text-center'>
+                <div className='text-2xl font-bold text-emerald-600'>
+                  {todayStats.diapers}
+                </div>
+                <div className='text-sm text-gray-600 dark:text-gray-300'>
+                  Diapers Today
+                </div>
+              </Card>
+            </div>
+          </AppErrorBoundary>
         )}
 
         {/* AI Voice Command Interface */}
-        <Card className='p-8'>
-          <div className='flex flex-col items-center space-y-6'>
-            {/* Primary Voice Button */}
-            <IconButton
-              icon={isListening ? <MicOff /> : <Mic />}
-              onClick={isListening ? stopListening : startListening}
-              disabled={isProcessing || isLoading}
-              variant={isListening ? 'danger' : 'primary'}
-              size='lg'
-              iconSize='2xl'
-              fullRounded
-              aria-label={isListening ? 'Stop listening' : 'Start voice input'}
-              className={`h-24 w-24 transition-all duration-200 ${
-                isListening
-                  ? 'scale-110 animate-pulse !bg-red-500 shadow-lg hover:!bg-red-600'
-                  : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 hover:shadow-lg'
-              }`}
-            />
-
-            {/* Status Text */}
-            {isListening ? (
-              <div className='text-center'>
-                <div className='animate-pulse text-lg font-medium text-blue-600 dark:text-blue-400'>
-                  🎤 Listening...
-                </div>
-                <div className='text-sm text-gray-500 dark:text-gray-400'>
-                  {aiService.isConfigured()
-                    ? "Say anything naturally - I'll understand!"
-                    : "Say something like 'Log a bottle feeding'"}
-                </div>
-              </div>
-            ) : isProcessing ? (
-              <div className='text-center'>
-                <div className='text-lg font-medium text-blue-600 dark:text-blue-400'>
-                  {aiService.isConfigured()
-                    ? '🤖 AI Processing...'
-                    : 'Processing...'}
-                </div>
-                <div className='mt-2 flex justify-center space-x-1'>
-                  <div className='h-2 w-2 animate-bounce rounded-full bg-blue-400'></div>
-                  <div
-                    className='h-2 w-2 animate-bounce rounded-full bg-blue-400'
-                    style={{ animationDelay: '0.1s' }}
-                  ></div>
-                  <div
-                    className='h-2 w-2 animate-bounce rounded-full bg-blue-400'
-                    style={{ animationDelay: '0.2s' }}
-                  ></div>
-                </div>
-              </div>
-            ) : (
-              <div className='text-center'>
-                <div className='text-lg font-medium text-gray-700 dark:text-gray-200'>
-                  Tap to speak
-                  {aiService.isConfigured() && (
-                    <span className='ml-2 text-green-600 dark:text-green-400'>
-                      🤖 AI Ready
-                    </span>
-                  )}
-                </div>
-                <div className='text-sm text-gray-500 dark:text-gray-400'>
-                  {aiService.isConfigured()
-                    ? 'Speak naturally - no specific phrases needed!'
-                    : 'Or type below if needed'}
-                </div>
-              </div>
-            )}
-
-            {/* Secondary Text Input */}
-            <div className='flex w-full max-w-md gap-2'>
-              <Input
-                type='text'
-                value={inputText}
-                onChange={setInputText}
-                placeholder='Or type your request here...'
-                className='flex-1'
-                disabled={isLoading}
-              />
+        <AppErrorBoundary level='component' name='Voice Interface'>
+          <Card className='p-8'>
+            <div className='flex flex-col items-center space-y-6'>
+              {/* Primary Voice Button */}
               <IconButton
-                icon={<Send />}
-                onClick={handleTextInput}
-                disabled={!inputText.trim() || isProcessing || isLoading}
-                aria-label='Send message'
-                className='min-w-[60px]'
+                icon={isListening ? <MicOff /> : <Mic />}
+                onClick={isListening ? stopListening : startListening}
+                disabled={isProcessing || isLoading}
+                variant={isListening ? 'danger' : 'primary'}
+                size='lg'
+                iconSize='2xl'
+                fullRounded
+                aria-label={
+                  isListening ? 'Stop listening' : 'Start voice input'
+                }
+                className={`h-24 w-24 transition-all duration-200 ${
+                  isListening
+                    ? 'scale-110 animate-pulse !bg-red-500 shadow-lg hover:!bg-red-600'
+                    : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 hover:shadow-lg'
+                }`}
               />
+
+              {/* Status Text */}
+              {isListening ? (
+                <div className='text-center'>
+                  <div className='animate-pulse text-lg font-medium text-blue-600 dark:text-blue-400'>
+                    🎤 Listening...
+                  </div>
+                  <div className='text-sm text-gray-500 dark:text-gray-400'>
+                    {aiService.isConfigured()
+                      ? "Say anything naturally - I'll understand!"
+                      : "Say something like 'Log a bottle feeding'"}
+                  </div>
+                </div>
+              ) : isProcessing ? (
+                <div className='text-center'>
+                  <div className='text-lg font-medium text-blue-600 dark:text-blue-400'>
+                    {aiService.isConfigured()
+                      ? '🤖 AI Processing...'
+                      : 'Processing...'}
+                  </div>
+                  <div className='mt-2 flex justify-center space-x-1'>
+                    <div className='h-2 w-2 animate-bounce rounded-full bg-blue-400'></div>
+                    <div
+                      className='h-2 w-2 animate-bounce rounded-full bg-blue-400'
+                      style={{ animationDelay: '0.1s' }}
+                    ></div>
+                    <div
+                      className='h-2 w-2 animate-bounce rounded-full bg-blue-400'
+                      style={{ animationDelay: '0.2s' }}
+                    ></div>
+                  </div>
+                </div>
+              ) : (
+                <div className='text-center'>
+                  <div className='text-lg font-medium text-gray-700 dark:text-gray-200'>
+                    Tap to speak
+                    {aiService.isConfigured() && (
+                      <span className='ml-2 text-green-600 dark:text-green-400'>
+                        🤖 AI Ready
+                      </span>
+                    )}
+                  </div>
+                  <div className='text-sm text-gray-500 dark:text-gray-400'>
+                    {aiService.isConfigured()
+                      ? 'Speak naturally - no specific phrases needed!'
+                      : 'Or type below if needed'}
+                  </div>
+                </div>
+              )}
+
+              {/* Secondary Text Input */}
+              <div className='flex w-full max-w-md gap-2'>
+                <Input
+                  type='text'
+                  value={inputText}
+                  onChange={setInputText}
+                  placeholder='Or type your request here...'
+                  className='flex-1'
+                  disabled={isLoading}
+                />
+                <IconButton
+                  icon={<Send />}
+                  onClick={handleTextInput}
+                  disabled={!inputText.trim() || isProcessing || isLoading}
+                  aria-label='Send message'
+                  className='min-w-[60px]'
+                />
+              </div>
             </div>
-          </div>
-        </Card>
+          </Card>
+        </AppErrorBoundary>
 
         {/* Activities List */}
-        <Card>
-          <div className='mb-4 flex items-center justify-between'>
-            <div className='flex items-center gap-3'>
-              <Clock className='h-5 w-5 text-gray-600 dark:text-gray-400' />
-              <h3 className='font-semibold text-gray-800 dark:text-gray-200'>
-                Recent Activities
-              </h3>
+        <AppErrorBoundary level='component' name='Activities List'>
+          <Card>
+            <div className='mb-4 flex items-center justify-between'>
+              <div className='flex items-center gap-3'>
+                <Clock className='h-5 w-5 text-gray-600 dark:text-gray-400' />
+                <h3 className='font-semibold text-gray-800 dark:text-gray-200'>
+                  Recent Activities
+                </h3>
+              </div>
+              <Button
+                onClick={openManualEntryModal}
+                variant='outline'
+                className='text-sm'
+                disabled={isLoading}
+              >
+                Manual Entry
+              </Button>
             </div>
-            <Button
-              onClick={openManualEntryModal}
-              variant='outline'
-              className='text-sm'
-              disabled={isLoading}
-            >
-              Manual Entry
-            </Button>
-          </div>
 
-          <GroupedActivitiesList
-            entries={entries.slice(0, 50)} // Show more entries with grouping
-            onEditEntry={openEditModal}
-            onDeleteEntry={handleDeleteEntry}
-            onViewDetails={openDetailsModal}
-            isLoading={entriesLoading}
-            className='max-h-96 overflow-y-auto'
-          />
-        </Card>
+            <GroupedActivitiesList
+              entries={entries.slice(0, 50)} // Show more entries with grouping
+              onEditEntry={openEditModal}
+              onDeleteEntry={handleDeleteEntry}
+              onViewDetails={openDetailsModal}
+              isLoading={entriesLoading}
+              className='max-h-96 overflow-y-auto'
+            />
+          </Card>
+        </AppErrorBoundary>
       </div>
 
       {/* Entry Details Modal */}
@@ -929,15 +952,17 @@ export const Activities: React.FC = () => {
       </Modal>
 
       {/* Edit Activity Modal */}
-      <Suspense fallback={<div>Loading modal...</div>}>
-        <ActivityModal
-          isOpen={isEditModalOpen}
-          entry={selectedEntry}
-          onClose={() => setIsEditModalOpen(false)}
-          onSave={handleEditSave}
-          onError={handleEditError}
-        />
-      </Suspense>
+      <AppErrorBoundary level='component' name='Edit Activity Modal'>
+        <Suspense fallback={<div>Loading modal...</div>}>
+          <ActivityModal
+            isOpen={isEditModalOpen}
+            entry={selectedEntry}
+            onClose={() => setIsEditModalOpen(false)}
+            onSave={handleEditSave}
+            onError={handleEditError}
+          />
+        </Suspense>
+      </AppErrorBoundary>
 
       {/* Confirmation Modal */}
       {confirmationModal.config && (
