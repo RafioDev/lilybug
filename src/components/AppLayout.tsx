@@ -5,8 +5,9 @@ import { migrateBabyData } from '../utils/migrateBabyData'
 import { NavBar } from './NavBar'
 import { Sidebar } from './Sidebar'
 import { MobileHeader } from './MobileHeader'
-import { BabyHeader } from './BabyHeader'
+import { Header } from './Header'
 import { FloatingAIAssistant } from './FloatingAIAssistant'
+import { HeaderProvider } from '../contexts/HeaderContext'
 import { useUserProfile } from '../hooks/queries/useProfileQueries'
 import type { User } from '@supabase/supabase-js'
 
@@ -69,18 +70,23 @@ export const AppLayout: React.FC = () => {
   }
 
   return (
-    <div className='min-h-screen lg:flex'>
-      <Sidebar userProfile={userProfileForProps} />
-      <div className='flex-1 lg:ml-64'>
-        <MobileHeader userProfile={userProfileForProps} />
-        {/* Desktop Baby Header - positioned at top of main content area */}
-        <div className='hidden lg:block'>
-          <BabyHeader variant='desktop' className='mx-4 mt-4 lg:mx-8' />
+    <HeaderProvider>
+      <div className='min-h-screen lg:flex'>
+        <Sidebar userProfile={userProfileForProps} />
+        <div className='flex-1 lg:ml-64'>
+          {/* Mobile Header - only show on mobile */}
+          <div className='lg:hidden'>
+            <MobileHeader userProfile={userProfileForProps} />
+          </div>
+          {/* Unified Header - show on desktop, replaces separate headers */}
+          <div className='hidden lg:block'>
+            <Header />
+          </div>
+          <Outlet />
         </div>
-        <Outlet />
+        <NavBar />
+        <FloatingAIAssistant />
       </div>
-      <NavBar />
-      <FloatingAIAssistant />
-    </div>
+    </HeaderProvider>
   )
 }
