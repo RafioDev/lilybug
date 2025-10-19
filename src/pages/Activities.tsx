@@ -10,7 +10,7 @@ import { Layout } from '../components/Layout'
 import { Card } from '../components/Card'
 import { Button, IconButton } from '../components/Button'
 import { Input } from '../components/Input'
-import { BabyHeader } from '../components/BabyHeader'
+
 import { chatActionService } from '../services/chatActionService'
 import { smartSearchService } from '../services/smartSearchService'
 import { aiService } from '../services/aiService'
@@ -439,9 +439,6 @@ export const Activities: React.FC = () => {
     return (
       <Layout>
         <div className='mx-auto max-w-4xl space-y-6'>
-          {/* Baby Header */}
-          <BabyHeader />
-
           {/* Loading Stats */}
           <div className='grid grid-cols-3 gap-4'>
             <Card className='text-center'>
@@ -506,9 +503,6 @@ export const Activities: React.FC = () => {
   return (
     <Layout>
       <div className='mx-auto max-w-4xl space-y-6'>
-        {/* Baby Header - replaces the old Lilybug branding */}
-        <BabyHeader />
-
         {/* Today's Summary */}
         {activeBaby && (
           <div className='grid grid-cols-3 gap-4'>

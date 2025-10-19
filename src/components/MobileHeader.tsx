@@ -21,7 +21,7 @@ const getPageTitle = (pathname: string): string => {
     case '/settings':
       return 'Settings'
     default:
-      return 'Lilybug'
+      return 'App'
   }
 }
 

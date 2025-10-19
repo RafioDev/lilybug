@@ -5,6 +5,7 @@ import { migrateBabyData } from '../utils/migrateBabyData'
 import { NavBar } from './NavBar'
 import { Sidebar } from './Sidebar'
 import { MobileHeader } from './MobileHeader'
+import { BabyHeader } from './BabyHeader'
 import { FloatingAIAssistant } from './FloatingAIAssistant'
 import { useUserProfile } from '../hooks/queries/useProfileQueries'
 import type { User } from '@supabase/supabase-js'
@@ -72,6 +73,10 @@ export const AppLayout: React.FC = () => {
       <Sidebar userProfile={userProfileForProps} />
       <div className='flex-1 lg:ml-64'>
         <MobileHeader userProfile={userProfileForProps} />
+        {/* Desktop Baby Header - positioned at top of main content area */}
+        <div className='hidden lg:block'>
+          <BabyHeader variant='desktop' className='mx-4 mt-4 lg:mx-8' />
+        </div>
         <Outlet />
       </div>
       <NavBar />
