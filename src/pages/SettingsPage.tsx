@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Settings, Baby as BabyIcon } from 'lucide-react'
 import { BabiesTab } from '../components/SettingsPage/BabiesTab'
@@ -30,19 +30,17 @@ const tabs: Tab[] = [
 
 export const SettingsPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams()
-  const [activeTab, setActiveTab] = useState<TabType>('babies')
 
-  // Initialize tab from URL parameter
-  useEffect(() => {
+  // Derive active tab from URL parameters instead of storing in state
+  const activeTab: TabType = (() => {
     const tabParam = searchParams.get('tab') as TabType
-    if (tabParam && tabs.some((tab) => tab.id === tabParam)) {
-      setActiveTab(tabParam)
-    }
-  }, [searchParams])
+    return tabParam && tabs.some((tab) => tab.id === tabParam)
+      ? tabParam
+      : 'babies'
+  })()
 
   // Update URL when tab changes
   const handleTabChange = (tabId: TabType) => {
-    setActiveTab(tabId)
     setSearchParams({ tab: tabId })
   }
 
