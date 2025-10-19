@@ -34,6 +34,10 @@ export const router = createBrowserRouter([
       },
       {
         path: 'babies',
+        element: <Navigate to='/settings' replace />,
+      },
+      {
+        path: 'settings',
         element: <BabyManagementPage />,
       },
     ],

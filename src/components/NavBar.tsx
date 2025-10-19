@@ -1,12 +1,12 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
-import { Sparkles, Heart, Users } from 'lucide-react'
+import { Sparkles, Heart, Settings } from 'lucide-react'
 
 export const NavBar: React.FC = () => {
   const navItems = [
-    { path: '/', label: 'AI Chat', icon: Sparkles },
+    { path: '/', label: 'Activities', icon: Sparkles },
     { path: '/insights', label: 'Insights', icon: Heart },
-    { path: '/babies', label: 'Babies', icon: Users },
+    { path: '/settings', label: 'Settings', icon: Settings },
   ]
 
   return (
