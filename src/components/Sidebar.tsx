@@ -34,7 +34,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ userProfile }) => {
               <Sparkles size={20} className='text-white' />
             </div>
             <span className='text-xl font-bold text-gray-800 dark:text-gray-100'>
-              Baby Tracker
+              Lilybug
             </span>
           </div>
         </div>
