@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import { ModalForm } from './ModalForm'
 import { ActivityForm, type ActivityFormData } from './ActivityForm'
 import { useForm } from '../hooks/useForm'
-import { useActivityOperations } from '../hooks/useActivityOperations'
+import { useUpdateEntry } from '../hooks/queries/useTrackerQueries'
 import { dateUtils } from '../utils/dateUtils'
 import type { TrackerEntry, UpdateTrackerEntry } from '../types'
 
@@ -21,7 +21,7 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
   onError,
   entry,
 }) => {
-  const { updateActivity } = useActivityOperations()
+  const updateEntry = useUpdateEntry()
 
   // Form validation
   const validateActivity = (values: ActivityFormData) => {
@@ -73,7 +73,10 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
         updates.diaper_type = values.diaperType
       }
 
-      const updatedEntry = await updateActivity.execute(entry.id, updates)
+      const updatedEntry = await updateEntry.mutateAsync({
+        id: entry.id,
+        updates,
+      })
       onSave(updatedEntry)
       onClose()
     } catch (error) {
@@ -125,7 +128,7 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
     }
   }, [isOpen]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const isSubmitting = updateActivity.loading
+  const isSubmitting = updateEntry.isPending
 
   if (!entry) return null
 
@@ -138,7 +141,7 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
       } Activity`}
       onSubmit={form.handleSubmit}
       isSubmitting={isSubmitting}
-      submitText='Save Changes'
+      submitText='Save'
       submitDisabled={
         Object.keys(form.errors).length > 0 || !form.values.startTime
       }

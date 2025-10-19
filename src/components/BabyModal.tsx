@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import { ModalForm } from './ModalForm'
 import { BabyForm, type BabyFormData } from './BabyForm'
 import { useForm } from '../hooks/useForm'
-import { useBabyOperations } from '../hooks/useBabyOperations'
+import { useCreateBaby, useUpdateBaby } from '../hooks/queries/useBabyQueries'
 import type { Baby } from '../types'
 
 /**
@@ -71,7 +71,8 @@ export const BabyModal: React.FC<BabyModalProps> = ({
   isFirstBaby = false,
 }) => {
   const isEditMode = !!baby
-  const { createBaby, updateBaby } = useBabyOperations()
+  const createBabyMutation = useCreateBaby()
+  const updateBabyMutation = useUpdateBaby()
 
   // Form validation
   const validateBaby = (values: BabyFormData) => {
@@ -98,12 +99,15 @@ export const BabyModal: React.FC<BabyModalProps> = ({
   const handleSubmit = async (values: BabyFormData) => {
     try {
       if (isEditMode && baby) {
-        await updateBaby.execute(baby.id, {
-          name: values.name,
-          birthdate: values.birthdate,
+        await updateBabyMutation.mutateAsync({
+          id: baby.id,
+          updates: {
+            name: values.name,
+            birthdate: values.birthdate,
+          },
         })
       } else {
-        await createBaby.execute({
+        await createBabyMutation.mutateAsync({
           name: values.name,
           birthdate: values.birthdate,
           is_active: isFirstBaby,
@@ -154,7 +158,8 @@ export const BabyModal: React.FC<BabyModalProps> = ({
     }
   }, [isOpen]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const isSubmitting = createBaby.loading || updateBaby.loading
+  const isSubmitting =
+    createBabyMutation.isPending || updateBabyMutation.isPending
 
   return (
     <ModalForm
@@ -163,7 +168,7 @@ export const BabyModal: React.FC<BabyModalProps> = ({
       title={isEditMode ? 'Edit Baby' : 'Add Baby'}
       onSubmit={form.handleSubmit}
       isSubmitting={isSubmitting}
-      submitText={isEditMode ? 'Update Baby' : 'Add Baby'}
+      submitText={isEditMode ? 'Update' : 'Save'}
       submitDisabled={Object.keys(form.errors).length > 0}
     >
       <BabyForm
