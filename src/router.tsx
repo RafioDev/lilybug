@@ -4,7 +4,7 @@ import { OnboardingPage } from './pages/OnboardingPage'
 import { Activities } from './pages/Activities'
 
 import { DashboardPage } from './pages/DashboardPage'
-import { BabyManagementPage } from './pages/BabyManagementPage'
+import { SettingsPage } from './pages/SettingsPage'
 import { AppLayout } from './components/AppLayout'
 
 export const router = createBrowserRouter([
@@ -38,7 +38,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'settings',
-        element: <BabyManagementPage />,
+        element: <SettingsPage />,
       },
     ],
   },
