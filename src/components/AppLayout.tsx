@@ -74,15 +74,16 @@ export const AppLayout: React.FC = () => {
       <div className='min-h-screen lg:flex'>
         <Sidebar userProfile={userProfileForProps} />
         <div className='flex-1 lg:ml-64'>
-          {/* Mobile Header - only show on mobile */}
-          <div className='lg:hidden'>
-            <MobileHeader userProfile={userProfileForProps} />
-          </div>
-          {/* Unified Header - show on desktop, replaces separate headers */}
-          <div className='hidden lg:block'>
+          {/* Desktop: Create a scrollable container for sticky header */}
+          <div className='hidden h-screen overflow-y-auto lg:block'>
             <Header />
+            <Outlet />
           </div>
-          <Outlet />
+          {/* Mobile: Create a scrollable container for sticky header */}
+          <div className='h-screen overflow-y-auto lg:hidden'>
+            <MobileHeader userProfile={userProfileForProps} />
+            <Outlet />
+          </div>
         </div>
         <NavBar />
         <FloatingAIAssistant />

@@ -50,16 +50,6 @@ export const SettingsPage: React.FC = () => {
   return (
     <div className='min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900'>
       <div className='mx-auto max-w-6xl px-4 py-8'>
-        {/* Page Header */}
-        <div className='mb-8'>
-          <h1 className='mb-2 text-3xl font-bold text-gray-900 dark:text-gray-100'>
-            Settings
-          </h1>
-          <p className='text-gray-600 dark:text-gray-400'>
-            Manage your babies and application preferences
-          </p>
-        </div>
-
         {/* Tab Navigation */}
         <div className='mb-8'>
           <div className='border-b border-gray-200 dark:border-gray-700'>
