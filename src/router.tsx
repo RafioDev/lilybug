@@ -1,7 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { AuthPage } from './pages/AuthPage'
 import { OnboardingPage } from './pages/OnboardingPage'
-import { AIHomePage } from './pages/AIHomePage'
+import { Activities } from './pages/Activities'
 
 import { DashboardPage } from './pages/DashboardPage'
 import { BabyManagementPage } from './pages/BabyManagementPage'
@@ -22,7 +22,7 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <AIHomePage />,
+        element: <Activities />,
       },
       {
         path: 'activities',

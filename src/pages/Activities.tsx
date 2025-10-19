@@ -5,11 +5,12 @@ import React, {
   useCallback,
   Suspense,
 } from 'react'
-import { Mic, MicOff, Send, Sparkles, Clock } from 'lucide-react'
+import { Mic, MicOff, Send, Clock } from 'lucide-react'
 import { Layout } from '../components/Layout'
 import { Card } from '../components/Card'
 import { Button, IconButton } from '../components/Button'
 import { Input } from '../components/Input'
+import { BabyHeader } from '../components/BabyHeader'
 import { chatActionService } from '../services/chatActionService'
 import { smartSearchService } from '../services/smartSearchService'
 import { aiService } from '../services/aiService'
@@ -74,7 +75,7 @@ interface AIMessage {
   isVoice?: boolean
 }
 
-export const AIHomePage: React.FC = () => {
+export const Activities: React.FC = () => {
   const [isListening, setIsListening] = useState(false)
   const [messages, setMessages] = useState<AIMessage[]>([])
   const [inputText, setInputText] = useState('')
@@ -438,18 +439,8 @@ export const AIHomePage: React.FC = () => {
     return (
       <Layout>
         <div className='mx-auto max-w-4xl space-y-6'>
-          {/* Header */}
-          <div className='space-y-2 text-center'>
-            <div className='flex items-center justify-center gap-3'>
-              <div className='rounded-full bg-gradient-to-r from-blue-500 to-purple-600 p-3'>
-                <Sparkles className='h-8 w-8 text-white' />
-              </div>
-              <h1 className='text-3xl font-bold text-gray-800 dark:text-gray-100'>
-                Lilybug
-              </h1>
-            </div>
-            <p className='text-gray-600 dark:text-gray-400'>Loading...</p>
-          </div>
+          {/* Baby Header */}
+          <BabyHeader />
 
           {/* Loading Stats */}
           <div className='grid grid-cols-3 gap-4'>
@@ -515,22 +506,8 @@ export const AIHomePage: React.FC = () => {
   return (
     <Layout>
       <div className='mx-auto max-w-4xl space-y-6'>
-        {/* Header */}
-        <div className='space-y-2 text-center'>
-          <div className='flex items-center justify-center gap-3'>
-            <div className='rounded-full bg-gradient-to-r from-blue-500 to-purple-600 p-3'>
-              <Sparkles className='h-8 w-8 text-white' />
-            </div>
-            <h1 className='text-3xl font-bold text-gray-800 dark:text-gray-100'>
-              Lilybug
-            </h1>
-          </div>
-          <p className='text-gray-600 dark:text-gray-400'>
-            {activeBaby
-              ? `Tracking ${activeBaby.name}`
-              : 'Add a baby to start tracking'}
-          </p>
-        </div>
+        {/* Baby Header - replaces the old Lilybug branding */}
+        <BabyHeader />
 
         {/* Today's Summary */}
         {activeBaby && (
