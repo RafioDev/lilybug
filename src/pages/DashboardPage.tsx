@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Layout } from '../components/Layout'
 import { Card } from '../components/Card'
 import { AIInsights } from '../components/AIInsights'
+import { PageErrorBoundary } from '../components/PageErrorBoundary'
 import { babyService } from '../services/babyService'
 import { trackerService } from '../services/trackerService'
 import { aiPatternService } from '../services/aiPatternService'
@@ -10,7 +11,7 @@ import type { Baby } from '../types'
 import type { PatternInsights } from '../services/aiPatternService'
 import type { ContextualGuidance } from '../services/aiAssistantService'
 
-export const DashboardPage: React.FC = () => {
+const DashboardContent: React.FC = () => {
   const [activeBaby, setActiveBaby] = useState<Baby | null>(null)
   const [aiInsights, setAiInsights] = useState<PatternInsights | null>(null)
   const [contextualGuidance, setContextualGuidance] = useState<
@@ -95,5 +96,13 @@ export const DashboardPage: React.FC = () => {
         )}
       </div>
     </Layout>
+  )
+}
+
+export const DashboardPage: React.FC = () => {
+  return (
+    <PageErrorBoundary pageName='Dashboard' contextData={{}}>
+      <DashboardContent />
+    </PageErrorBoundary>
   )
 }

@@ -11,6 +11,7 @@ import { Card } from '../components/Card'
 import { Button, IconButton } from '../components/Button'
 import { Input } from '../components/Input'
 import { AppErrorBoundary } from '../components/AppErrorBoundary'
+import { PageErrorBoundary } from '../components/PageErrorBoundary'
 
 import { chatActionService } from '../services/chatActionService'
 import { smartSearchService } from '../services/smartSearchService'
@@ -77,7 +78,7 @@ interface AIMessage {
   isVoice?: boolean
 }
 
-export const Activities: React.FC = () => {
+const ActivitiesContent: React.FC = () => {
   const [isListening, setIsListening] = useState(false)
   const [messages, setMessages] = useState<AIMessage[]>([])
   const [inputText, setInputText] = useState('')
@@ -979,5 +980,13 @@ export const Activities: React.FC = () => {
         />
       )}
     </Layout>
+  )
+}
+
+export const Activities: React.FC = () => {
+  return (
+    <PageErrorBoundary pageName='Activities' contextData={{}}>
+      <ActivitiesContent />
+    </PageErrorBoundary>
   )
 }

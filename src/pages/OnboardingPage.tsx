@@ -3,6 +3,7 @@ import { Baby } from 'lucide-react'
 import { Card } from '../components/Card'
 import { Button } from '../components/Button'
 import { Input } from '../components/Input'
+import { PageErrorBoundary } from '../components/PageErrorBoundary'
 import { profileService } from '../services/profileService'
 import { babyService } from '../services/babyService'
 
@@ -10,9 +11,7 @@ interface OnboardingPageProps {
   onComplete: () => void
 }
 
-export const OnboardingPage: React.FC<OnboardingPageProps> = ({
-  onComplete,
-}) => {
+const OnboardingContent: React.FC<OnboardingPageProps> = ({ onComplete }) => {
   const [step, setStep] = useState(1)
   const [formData, setFormData] = useState({
     babyName: '',
@@ -149,5 +148,15 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
         </p>
       </div>
     </div>
+  )
+}
+
+export const OnboardingPage: React.FC<OnboardingPageProps> = ({
+  onComplete,
+}) => {
+  return (
+    <PageErrorBoundary pageName='Onboarding' contextData={{}}>
+      <OnboardingContent onComplete={onComplete} />
+    </PageErrorBoundary>
   )
 }

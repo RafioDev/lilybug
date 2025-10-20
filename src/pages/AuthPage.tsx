@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { Baby, Mail, Lock } from 'lucide-react'
 import { Card } from '../components/Card'
 import { Button } from '../components/Button'
+import { PageErrorBoundary } from '../components/PageErrorBoundary'
 import { supabase } from '../lib/supabase'
 
-export const AuthPage: React.FC = () => {
+const AuthContent: React.FC = () => {
   const navigate = useNavigate()
   const [isSignUp, setIsSignUp] = useState(false)
   const [email, setEmail] = useState('')
@@ -161,5 +162,13 @@ export const AuthPage: React.FC = () => {
         </div>
       </div>
     </div>
+  )
+}
+
+export const AuthPage: React.FC = () => {
+  return (
+    <PageErrorBoundary pageName='Authentication' contextData={{}}>
+      <AuthContent />
+    </PageErrorBoundary>
   )
 }

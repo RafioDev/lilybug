@@ -1,6 +1,7 @@
 import React from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Settings, Baby as BabyIcon } from 'lucide-react'
+import { PageErrorBoundary } from '../components/PageErrorBoundary'
 import { BabiesTab } from '../components/SettingsPage/BabiesTab'
 import { GeneralTab } from '../components/SettingsPage/GeneralTab'
 
@@ -28,7 +29,7 @@ const tabs: Tab[] = [
   },
 ]
 
-export const SettingsPage: React.FC = () => {
+const SettingsContent: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams()
 
   // Derive active tab from URL parameters instead of storing in state
@@ -79,5 +80,13 @@ export const SettingsPage: React.FC = () => {
         </div>
       </div>
     </div>
+  )
+}
+
+export const SettingsPage: React.FC = () => {
+  return (
+    <PageErrorBoundary pageName='Settings' contextData={{}}>
+      <SettingsContent />
+    </PageErrorBoundary>
   )
 }
