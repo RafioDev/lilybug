@@ -3,6 +3,7 @@ import { Layout } from '../components/Layout'
 import { Card } from '../components/Card'
 import { AIInsights } from '../components/AIInsights'
 import { PageErrorBoundary } from '../components/PageErrorBoundary'
+import { SectionErrorBoundary } from '../components/SectionErrorBoundary'
 import { babyService } from '../services/babyService'
 import { trackerService } from '../services/trackerService'
 import { aiPatternService } from '../services/aiPatternService'
@@ -86,13 +87,18 @@ const DashboardContent: React.FC = () => {
       <div className='space-y-6'>
         {/* AI Insights Section */}
         {aiInsights && (
-          <Card className='lg:p-8'>
-            <AIInsights
-              insights={aiInsights}
-              contextualGuidance={contextualGuidance}
-              nextActivityPrediction={nextActivityPrediction}
-            />
-          </Card>
+          <SectionErrorBoundary
+            sectionName='AI Insights'
+            contextData={{ babyId: activeBaby?.id }}
+          >
+            <Card className='lg:p-8'>
+              <AIInsights
+                insights={aiInsights}
+                contextualGuidance={contextualGuidance}
+                nextActivityPrediction={nextActivityPrediction}
+              />
+            </Card>
+          </SectionErrorBoundary>
         )}
       </div>
     </Layout>

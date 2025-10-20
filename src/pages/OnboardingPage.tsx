@@ -4,6 +4,7 @@ import { Card } from '../components/Card'
 import { Button } from '../components/Button'
 import { Input } from '../components/Input'
 import { PageErrorBoundary } from '../components/PageErrorBoundary'
+import { SectionErrorBoundary } from '../components/SectionErrorBoundary'
 import { profileService } from '../services/profileService'
 import { babyService } from '../services/babyService'
 
@@ -56,92 +57,100 @@ const OnboardingContent: React.FC<OnboardingPageProps> = ({ onComplete }) => {
           </p>
         </div>
 
-        <Card padding='lg'>
-          {step === 1 && (
-            <div className='space-y-5'>
-              <div>
-                <h2 className='mb-2 text-xl font-semibold text-gray-800 dark:text-white'>
-                  Let's get started
-                </h2>
-                <p className='text-sm text-gray-600 dark:text-gray-300'>
-                  Tell us about your baby
-                </p>
-              </div>
+        <SectionErrorBoundary sectionName={`Onboarding Step ${step}`}>
+          <Card padding='lg'>
+            {step === 1 && (
+              <div className='space-y-5'>
+                <div>
+                  <h2 className='mb-2 text-xl font-semibold text-gray-800 dark:text-white'>
+                    Let's get started
+                  </h2>
+                  <p className='text-sm text-gray-600 dark:text-gray-300'>
+                    Tell us about your baby
+                  </p>
+                </div>
 
-              <Input
-                label="Baby's Name"
-                value={formData.babyName}
-                onChange={(val) => setFormData({ ...formData, babyName: val })}
-                placeholder='e.g., Emma'
-                required
-              />
+                <Input
+                  label="Baby's Name"
+                  value={formData.babyName}
+                  onChange={(val) =>
+                    setFormData({ ...formData, babyName: val })
+                  }
+                  placeholder='e.g., Emma'
+                  required
+                />
 
-              <Input
-                label="Baby's Birthdate"
-                type='date'
-                value={formData.babyBirthdate}
-                onChange={(val) =>
-                  setFormData({ ...formData, babyBirthdate: val })
-                }
-                required
-                max={new Date().toISOString().split('T')[0]}
-              />
+                <Input
+                  label="Baby's Birthdate"
+                  type='date'
+                  value={formData.babyBirthdate}
+                  onChange={(val) =>
+                    setFormData({ ...formData, babyBirthdate: val })
+                  }
+                  required
+                  max={new Date().toISOString().split('T')[0]}
+                />
 
-              <Button
-                onClick={() => setStep(2)}
-                fullWidth
-                disabled={!formData.babyName || !formData.babyBirthdate}
-              >
-                Continue
-              </Button>
-            </div>
-          )}
-
-          {step === 2 && (
-            <div className='space-y-5'>
-              <div>
-                <h2 className='mb-2 text-xl font-semibold text-gray-800 dark:text-white'>
-                  Parent Information
-                </h2>
-                <p className='text-sm text-gray-600 dark:text-gray-300'>
-                  Help us personalize your experience
-                </p>
-              </div>
-
-              <Input
-                label='Your Name'
-                value={formData.parent1Name}
-                onChange={(val) =>
-                  setFormData({ ...formData, parent1Name: val })
-                }
-                placeholder='e.g., Sarah'
-                required
-              />
-
-              <Input
-                label="Partner's Name (Optional)"
-                value={formData.parent2Name}
-                onChange={(val) =>
-                  setFormData({ ...formData, parent2Name: val })
-                }
-                placeholder='e.g., John'
-              />
-
-              <div className='flex gap-3'>
-                <Button onClick={() => setStep(1)} variant='outline' fullWidth>
-                  Back
-                </Button>
                 <Button
-                  onClick={handleSubmit}
+                  onClick={() => setStep(2)}
                   fullWidth
-                  disabled={!formData.parent1Name}
+                  disabled={!formData.babyName || !formData.babyBirthdate}
                 >
-                  Get Started
+                  Continue
                 </Button>
               </div>
-            </div>
-          )}
-        </Card>
+            )}
+
+            {step === 2 && (
+              <div className='space-y-5'>
+                <div>
+                  <h2 className='mb-2 text-xl font-semibold text-gray-800 dark:text-white'>
+                    Parent Information
+                  </h2>
+                  <p className='text-sm text-gray-600 dark:text-gray-300'>
+                    Help us personalize your experience
+                  </p>
+                </div>
+
+                <Input
+                  label='Your Name'
+                  value={formData.parent1Name}
+                  onChange={(val) =>
+                    setFormData({ ...formData, parent1Name: val })
+                  }
+                  placeholder='e.g., Sarah'
+                  required
+                />
+
+                <Input
+                  label="Partner's Name (Optional)"
+                  value={formData.parent2Name}
+                  onChange={(val) =>
+                    setFormData({ ...formData, parent2Name: val })
+                  }
+                  placeholder='e.g., John'
+                />
+
+                <div className='flex gap-3'>
+                  <Button
+                    onClick={() => setStep(1)}
+                    variant='outline'
+                    fullWidth
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    onClick={handleSubmit}
+                    fullWidth
+                    disabled={!formData.parent1Name}
+                  >
+                    Get Started
+                  </Button>
+                </div>
+              </div>
+            )}
+          </Card>
+        </SectionErrorBoundary>
 
         <p className='mt-6 text-center text-sm text-gray-500 dark:text-gray-400'>
           You can update this information anytime in settings

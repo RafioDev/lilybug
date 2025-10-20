@@ -4,6 +4,7 @@ import { Baby, Mail, Lock } from 'lucide-react'
 import { Card } from '../components/Card'
 import { Button } from '../components/Button'
 import { PageErrorBoundary } from '../components/PageErrorBoundary'
+import { SectionErrorBoundary } from '../components/SectionErrorBoundary'
 import { supabase } from '../lib/supabase'
 
 const AuthContent: React.FC = () => {
@@ -79,80 +80,82 @@ const AuthContent: React.FC = () => {
           </p>
         </div>
 
-        <Card padding='lg'>
-          <form onSubmit={handleAuth} className='space-y-5'>
-            <div>
-              <h2 className='mb-2 text-xl font-semibold text-gray-800 dark:text-white'>
-                {isSignUp ? 'Create Account' : 'Welcome Back'}
-              </h2>
-              <p className='text-sm text-gray-600 dark:text-gray-300'>
-                {isSignUp
-                  ? 'Start your parenting journey'
-                  : 'Sign in to continue'}
-              </p>
-            </div>
-
-            {error && (
-              <div className='rounded-xl border border-rose-200 bg-rose-50 p-3 dark:border-rose-800 dark:bg-rose-900/20'>
-                <p className='text-sm text-rose-700 dark:text-rose-400'>
-                  {error}
+        <SectionErrorBoundary sectionName='Authentication Form'>
+          <Card padding='lg'>
+            <form onSubmit={handleAuth} className='space-y-5'>
+              <div>
+                <h2 className='mb-2 text-xl font-semibold text-gray-800 dark:text-white'>
+                  {isSignUp ? 'Create Account' : 'Welcome Back'}
+                </h2>
+                <p className='text-sm text-gray-600 dark:text-gray-300'>
+                  {isSignUp
+                    ? 'Start your parenting journey'
+                    : 'Sign in to continue'}
                 </p>
               </div>
-            )}
 
-            <div className='space-y-4'>
-              <div className='relative'>
-                <Mail
-                  size={20}
-                  className='absolute top-1/2 left-3 -translate-y-1/2 text-gray-400 dark:text-gray-500'
-                />
-                <input
-                  type='email'
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder='Email address'
-                  required
-                  className='w-full rounded-xl border-2 border-gray-200 py-3 pr-4 pl-11 transition-colors focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-400'
-                />
+              {error && (
+                <div className='rounded-xl border border-rose-200 bg-rose-50 p-3 dark:border-rose-800 dark:bg-rose-900/20'>
+                  <p className='text-sm text-rose-700 dark:text-rose-400'>
+                    {error}
+                  </p>
+                </div>
+              )}
+
+              <div className='space-y-4'>
+                <div className='relative'>
+                  <Mail
+                    size={20}
+                    className='absolute top-1/2 left-3 -translate-y-1/2 text-gray-400 dark:text-gray-500'
+                  />
+                  <input
+                    type='email'
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder='Email address'
+                    required
+                    className='w-full rounded-xl border-2 border-gray-200 py-3 pr-4 pl-11 transition-colors focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-400'
+                  />
+                </div>
+
+                <div className='relative'>
+                  <Lock
+                    size={20}
+                    className='absolute top-1/2 left-3 -translate-y-1/2 text-gray-400 dark:text-gray-500'
+                  />
+                  <input
+                    type='password'
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder='Password'
+                    required
+                    minLength={6}
+                    className='w-full rounded-xl border-2 border-gray-200 py-3 pr-4 pl-11 transition-colors focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-400'
+                  />
+                </div>
               </div>
 
-              <div className='relative'>
-                <Lock
-                  size={20}
-                  className='absolute top-1/2 left-3 -translate-y-1/2 text-gray-400 dark:text-gray-500'
-                />
-                <input
-                  type='password'
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder='Password'
-                  required
-                  minLength={6}
-                  className='w-full rounded-xl border-2 border-gray-200 py-3 pr-4 pl-11 transition-colors focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-400'
-                />
+              <Button type='submit' fullWidth disabled={loading}>
+                {loading ? 'Loading...' : isSignUp ? 'Sign Up' : 'Sign In'}
+              </Button>
+
+              <div className='text-center'>
+                <button
+                  type='button'
+                  onClick={() => {
+                    setIsSignUp(!isSignUp)
+                    setError('')
+                  }}
+                  className='text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300'
+                >
+                  {isSignUp
+                    ? 'Already have an account? Sign in'
+                    : "Don't have an account? Sign up"}
+                </button>
               </div>
-            </div>
-
-            <Button type='submit' fullWidth disabled={loading}>
-              {loading ? 'Loading...' : isSignUp ? 'Sign Up' : 'Sign In'}
-            </Button>
-
-            <div className='text-center'>
-              <button
-                type='button'
-                onClick={() => {
-                  setIsSignUp(!isSignUp)
-                  setError('')
-                }}
-                className='text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300'
-              >
-                {isSignUp
-                  ? 'Already have an account? Sign in'
-                  : "Don't have an account? Sign up"}
-              </button>
-            </div>
-          </form>
-        </Card>
+            </form>
+          </Card>
+        </SectionErrorBoundary>
 
         <div className='mt-6 text-center'>
           <p className='mx-auto max-w-sm text-xs leading-relaxed text-gray-500 dark:text-gray-400'>

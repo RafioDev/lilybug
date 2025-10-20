@@ -12,6 +12,7 @@ import { Button, IconButton } from '../components/Button'
 import { Input } from '../components/Input'
 import { AppErrorBoundary } from '../components/AppErrorBoundary'
 import { PageErrorBoundary } from '../components/PageErrorBoundary'
+import { SectionErrorBoundary } from '../components/SectionErrorBoundary'
 
 import { chatActionService } from '../services/chatActionService'
 import { smartSearchService } from '../services/smartSearchService'
@@ -521,7 +522,10 @@ const ActivitiesContent: React.FC = () => {
       <div className='mx-auto max-w-4xl space-y-6'>
         {/* Today's Summary */}
         {activeBaby && (
-          <AppErrorBoundary level='component' name="Today's Stats">
+          <SectionErrorBoundary
+            sectionName="Today's Stats"
+            contextData={{ babyId: activeBaby.id }}
+          >
             <div className='grid grid-cols-3 gap-4'>
               <Card className='text-center'>
                 <div className='text-2xl font-bold text-blue-600'>
@@ -548,11 +552,14 @@ const ActivitiesContent: React.FC = () => {
                 </div>
               </Card>
             </div>
-          </AppErrorBoundary>
+          </SectionErrorBoundary>
         )}
 
         {/* AI Voice Command Interface */}
-        <AppErrorBoundary level='component' name='Voice Interface'>
+        <SectionErrorBoundary
+          sectionName='Voice Interface'
+          contextData={{ babyId: activeBaby?.id }}
+        >
           <Card className='p-8'>
             <div className='flex flex-col items-center space-y-6'>
               {/* Primary Voice Button */}
@@ -643,10 +650,13 @@ const ActivitiesContent: React.FC = () => {
               </div>
             </div>
           </Card>
-        </AppErrorBoundary>
+        </SectionErrorBoundary>
 
         {/* Activities List */}
-        <AppErrorBoundary level='component' name='Activities List'>
+        <SectionErrorBoundary
+          sectionName='Activities List'
+          contextData={{ babyId: activeBaby?.id }}
+        >
           <Card>
             <div className='mb-4 flex items-center justify-between'>
               <div className='flex items-center gap-3'>
@@ -674,7 +684,7 @@ const ActivitiesContent: React.FC = () => {
               className='max-h-96 overflow-y-auto'
             />
           </Card>
-        </AppErrorBoundary>
+        </SectionErrorBoundary>
       </div>
 
       {/* Entry Details Modal */}
