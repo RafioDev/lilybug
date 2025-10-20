@@ -11,6 +11,7 @@ import {
 
 import { Input } from './Input'
 import { IconButton } from './Button'
+import { ComponentErrorBoundary } from './ComponentErrorBoundary'
 import { chatActionService } from '../services/chatActionService'
 import { smartSearchService } from '../services/smartSearchService'
 import { trackerService } from '../services/trackerService'
@@ -306,152 +307,159 @@ export const GlobalAIAssistant: React.FC<GlobalAIAssistantProps> = ({
   }
 
   return (
-    <div
-      className={`fixed right-6 bottom-6 z-50 transition-all duration-200 ${
-        isMinimized ? 'h-16 w-80' : 'h-96 w-80'
-      }`}
+    <ComponentErrorBoundary
+      componentName='GlobalAIAssistant'
+      contextData={{
+        babyId: activeBaby?.id,
+      }}
     >
-      <div className='flex h-full flex-col rounded-lg border border-gray-200 bg-white shadow-2xl'>
-        {/* Header */}
-        <div className='flex items-center justify-between rounded-t-lg border-b border-gray-200 bg-gradient-to-r from-blue-500 to-purple-600 p-4 text-white'>
-          <div className='flex items-center gap-2'>
-            <MessageCircle className='h-5 w-5' />
-            <span className='text-sm font-medium'>Assistant</span>
+      <div
+        className={`fixed right-6 bottom-6 z-50 transition-all duration-200 ${
+          isMinimized ? 'h-16 w-80' : 'h-96 w-80'
+        }`}
+      >
+        <div className='flex h-full flex-col rounded-lg border border-gray-200 bg-white shadow-2xl'>
+          {/* Header */}
+          <div className='flex items-center justify-between rounded-t-lg border-b border-gray-200 bg-gradient-to-r from-blue-500 to-purple-600 p-4 text-white'>
+            <div className='flex items-center gap-2'>
+              <MessageCircle className='h-5 w-5' />
+              <span className='text-sm font-medium'>Assistant</span>
+            </div>
+            <div className='flex items-center gap-1'>
+              <button
+                onClick={() => setIsMinimized(!isMinimized)}
+                className='rounded p-1 hover:bg-white/20'
+              >
+                {isMinimized ? (
+                  <Maximize2 className='h-4 w-4' />
+                ) : (
+                  <Minimize2 className='h-4 w-4' />
+                )}
+              </button>
+              <button
+                onClick={() => setIsOpen(false)}
+                className='rounded p-1 hover:bg-white/20'
+              >
+                <X className='h-4 w-4' />
+              </button>
+            </div>
           </div>
-          <div className='flex items-center gap-1'>
-            <button
-              onClick={() => setIsMinimized(!isMinimized)}
-              className='rounded p-1 hover:bg-white/20'
-            >
-              {isMinimized ? (
-                <Maximize2 className='h-4 w-4' />
-              ) : (
-                <Minimize2 className='h-4 w-4' />
-              )}
-            </button>
-            <button
-              onClick={() => setIsOpen(false)}
-              className='rounded p-1 hover:bg-white/20'
-            >
-              <X className='h-4 w-4' />
-            </button>
-          </div>
-        </div>
 
-        {!isMinimized && (
-          <>
-            {/* Messages */}
-            <div className='flex-1 space-y-3 overflow-y-auto p-3'>
-              {messages.length === 0 && (
-                <div className='py-4 text-center text-sm text-gray-500'>
-                  <MessageCircle className='mx-auto mb-2 h-8 w-8 opacity-50' />
-                  <p>Hi! I'm your assistant.</p>
-                  <p className='mt-1 text-xs'>
-                    Try saying "Log a bottle feeding" or click the mic!
-                  </p>
-                </div>
-              )}
+          {!isMinimized && (
+            <>
+              {/* Messages */}
+              <div className='flex-1 space-y-3 overflow-y-auto p-3'>
+                {messages.length === 0 && (
+                  <div className='py-4 text-center text-sm text-gray-500'>
+                    <MessageCircle className='mx-auto mb-2 h-8 w-8 opacity-50' />
+                    <p>Hi! I'm your assistant.</p>
+                    <p className='mt-1 text-xs'>
+                      Try saying "Log a bottle feeding" or click the mic!
+                    </p>
+                  </div>
+                )}
 
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex gap-2 ${
-                    message.type === 'user' ? 'justify-end' : 'justify-start'
-                  }`}
-                >
+                {messages.map((message) => (
                   <div
-                    className={`max-w-[80%] rounded-lg p-2 text-sm ${
-                      message.type === 'user'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-900'
+                    key={message.id}
+                    className={`flex gap-2 ${
+                      message.type === 'user' ? 'justify-end' : 'justify-start'
                     }`}
                   >
-                    <p className='whitespace-pre-line'>{message.content}</p>
                     <div
-                      className={`mt-1 text-xs ${
+                      className={`max-w-[80%] rounded-lg p-2 text-sm ${
                         message.type === 'user'
-                          ? 'text-blue-100'
-                          : 'text-gray-500'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 text-gray-900'
                       }`}
                     >
-                      {message.isVoice && '🎤 '}
-                      {formatTime(message.timestamp)}
+                      <p className='whitespace-pre-line'>{message.content}</p>
+                      <div
+                        className={`mt-1 text-xs ${
+                          message.type === 'user'
+                            ? 'text-blue-100'
+                            : 'text-gray-500'
+                        }`}
+                      >
+                        {message.isVoice && '🎤 '}
+                        {formatTime(message.timestamp)}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
 
-              {isProcessing && (
-                <div className='flex justify-start'>
-                  <div className='rounded-lg bg-gray-100 p-2 text-gray-900'>
-                    <div className='flex space-x-1'>
-                      <div className='h-2 w-2 animate-bounce rounded-full bg-gray-400'></div>
-                      <div
-                        className='h-2 w-2 animate-bounce rounded-full bg-gray-400'
-                        style={{ animationDelay: '0.1s' }}
-                      ></div>
-                      <div
-                        className='h-2 w-2 animate-bounce rounded-full bg-gray-400'
-                        style={{ animationDelay: '0.2s' }}
-                      ></div>
+                {isProcessing && (
+                  <div className='flex justify-start'>
+                    <div className='rounded-lg bg-gray-100 p-2 text-gray-900'>
+                      <div className='flex space-x-1'>
+                        <div className='h-2 w-2 animate-bounce rounded-full bg-gray-400'></div>
+                        <div
+                          className='h-2 w-2 animate-bounce rounded-full bg-gray-400'
+                          style={{ animationDelay: '0.1s' }}
+                        ></div>
+                        <div
+                          className='h-2 w-2 animate-bounce rounded-full bg-gray-400'
+                          style={{ animationDelay: '0.2s' }}
+                        ></div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              <div ref={messagesEndRef} />
-            </div>
-
-            {/* Input */}
-            <div className='border-t border-gray-200 p-3'>
-              <div className='flex gap-2'>
-                <IconButton
-                  icon={
-                    isListening ? (
-                      <MicOff className='h-4 w-4' />
-                    ) : (
-                      <Mic className='h-4 w-4' />
-                    )
-                  }
-                  onClick={isListening ? stopListening : startListening}
-                  disabled={isProcessing}
-                  variant={isListening ? 'danger' : 'primary'}
-                  size='sm'
-                  fullRounded
-                  aria-label={
-                    isListening ? 'Stop listening' : 'Start voice input'
-                  }
-                  className={`${isListening ? 'animate-pulse' : ''}`}
-                />
-
-                <Input
-                  type='text'
-                  value={inputText}
-                  onChange={setInputText}
-                  placeholder='Type or speak your request...'
-                  className='flex-1 text-sm'
-                />
-
-                <IconButton
-                  icon={<Send className='h-4 w-4' />}
-                  onClick={handleTextInput}
-                  disabled={!inputText.trim() || isProcessing}
-                  variant='primary'
-                  size='sm'
-                  fullRounded
-                  aria-label='Send message'
-                />
+                <div ref={messagesEndRef} />
               </div>
 
-              {isListening && (
-                <div className='mt-2 animate-pulse text-center text-xs text-blue-600'>
-                  🎤 Listening... Speak now!
+              {/* Input */}
+              <div className='border-t border-gray-200 p-3'>
+                <div className='flex gap-2'>
+                  <IconButton
+                    icon={
+                      isListening ? (
+                        <MicOff className='h-4 w-4' />
+                      ) : (
+                        <Mic className='h-4 w-4' />
+                      )
+                    }
+                    onClick={isListening ? stopListening : startListening}
+                    disabled={isProcessing}
+                    variant={isListening ? 'danger' : 'primary'}
+                    size='sm'
+                    fullRounded
+                    aria-label={
+                      isListening ? 'Stop listening' : 'Start voice input'
+                    }
+                    className={`${isListening ? 'animate-pulse' : ''}`}
+                  />
+
+                  <Input
+                    type='text'
+                    value={inputText}
+                    onChange={setInputText}
+                    placeholder='Type or speak your request...'
+                    className='flex-1 text-sm'
+                  />
+
+                  <IconButton
+                    icon={<Send className='h-4 w-4' />}
+                    onClick={handleTextInput}
+                    disabled={!inputText.trim() || isProcessing}
+                    variant='primary'
+                    size='sm'
+                    fullRounded
+                    aria-label='Send message'
+                  />
                 </div>
-              )}
-            </div>
-          </>
-        )}
+
+                {isListening && (
+                  <div className='mt-2 animate-pulse text-center text-xs text-blue-600'>
+                    🎤 Listening... Speak now!
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
       </div>
-    </div>
+    </ComponentErrorBoundary>
   )
 }

@@ -4,7 +4,7 @@ import { ActivityForm, type ActivityFormData } from './ActivityForm'
 import { useForm } from '../hooks/useForm'
 import { useUpdateEntry } from '../hooks/queries/useTrackerQueries'
 import { dateUtils } from '../utils/dateUtils'
-import { AppErrorBoundary } from './AppErrorBoundary'
+import { ComponentErrorBoundary } from './ComponentErrorBoundary'
 import { reportError } from '../utils/errorHandler'
 import type { TrackerEntry, UpdateTrackerEntry } from '../types'
 
@@ -140,7 +140,7 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
   if (!entry) return null
 
   return (
-    <AppErrorBoundary level='component' name='Activity Modal Form'>
+    <ComponentErrorBoundary componentName='ActivityModal'>
       <ModalForm
         isOpen={isOpen}
         onClose={onClose}
@@ -160,15 +160,15 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
             Created: {new Date(entry.created_at).toLocaleString()}
           </p>
         </div>
-        <AppErrorBoundary level='component' name='Activity Form'>
+        <ComponentErrorBoundary componentName='ActivityForm'>
           <ActivityForm
             values={form.values}
             errors={form.errors}
             onChange={form.handleChange}
             disabled={isSubmitting}
           />
-        </AppErrorBoundary>
+        </ComponentErrorBoundary>
       </ModalForm>
-    </AppErrorBoundary>
+    </ComponentErrorBoundary>
   )
 }

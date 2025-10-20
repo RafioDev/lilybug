@@ -3,6 +3,7 @@ import { ModalForm } from './ModalForm'
 import { BabyForm, type BabyFormData } from './BabyForm'
 import { useForm } from '../hooks/useForm'
 import { useCreateBaby, useUpdateBaby } from '../hooks/queries/useBabyQueries'
+import { ComponentErrorBoundary } from './ComponentErrorBoundary'
 import type { Baby } from '../types'
 
 /**
@@ -162,21 +163,30 @@ export const BabyModal: React.FC<BabyModalProps> = ({
     createBabyMutation.isPending || updateBabyMutation.isPending
 
   return (
-    <ModalForm
-      isOpen={isOpen}
-      onClose={onClose}
-      title={isEditMode ? 'Edit Baby' : 'Add Baby'}
-      onSubmit={form.handleSubmit}
-      isSubmitting={isSubmitting}
-      submitText={isEditMode ? 'Update' : 'Save'}
-      submitDisabled={Object.keys(form.errors).length > 0}
+    <ComponentErrorBoundary
+      componentName='BabyModal'
+      contextData={{
+        babyId: baby?.id,
+      }}
     >
-      <BabyForm
-        values={form.values}
-        errors={form.errors}
-        onChange={form.handleChange}
-        disabled={isSubmitting}
-      />
-    </ModalForm>
+      <ModalForm
+        isOpen={isOpen}
+        onClose={onClose}
+        title={isEditMode ? 'Edit Baby' : 'Add Baby'}
+        onSubmit={form.handleSubmit}
+        isSubmitting={isSubmitting}
+        submitText={isEditMode ? 'Update' : 'Save'}
+        submitDisabled={Object.keys(form.errors).length > 0}
+      >
+        <ComponentErrorBoundary componentName='BabyForm'>
+          <BabyForm
+            values={form.values}
+            errors={form.errors}
+            onChange={form.handleChange}
+            disabled={isSubmitting}
+          />
+        </ComponentErrorBoundary>
+      </ModalForm>
+    </ComponentErrorBoundary>
   )
 }

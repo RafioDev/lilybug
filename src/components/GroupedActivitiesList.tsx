@@ -1,6 +1,7 @@
 import React from 'react'
 import { Clock } from 'lucide-react'
 import { ActivityGroup } from './ActivityGroup'
+import { ComponentErrorBoundary } from './ComponentErrorBoundary'
 import { activityUtils } from '../utils/activityUtils'
 import type { TrackerEntry } from '../types'
 
@@ -38,16 +39,24 @@ export const GroupedActivitiesList: React.FC<GroupedActivitiesListProps> = ({
   }
 
   return (
-    <div className={`space-y-6 ${className} ${isLoading ? 'opacity-70' : ''}`}>
-      {dateGroups.map((dateGroup) => (
-        <ActivityGroup
-          key={dateGroup.date}
-          dateGroup={dateGroup}
-          onEditEntry={onEditEntry}
-          onDeleteEntry={onDeleteEntry}
-          onViewDetails={onViewDetails}
-        />
-      ))}
-    </div>
+    <ComponentErrorBoundary componentName='GroupedActivitiesList'>
+      <div
+        className={`space-y-6 ${className} ${isLoading ? 'opacity-70' : ''}`}
+      >
+        {dateGroups.map((dateGroup) => (
+          <ComponentErrorBoundary
+            key={dateGroup.date}
+            componentName='ActivityGroup'
+          >
+            <ActivityGroup
+              dateGroup={dateGroup}
+              onEditEntry={onEditEntry}
+              onDeleteEntry={onDeleteEntry}
+              onViewDetails={onViewDetails}
+            />
+          </ComponentErrorBoundary>
+        ))}
+      </div>
+    </ComponentErrorBoundary>
   )
 }

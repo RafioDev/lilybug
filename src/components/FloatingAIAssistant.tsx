@@ -11,6 +11,7 @@ import {
 import { useLocation } from 'react-router-dom'
 import { Input } from './Input'
 import { IconButton } from './Button'
+import { ComponentErrorBoundary } from './ComponentErrorBoundary'
 import { chatActionService } from '../services/chatActionService'
 import { smartSearchService } from '../services/smartSearchService'
 import { useActiveBaby } from '../hooks/queries/useBabyQueries'
@@ -306,153 +307,160 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({
   }
 
   return (
-    <div
-      className={`fixed right-6 bottom-24 z-50 transition-all duration-200 lg:bottom-6 ${
-        isMinimized ? 'h-16 w-80' : 'h-96 w-80'
-      }`}
+    <ComponentErrorBoundary
+      componentName='FloatingAIAssistant'
+      contextData={{
+        babyId: activeBaby?.id,
+      }}
     >
-      <div className='flex h-full flex-col rounded-lg border border-gray-200 bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-800'>
-        {/* Header */}
-        <div className='flex items-center justify-between rounded-t-lg border-b border-gray-200 bg-gradient-to-r from-blue-500 to-purple-600 p-4 text-white dark:border-gray-700'>
-          <div className='flex items-center gap-2'>
-            <Sparkles className='h-5 w-5' />
-            <span className='text-sm font-medium'>Assistant</span>
+      <div
+        className={`fixed right-6 bottom-24 z-50 transition-all duration-200 lg:bottom-6 ${
+          isMinimized ? 'h-16 w-80' : 'h-96 w-80'
+        }`}
+      >
+        <div className='flex h-full flex-col rounded-lg border border-gray-200 bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-800'>
+          {/* Header */}
+          <div className='flex items-center justify-between rounded-t-lg border-b border-gray-200 bg-gradient-to-r from-blue-500 to-purple-600 p-4 text-white dark:border-gray-700'>
+            <div className='flex items-center gap-2'>
+              <Sparkles className='h-5 w-5' />
+              <span className='text-sm font-medium'>Assistant</span>
+            </div>
+            <div className='flex items-center gap-1'>
+              <IconButton
+                icon={
+                  isMinimized ? (
+                    <Maximize2 className='h-4 w-4' />
+                  ) : (
+                    <Minimize2 className='h-4 w-4' />
+                  )
+                }
+                onClick={() => setIsMinimized(!isMinimized)}
+                variant='primary'
+                size='sm'
+                aria-label={
+                  isMinimized ? 'Maximize assistant' : 'Minimize assistant'
+                }
+                className='min-h-auto min-w-auto border-none bg-transparent p-1 shadow-none hover:bg-white/20'
+              />
+              <IconButton
+                icon={<X className='h-4 w-4' />}
+                onClick={() => setIsOpen(false)}
+                variant='primary'
+                size='sm'
+                aria-label='Close assistant'
+                className='min-h-auto min-w-auto border-none bg-transparent p-1 shadow-none hover:bg-white/20'
+              />
+            </div>
           </div>
-          <div className='flex items-center gap-1'>
-            <IconButton
-              icon={
-                isMinimized ? (
-                  <Maximize2 className='h-4 w-4' />
-                ) : (
-                  <Minimize2 className='h-4 w-4' />
-                )
-              }
-              onClick={() => setIsMinimized(!isMinimized)}
-              variant='primary'
-              size='sm'
-              aria-label={
-                isMinimized ? 'Maximize assistant' : 'Minimize assistant'
-              }
-              className='min-h-auto min-w-auto border-none bg-transparent p-1 shadow-none hover:bg-white/20'
-            />
-            <IconButton
-              icon={<X className='h-4 w-4' />}
-              onClick={() => setIsOpen(false)}
-              variant='primary'
-              size='sm'
-              aria-label='Close assistant'
-              className='min-h-auto min-w-auto border-none bg-transparent p-1 shadow-none hover:bg-white/20'
-            />
-          </div>
-        </div>
 
-        {!isMinimized && (
-          <>
-            {/* Messages */}
-            <div className='flex-1 space-y-3 overflow-y-auto bg-white p-3 dark:bg-gray-800'>
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex gap-2 ${
-                    message.type === 'user' ? 'justify-end' : 'justify-start'
-                  }`}
-                >
+          {!isMinimized && (
+            <>
+              {/* Messages */}
+              <div className='flex-1 space-y-3 overflow-y-auto bg-white p-3 dark:bg-gray-800'>
+                {messages.map((message) => (
                   <div
-                    className={`max-w-[80%] rounded-lg p-2 text-sm ${
-                      message.type === 'user'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-gray-100'
+                    key={message.id}
+                    className={`flex gap-2 ${
+                      message.type === 'user' ? 'justify-end' : 'justify-start'
                     }`}
                   >
-                    <p className='whitespace-pre-line'>{message.content}</p>
                     <div
-                      className={`mt-1 text-xs ${
+                      className={`max-w-[80%] rounded-lg p-2 text-sm ${
                         message.type === 'user'
-                          ? 'text-blue-100'
-                          : 'text-gray-500 dark:text-gray-400'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-gray-100'
                       }`}
                     >
-                      {message.isVoice && '🎤 '}
-                      {formatTime(message.timestamp)}
+                      <p className='whitespace-pre-line'>{message.content}</p>
+                      <div
+                        className={`mt-1 text-xs ${
+                          message.type === 'user'
+                            ? 'text-blue-100'
+                            : 'text-gray-500 dark:text-gray-400'
+                        }`}
+                      >
+                        {message.isVoice && '🎤 '}
+                        {formatTime(message.timestamp)}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
 
-              {isProcessing && (
-                <div className='flex justify-start'>
-                  <div className='rounded-lg bg-gray-100 p-2 text-gray-900 dark:bg-gray-700 dark:text-gray-100'>
-                    <div className='flex space-x-1'>
-                      <div className='h-2 w-2 animate-bounce rounded-full bg-gray-400 dark:bg-gray-500'></div>
-                      <div
-                        className='h-2 w-2 animate-bounce rounded-full bg-gray-400 dark:bg-gray-500'
-                        style={{ animationDelay: '0.1s' }}
-                      ></div>
-                      <div
-                        className='h-2 w-2 animate-bounce rounded-full bg-gray-400 dark:bg-gray-500'
-                        style={{ animationDelay: '0.2s' }}
-                      ></div>
+                {isProcessing && (
+                  <div className='flex justify-start'>
+                    <div className='rounded-lg bg-gray-100 p-2 text-gray-900 dark:bg-gray-700 dark:text-gray-100'>
+                      <div className='flex space-x-1'>
+                        <div className='h-2 w-2 animate-bounce rounded-full bg-gray-400 dark:bg-gray-500'></div>
+                        <div
+                          className='h-2 w-2 animate-bounce rounded-full bg-gray-400 dark:bg-gray-500'
+                          style={{ animationDelay: '0.1s' }}
+                        ></div>
+                        <div
+                          className='h-2 w-2 animate-bounce rounded-full bg-gray-400 dark:bg-gray-500'
+                          style={{ animationDelay: '0.2s' }}
+                        ></div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              <div ref={messagesEndRef} />
-            </div>
-
-            {/* Input */}
-            <div className='border-t border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800'>
-              <div className='mb-2 flex gap-2'>
-                <Input
-                  type='text'
-                  value={inputText}
-                  onChange={setInputText}
-                  placeholder='Or type here...'
-                  className='flex-1 text-sm'
-                />
-
-                <IconButton
-                  icon={<Send className='h-4 w-4' />}
-                  onClick={handleTextInput}
-                  disabled={!inputText.trim() || isProcessing}
-                  variant='primary'
-                  size='sm'
-                  fullRounded
-                  aria-label='Send message'
-                  className='flex-shrink-0 p-2'
-                />
-
-                <IconButton
-                  icon={
-                    isListening ? (
-                      <MicOff className='h-4 w-4' />
-                    ) : (
-                      <Mic className='h-4 w-4' />
-                    )
-                  }
-                  onClick={isListening ? stopListening : startListening}
-                  disabled={isProcessing}
-                  variant={isListening ? 'danger' : 'primary'}
-                  size='sm'
-                  fullRounded
-                  aria-label={
-                    isListening ? 'Stop listening' : 'Start voice input'
-                  }
-                  className={`flex-shrink-0 p-2 ${
-                    isListening ? 'animate-pulse' : ''
-                  }`}
-                />
+                <div ref={messagesEndRef} />
               </div>
 
-              {isListening && (
-                <div className='animate-pulse text-center text-xs text-blue-600 dark:text-blue-400'>
-                  🎤 Listening... Speak now!
+              {/* Input */}
+              <div className='border-t border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800'>
+                <div className='mb-2 flex gap-2'>
+                  <Input
+                    type='text'
+                    value={inputText}
+                    onChange={setInputText}
+                    placeholder='Or type here...'
+                    className='flex-1 text-sm'
+                  />
+
+                  <IconButton
+                    icon={<Send className='h-4 w-4' />}
+                    onClick={handleTextInput}
+                    disabled={!inputText.trim() || isProcessing}
+                    variant='primary'
+                    size='sm'
+                    fullRounded
+                    aria-label='Send message'
+                    className='flex-shrink-0 p-2'
+                  />
+
+                  <IconButton
+                    icon={
+                      isListening ? (
+                        <MicOff className='h-4 w-4' />
+                      ) : (
+                        <Mic className='h-4 w-4' />
+                      )
+                    }
+                    onClick={isListening ? stopListening : startListening}
+                    disabled={isProcessing}
+                    variant={isListening ? 'danger' : 'primary'}
+                    size='sm'
+                    fullRounded
+                    aria-label={
+                      isListening ? 'Stop listening' : 'Start voice input'
+                    }
+                    className={`flex-shrink-0 p-2 ${
+                      isListening ? 'animate-pulse' : ''
+                    }`}
+                  />
                 </div>
-              )}
-            </div>
-          </>
-        )}
+
+                {isListening && (
+                  <div className='animate-pulse text-center text-xs text-blue-600 dark:text-blue-400'>
+                    🎤 Listening... Speak now!
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
       </div>
-    </div>
+    </ComponentErrorBoundary>
   )
 }

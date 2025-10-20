@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import { AlertTriangle } from 'lucide-react'
 import { Modal } from './Modal'
 import { Button } from './Button'
+import { ComponentErrorBoundary } from './ComponentErrorBoundary'
 
 interface ConfirmationModalProps {
   isOpen: boolean
@@ -66,56 +67,58 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
       : 'text-amber-500 dark:text-amber-400'
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size='sm'>
-      <div className='text-center'>
-        {/* Icon */}
-        <div className='mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30'>
-          <AlertTriangle
-            className={`h-6 w-6 ${iconColor}`}
-            aria-hidden='true'
-          />
-        </div>
+    <ComponentErrorBoundary componentName='ConfirmationModal'>
+      <Modal isOpen={isOpen} onClose={onClose} size='sm'>
+        <div className='text-center'>
+          {/* Icon */}
+          <div className='mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30'>
+            <AlertTriangle
+              className={`h-6 w-6 ${iconColor}`}
+              aria-hidden='true'
+            />
+          </div>
 
-        {/* Title */}
-        <h3
-          className='mb-2 text-lg font-semibold text-gray-900 dark:text-white'
-          id='confirmation-modal-title'
-        >
-          {title}
-        </h3>
-
-        {/* Message */}
-        <p
-          className='mb-6 text-sm text-gray-600 dark:text-gray-300'
-          id='confirmation-modal-description'
-        >
-          {message}
-        </p>
-
-        {/* Action Buttons */}
-        <div className='flex flex-col-reverse gap-3 sm:flex-row sm:justify-center'>
-          <Button
-            variant='outline'
-            onClick={onClose}
-            disabled={isLoading}
-            className='sm:w-auto'
-            aria-describedby='confirmation-modal-description'
-            data-cancel-button='true'
+          {/* Title */}
+          <h3
+            className='mb-2 text-lg font-semibold text-gray-900 dark:text-white'
+            id='confirmation-modal-title'
           >
-            {cancelText}
-          </Button>
-          <Button
-            variant='danger'
-            onClick={onConfirm}
-            loading={isLoading}
-            disabled={isLoading}
-            className='sm:w-auto'
-            aria-describedby='confirmation-modal-description'
+            {title}
+          </h3>
+
+          {/* Message */}
+          <p
+            className='mb-6 text-sm text-gray-600 dark:text-gray-300'
+            id='confirmation-modal-description'
           >
-            {confirmText}
-          </Button>
+            {message}
+          </p>
+
+          {/* Action Buttons */}
+          <div className='flex flex-col-reverse gap-3 sm:flex-row sm:justify-center'>
+            <Button
+              variant='outline'
+              onClick={onClose}
+              disabled={isLoading}
+              className='sm:w-auto'
+              aria-describedby='confirmation-modal-description'
+              data-cancel-button='true'
+            >
+              {cancelText}
+            </Button>
+            <Button
+              variant='danger'
+              onClick={onConfirm}
+              loading={isLoading}
+              disabled={isLoading}
+              className='sm:w-auto'
+              aria-describedby='confirmation-modal-description'
+            >
+              {confirmText}
+            </Button>
+          </div>
         </div>
-      </div>
-    </Modal>
+      </Modal>
+    </ComponentErrorBoundary>
   )
 }

@@ -8,6 +8,7 @@ import { MobileHeader } from './MobileHeader'
 import { Header } from './Header'
 import { FloatingAIAssistant } from './FloatingAIAssistant'
 import { HeaderProvider } from '../contexts/HeaderContext'
+import { ComponentErrorBoundary } from './ComponentErrorBoundary'
 import { useUserProfile } from '../hooks/queries/useProfileQueries'
 import type { User } from '@supabase/supabase-js'
 
@@ -70,24 +71,39 @@ export const AppLayout: React.FC = () => {
   }
 
   return (
-    <HeaderProvider>
-      <div className='min-h-screen lg:flex'>
-        <Sidebar userProfile={userProfileForProps} />
-        <div className='flex-1 lg:ml-64'>
-          {/* Desktop: Create a scrollable container for sticky header */}
-          <div className='hidden h-screen overflow-y-auto lg:block'>
-            <Header />
-            <Outlet />
+    <ComponentErrorBoundary
+      componentName='AppLayout'
+      contextData={{ userId: user?.id }}
+    >
+      <HeaderProvider>
+        <div className='min-h-screen lg:flex'>
+          <ComponentErrorBoundary componentName='Sidebar'>
+            <Sidebar userProfile={userProfileForProps} />
+          </ComponentErrorBoundary>
+          <div className='flex-1 lg:ml-64'>
+            {/* Desktop: Create a scrollable container for sticky header */}
+            <div className='hidden h-screen overflow-y-auto lg:block'>
+              <ComponentErrorBoundary componentName='Header'>
+                <Header />
+              </ComponentErrorBoundary>
+              <Outlet />
+            </div>
+            {/* Mobile: Create a scrollable container for sticky header */}
+            <div className='h-screen overflow-y-auto lg:hidden'>
+              <ComponentErrorBoundary componentName='MobileHeader'>
+                <MobileHeader userProfile={userProfileForProps} />
+              </ComponentErrorBoundary>
+              <Outlet />
+            </div>
           </div>
-          {/* Mobile: Create a scrollable container for sticky header */}
-          <div className='h-screen overflow-y-auto lg:hidden'>
-            <MobileHeader userProfile={userProfileForProps} />
-            <Outlet />
-          </div>
+          <ComponentErrorBoundary componentName='NavBar'>
+            <NavBar />
+          </ComponentErrorBoundary>
+          <ComponentErrorBoundary componentName='FloatingAIAssistant'>
+            <FloatingAIAssistant />
+          </ComponentErrorBoundary>
         </div>
-        <NavBar />
-        <FloatingAIAssistant />
-      </div>
-    </HeaderProvider>
+      </HeaderProvider>
+    </ComponentErrorBoundary>
   )
 }
