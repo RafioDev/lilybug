@@ -6,18 +6,22 @@ import { migrateBabyData } from '../utils/migrateBabyData'
 import { Sidebar } from './Sidebar'
 import { MobileHeader } from './MobileHeader'
 import { Header } from './Header'
-import { FloatingAIAssistant } from './FloatingAIAssistant'
+import { UnifiedActionFooter } from './UnifiedActionFooter'
+import { NewActivityModal } from './NewActivityModal'
 import { HeaderProvider } from '../contexts/HeaderContext'
 import { ComponentErrorBoundary } from './ComponentErrorBoundary'
 import { useUserProfile } from '../hooks/queries/useProfileQueries'
+import { useActiveBaby } from '../hooks/queries/useBabyQueries'
 import type { User } from '@supabase/supabase-js'
 
 export const AppLayout: React.FC = () => {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isManualEntryModalOpen, setIsManualEntryModalOpen] = useState(false)
 
   // Use React Query for profile data
   const { data: profileData, isLoading: profileLoading } = useUserProfile()
+  const { data: activeBaby } = useActiveBaby()
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -97,10 +101,30 @@ export const AppLayout: React.FC = () => {
             </div>
           </div>
 
-          <ComponentErrorBoundary componentName='FloatingAIAssistant'>
-            <FloatingAIAssistant />
+          <ComponentErrorBoundary componentName='UnifiedActionFooter'>
+            <UnifiedActionFooter
+              onManualEntry={() => setIsManualEntryModalOpen(true)}
+            />
           </ComponentErrorBoundary>
         </div>
+
+        {/* Global Manual Entry Modal */}
+        {activeBaby && (
+          <ComponentErrorBoundary componentName='NewActivityModal'>
+            <NewActivityModal
+              isOpen={isManualEntryModalOpen}
+              onClose={() => setIsManualEntryModalOpen(false)}
+              onSave={() => {
+                // Entry created successfully - modal will close automatically
+              }}
+              onError={(error) => {
+                console.error('Manual entry error:', error)
+                // Could add toast notification here in the future
+              }}
+              babyId={activeBaby.id}
+            />
+          </ComponentErrorBoundary>
+        )}
       </HeaderProvider>
     </ComponentErrorBoundary>
   )

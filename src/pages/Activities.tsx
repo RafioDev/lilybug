@@ -23,7 +23,6 @@ import { GroupedActivitiesList } from '../components/GroupedActivitiesList'
 import { QuickFeedingModal } from '../components/QuickFeedingModal'
 import { QuickDiaperModal } from '../components/QuickDiaperModal'
 import { QuickSleepModal } from '../components/QuickSleepModal'
-import { QuickActionFooter } from '../components/QuickActionFooter'
 
 import { ConfirmationModal } from '../components/ConfirmationModal'
 import { useConfirmationModal } from '../hooks/useConfirmationModal'
@@ -693,14 +692,6 @@ const ActivitiesContent: React.FC = () => {
           />
         </>
       )}
-
-      {/* Quick Action Footer - Essential for thumb-optimized interactions */}
-      <QuickActionFooter
-        onEntryCreated={() => {
-          // Entries will automatically refresh via React Query
-        }}
-        onManualEntry={() => setIsManualEntryModalOpen(true)}
-      />
 
       {/* Confirmation Modal */}
       {confirmationModal.config && (
