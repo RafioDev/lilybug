@@ -714,11 +714,14 @@ const ActivitiesContent: React.FC = () => {
             </div>
 
             <GroupedActivitiesList
-              entries={entries.slice(0, 50)} // Show more entries with grouping
+              entries={entries} // Show all entries with lazy loading
               onEditEntry={openEditModal}
               onDeleteEntry={handleDeleteEntry}
               onViewDetails={openDetailsModal}
               isLoading={entriesLoading}
+              compactMode={true} // Enable compact mobile display
+              virtualScrolling={true} // Enable performance optimizations
+              maxInitialGroups={3} // Show 3 days initially
               className='max-h-96 overflow-y-auto'
             />
           </Card>
