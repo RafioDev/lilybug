@@ -29,7 +29,7 @@ import { useConfirmationModal } from '../hooks/useConfirmationModal'
 import { reportError } from '../utils/errorHandler'
 import type { TrackerEntry, EntryType, FeedingType, DiaperType } from '../types'
 
-// Voice functionality types and interfaces are now handled by QuickActionFooter
+// Voice functionality types and interfaces are now handled by UnifiedActionFooter
 
 const ActivitiesContent: React.FC = () => {
   // Voice interface state removed - now handled by FloatingActionButton system
@@ -96,13 +96,13 @@ const ActivitiesContent: React.FC = () => {
     notes: '',
   })
 
-  // Voice-related refs are now handled by QuickActionFooter
+  // Voice-related refs are now handled by UnifiedActionFooter
 
   // Stats are now calculated using useMemo above
 
-  // Voice functionality is now handled by QuickActionFooter component
+  // Voice functionality is now handled by UnifiedActionFooter component
 
-  // Voice functionality and speech recognition is now handled by QuickActionFooter
+  // Voice functionality and speech recognition is now handled by UnifiedActionFooter
 
   // Activities functions
   const deleteEntry = async (id: string) => {

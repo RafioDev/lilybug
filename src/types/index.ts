@@ -74,3 +74,41 @@ export interface NewWellnessEntry {
   sleep_hours?: number | null
   journal_entry?: string | null
 }
+
+// Speech Recognition types
+export interface SpeechRecognitionResult {
+  transcript: string
+  confidence: number
+}
+
+export interface SpeechRecognitionResultList {
+  [index: number]: SpeechRecognitionResult[]
+  length: number
+}
+
+export interface SpeechRecognitionEvent {
+  results: SpeechRecognitionResultList
+}
+
+export interface SpeechRecognitionErrorEvent {
+  error: string
+}
+
+export interface SpeechRecognitionInterface {
+  continuous: boolean
+  interimResults: boolean
+  lang: string
+  onstart: (() => void) | null
+  onresult: ((event: SpeechRecognitionEvent) => void) | null
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null
+  onend: (() => void) | null
+  start(): void
+  stop(): void
+}
+
+declare global {
+  interface Window {
+    webkitSpeechRecognition?: new () => SpeechRecognitionInterface
+    SpeechRecognition?: new () => SpeechRecognitionInterface
+  }
+}

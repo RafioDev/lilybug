@@ -3,44 +3,11 @@ import { chatActionService } from '../services/chatActionService'
 import { smartSearchService } from '../services/smartSearchService'
 import { useActiveBaby } from './queries/useBabyQueries'
 import { useEntries } from './queries/useTrackerQueries'
-
-// Speech Recognition types
-interface SpeechRecognitionResult {
-  transcript: string
-  confidence: number
-}
-
-interface SpeechRecognitionResultList {
-  [index: number]: SpeechRecognitionResult[]
-  length: number
-}
-
-interface SpeechRecognitionEvent {
-  results: SpeechRecognitionResultList
-}
-
-interface SpeechRecognitionErrorEvent {
-  error: string
-}
-
-interface SpeechRecognitionInterface {
-  continuous: boolean
-  interimResults: boolean
-  lang: string
-  onstart: (() => void) | null
-  onresult: ((event: SpeechRecognitionEvent) => void) | null
-  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null
-  onend: (() => void) | null
-  start(): void
-  stop(): void
-}
-
-declare global {
-  interface Window {
-    webkitSpeechRecognition?: new () => SpeechRecognitionInterface
-    SpeechRecognition?: new () => SpeechRecognitionInterface
-  }
-}
+import type {
+  SpeechRecognitionEvent,
+  SpeechRecognitionErrorEvent,
+  SpeechRecognitionInterface,
+} from '../types'
 
 export interface VoiceState {
   isListening: boolean

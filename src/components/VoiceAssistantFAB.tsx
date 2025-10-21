@@ -9,45 +9,12 @@ import { smartSearchService } from '../services/smartSearchService'
 import { useActiveBaby } from '../hooks/queries/useBabyQueries'
 import { useEntries } from '../hooks/queries/useTrackerQueries'
 import { cn } from '../utils/cn'
-import type { EntryType } from '../types'
-
-// Speech Recognition types (reused from FloatingAIAssistant)
-interface SpeechRecognitionResult {
-  transcript: string
-  confidence: number
-}
-
-interface SpeechRecognitionResultList {
-  [index: number]: SpeechRecognitionResult[]
-  length: number
-}
-
-interface SpeechRecognitionEvent {
-  results: SpeechRecognitionResultList
-}
-
-interface SpeechRecognitionErrorEvent {
-  error: string
-}
-
-interface SpeechRecognitionInterface {
-  continuous: boolean
-  interimResults: boolean
-  lang: string
-  onstart: (() => void) | null
-  onresult: ((event: SpeechRecognitionEvent) => void) | null
-  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null
-  onend: (() => void) | null
-  start(): void
-  stop(): void
-}
-
-declare global {
-  interface Window {
-    webkitSpeechRecognition?: new () => SpeechRecognitionInterface
-    SpeechRecognition?: new () => SpeechRecognitionInterface
-  }
-}
+import type {
+  EntryType,
+  SpeechRecognitionEvent,
+  SpeechRecognitionErrorEvent,
+  SpeechRecognitionInterface,
+} from '../types'
 
 interface VoiceAssistantFABProps {
   onEntryCreated?: () => void
