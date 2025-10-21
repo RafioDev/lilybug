@@ -32,7 +32,7 @@ import type { TrackerEntry, EntryType, FeedingType, DiaperType } from '../types'
 // Voice functionality types and interfaces are now handled by UnifiedActionFooter
 
 const ActivitiesContent: React.FC = () => {
-  // Voice interface state removed - now handled by FloatingActionButton system
+  // Voice interface state removed - now handled by UnifiedActionFooter system
   // Use React Query for data
   const { data: activeBaby, isLoading: babyLoading } = useActiveBaby()
   const { data: entries = [], isLoading: entriesLoading } = useEntries(
@@ -319,9 +319,7 @@ const ActivitiesContent: React.FC = () => {
           </SectionErrorBoundary>
         )}
 
-        {/* Minimized Voice Interface - Now handled by FloatingActionButton */}
-        {/* The large voice interface card has been removed to maximize space for activities */}
-        {/* Voice functionality is now available through the floating FAB system */}
+        {/* Voice functionality is now handled by UnifiedActionFooter */}
 
         {/* Activities List - Maximized Height */}
         <SectionErrorBoundary
