@@ -161,7 +161,10 @@ export const FloatingActionButton = React.memo<FABProps>(
           >
             {React.isValidElement(icon)
               ? React.cloneElement(icon, {
-                  className: cn(iconSize, (icon.props as unknown)?.className),
+                  className: cn(
+                    iconSize,
+                    (icon.props as { className?: string })?.className
+                  ),
                 } as React.HTMLAttributes<HTMLElement>)
               : icon}
           </span>

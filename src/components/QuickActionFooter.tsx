@@ -1,17 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import { Mic, MicOff, Sparkles, MessageCircle } from 'lucide-react'
-import { useLocation } from 'react-router-dom'
-import { ExpandableFAB } from './ExpandableFAB'
-import { createDefaultQuickActions } from './fabUtils'
+import { Mic, MicOff, Sparkles, MessageCircle, Plus } from 'lucide-react'
+import { Button } from './Button'
 import { ComponentErrorBoundary } from './ComponentErrorBoundary'
 import { chatActionService } from '../services/chatActionService'
 import { smartSearchService } from '../services/smartSearchService'
 import { useActiveBaby } from '../hooks/queries/useBabyQueries'
 import { useEntries } from '../hooks/queries/useTrackerQueries'
 import { cn } from '../utils/cn'
-import type { EntryType } from '../types'
 
-// Speech Recognition types (reused from FloatingAIAssistant)
+// Speech Recognition types
 interface SpeechRecognitionResult {
   transcript: string
   confidence: number
@@ -49,25 +46,17 @@ declare global {
   }
 }
 
-interface VoiceAssistantFABProps {
+interface QuickActionFooterProps {
   onEntryCreated?: () => void
-  onQuickEntry?: (entryType: EntryType) => void
-  position?: {
-    bottom?: string
-    right?: string
-    left?: string
-    top?: string
-  }
+  onManualEntry?: () => void
   className?: string
 }
 
-export const VoiceAssistantFAB: React.FC<VoiceAssistantFABProps> = ({
+export const QuickActionFooter: React.FC<QuickActionFooterProps> = ({
   onEntryCreated,
-  onQuickEntry,
-  position = { bottom: '1.5rem', right: '1.5rem' },
+  onManualEntry,
   className = '',
 }) => {
-  const location = useLocation()
   const [isListening, setIsListening] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [showFeedback, setShowFeedback] = useState(false)
@@ -78,9 +67,6 @@ export const VoiceAssistantFAB: React.FC<VoiceAssistantFABProps> = ({
 
   const recognitionRef = useRef<SpeechRecognitionInterface | null>(null)
   const feedbackTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
-
-  // Show on Activities page (which is the root path)
-  const shouldShow = location.pathname === '/'
 
   // Use React Query for data
   const { data: activeBaby } = useActiveBaby()
@@ -201,10 +187,7 @@ export const VoiceAssistantFAB: React.FC<VoiceAssistantFABProps> = ({
 
   // Initialize speech recognition
   useEffect(() => {
-    if (
-      shouldShow &&
-      (window.webkitSpeechRecognition || window.SpeechRecognition)
-    ) {
+    if (window.webkitSpeechRecognition || window.SpeechRecognition) {
       const SpeechRecognitionClass =
         window.webkitSpeechRecognition || window.SpeechRecognition
       if (SpeechRecognitionClass) {
@@ -254,7 +237,7 @@ export const VoiceAssistantFAB: React.FC<VoiceAssistantFABProps> = ({
         clearTimeout(feedbackTimeoutRef.current)
       }
     }
-  }, [shouldShow, handleVoiceInput])
+  }, [handleVoiceInput])
 
   // Voice control functions
   const startListening = useCallback(() => {
@@ -269,25 +252,8 @@ export const VoiceAssistantFAB: React.FC<VoiceAssistantFABProps> = ({
     }
   }, [isListening])
 
-  // Handle quick entry actions
-  const handleQuickEntry = useCallback(
-    (entryType: EntryType) => {
-      if (onQuickEntry) {
-        onQuickEntry(entryType)
-      }
-    },
-    [onQuickEntry]
-  )
-
-  // Create quick actions
-  const quickActions = createDefaultQuickActions(
-    () => handleQuickEntry('feeding'),
-    () => handleQuickEntry('diaper'),
-    () => handleQuickEntry('sleep')
-  )
-
-  // Handle primary FAB action (voice activation)
-  const handlePrimaryAction = useCallback(() => {
+  // Handle voice button click
+  const handleVoiceClick = useCallback(() => {
     if (isListening) {
       stopListening()
     } else {
@@ -295,14 +261,9 @@ export const VoiceAssistantFAB: React.FC<VoiceAssistantFABProps> = ({
     }
   }, [isListening, startListening, stopListening])
 
-  // Don't render if not on a page that should show the assistant
-  if (!shouldShow) {
-    return null
-  }
-
   return (
     <ComponentErrorBoundary
-      componentName='VoiceAssistantFAB'
+      componentName='QuickActionFooter'
       contextData={{
         babyId: activeBaby?.id,
       }}
@@ -312,7 +273,7 @@ export const VoiceAssistantFAB: React.FC<VoiceAssistantFABProps> = ({
         {showFeedback && (
           <div
             className={cn(
-              'fixed right-6 bottom-20 left-6 z-40 transform rounded-lg p-3 shadow-lg transition-all duration-300 md:right-6 md:left-auto md:w-80',
+              'fixed right-4 bottom-20 left-4 z-50 transform rounded-lg p-3 shadow-lg transition-all duration-300',
               feedbackType === 'success' && 'bg-emerald-500 text-white',
               feedbackType === 'error' && 'bg-rose-500 text-white',
               feedbackType === 'info' && 'bg-blue-500 text-white',
@@ -353,39 +314,54 @@ export const VoiceAssistantFAB: React.FC<VoiceAssistantFABProps> = ({
           </div>
         )}
 
-        {/* Main FAB System */}
-        <ExpandableFAB
-          primaryIcon={
-            isListening ? (
-              <MicOff className='h-6 w-6' />
-            ) : isProcessing ? (
-              <div className='animate-spin'>
-                <Sparkles className='h-6 w-6' />
-              </div>
-            ) : (
-              <Mic className='h-6 w-6' />
-            )
-          }
-          primaryLabel={
-            isListening
-              ? 'Stop listening'
-              : isProcessing
-                ? 'Processing...'
-                : 'Voice Assistant'
-          }
-          onPrimaryAction={handlePrimaryAction}
-          quickActions={quickActions}
-          position={position}
-          className={cn(
-            'transition-all duration-300',
-            isListening && 'animate-pulse',
-            className
-          )}
-          aria-label='Voice Assistant and Quick Actions'
-        />
+        {/* Footer with two main actions */}
+        <div className='fixed right-0 bottom-0 left-0 z-40 border-t border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800'>
+          <div className='mx-auto flex max-w-md gap-3'>
+            {/* Voice Assistant Button */}
+            <Button
+              onClick={handleVoiceClick}
+              variant={isListening ? 'danger' : 'primary'}
+              size='lg'
+              fullWidth
+              disabled={isProcessing}
+              className={cn(
+                'flex h-14 items-center justify-center gap-2',
+                isListening && 'animate-pulse'
+              )}
+            >
+              {isListening ? (
+                <MicOff className='h-5 w-5' />
+              ) : isProcessing ? (
+                <div className='animate-spin'>
+                  <Sparkles className='h-5 w-5' />
+                </div>
+              ) : (
+                <Mic className='h-5 w-5' />
+              )}
+              <span className='font-medium'>
+                {isListening
+                  ? 'Stop'
+                  : isProcessing
+                    ? 'Processing...'
+                    : 'Voice'}
+              </span>
+            </Button>
+
+            {/* Manual Entry Button */}
+            <Button
+              onClick={onManualEntry}
+              variant='outline'
+              size='lg'
+              fullWidth
+              disabled={isListening || isProcessing}
+              className='flex h-14 items-center justify-center gap-2'
+            >
+              <Plus className='h-5 w-5' />
+              <span className='font-medium'>Manual</span>
+            </Button>
+          </div>
+        </div>
       </div>
     </ComponentErrorBoundary>
   )
 }
-
-export default VoiceAssistantFAB

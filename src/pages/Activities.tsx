@@ -17,7 +17,6 @@ import { SectionErrorBoundary } from '../components/SectionErrorBoundary'
 import { chatActionService } from '../services/chatActionService'
 import { smartSearchService } from '../services/smartSearchService'
 import { aiService } from '../services/aiService'
-import { smartDefaultsEngine } from '../services/smartDefaultsService'
 import { useActiveBaby } from '../hooks/queries/useBabyQueries'
 import {
   useEntries,
@@ -29,6 +28,11 @@ import { dateUtils } from '../utils/dateUtils'
 import { Modal } from '../components/Modal'
 import { ActivityModal } from '../components/LazyModals'
 import { GroupedActivitiesList } from '../components/GroupedActivitiesList'
+import { QuickFeedingModal } from '../components/QuickFeedingModal'
+import { QuickDiaperModal } from '../components/QuickDiaperModal'
+import { QuickSleepModal } from '../components/QuickSleepModal'
+import { QuickActionFooter } from '../components/QuickActionFooter'
+
 import { ConfirmationModal } from '../components/ConfirmationModal'
 import { useConfirmationModal } from '../hooks/useConfirmationModal'
 import { reportError } from '../utils/errorHandler'
@@ -110,6 +114,11 @@ const ActivitiesContent: React.FC = () => {
   const [isManualEntryModalOpen, setIsManualEntryModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [selectedEntry, setSelectedEntry] = useState<TrackerEntry | null>(null)
+
+  // Quick entry modal states
+  const [isQuickFeedingModalOpen, setIsQuickFeedingModalOpen] = useState(false)
+  const [isQuickDiaperModalOpen, setIsQuickDiaperModalOpen] = useState(false)
+  const [isQuickSleepModalOpen, setIsQuickSleepModalOpen] = useState(false)
   const [formData, setFormData] = useState({
     entryType: 'feeding' as EntryType,
     startTime: dateUtils.getCurrentLocalDateTime(),
@@ -395,27 +404,6 @@ const ActivitiesContent: React.FC = () => {
     // You could add a toast notification here
   }
 
-  const openManualEntryModal = () => {
-    // Calculate smart defaults based on recent entries
-    const timeContext = smartDefaultsEngine.createTimeContext(entries || [])
-    const smartDefaults = smartDefaultsEngine.calculateDefaults(
-      'feeding', // Default to feeding, but user can change
-      entries || [],
-      timeContext
-    )
-
-    setFormData({
-      entryType: smartDefaults.entryType || 'feeding',
-      startTime: smartDefaults.startTime || dateUtils.getCurrentLocalDateTime(),
-      endTime: smartDefaults.endTime || '',
-      quantity: smartDefaults.quantity?.toString() || '',
-      feedingType: smartDefaults.feedingType || 'bottle',
-      diaperType: smartDefaults.diaperType || 'wet',
-      notes: smartDefaults.notes || '',
-    })
-    setIsManualEntryModalOpen(true)
-  }
-
   const handleManualSubmit = async () => {
     if (!activeBaby) {
       console.error('No active baby selected')
@@ -528,7 +516,7 @@ const ActivitiesContent: React.FC = () => {
 
   return (
     <Layout>
-      <div className='mx-auto max-w-4xl space-y-6'>
+      <div className='mx-auto max-w-4xl space-y-6 pb-20'>
         {/* Today's Summary */}
         {activeBaby && (
           <SectionErrorBoundary
@@ -661,6 +649,55 @@ const ActivitiesContent: React.FC = () => {
           </Card>
         </SectionErrorBoundary>
 
+        {/* Quick Entry Buttons */}
+        <SectionErrorBoundary
+          sectionName='Quick Entry Buttons'
+          contextData={{ babyId: activeBaby?.id }}
+        >
+          <Card>
+            <div className='mb-3'>
+              <h3 className='text-sm font-semibold text-gray-800 dark:text-gray-200'>
+                ⚡ Quick Entry
+              </h3>
+              <p className='text-xs text-gray-600 dark:text-gray-400'>
+                One-tap entries with smart defaults
+              </p>
+            </div>
+            <div className='grid grid-cols-3 gap-2'>
+              <Button
+                onClick={() => setIsQuickFeedingModalOpen(true)}
+                variant='outline'
+                size='sm'
+                disabled={isLoading}
+                className='flex h-16 flex-col items-center gap-1 text-xs'
+              >
+                <span className='text-lg'>🍼</span>
+                <span>Feeding</span>
+              </Button>
+              <Button
+                onClick={() => setIsQuickDiaperModalOpen(true)}
+                variant='outline'
+                size='sm'
+                disabled={isLoading}
+                className='flex h-16 flex-col items-center gap-1 text-xs'
+              >
+                <span className='text-lg'>👶</span>
+                <span>Diaper</span>
+              </Button>
+              <Button
+                onClick={() => setIsQuickSleepModalOpen(true)}
+                variant='outline'
+                size='sm'
+                disabled={isLoading}
+                className='flex h-16 flex-col items-center gap-1 text-xs'
+              >
+                <span className='text-lg'>😴</span>
+                <span>Sleep</span>
+              </Button>
+            </div>
+          </Card>
+        </SectionErrorBoundary>
+
         {/* Activities List */}
         <SectionErrorBoundary
           sectionName='Activities List'
@@ -674,14 +711,6 @@ const ActivitiesContent: React.FC = () => {
                   Recent Activities
                 </h3>
               </div>
-              <Button
-                onClick={openManualEntryModal}
-                variant='outline'
-                className='text-sm'
-                disabled={isLoading}
-              >
-                Manual Entry
-              </Button>
             </div>
 
             <GroupedActivitiesList
@@ -992,6 +1021,57 @@ const ActivitiesContent: React.FC = () => {
           />
         </Suspense>
       </AppErrorBoundary>
+
+      {/* Quick Entry Modals */}
+      {activeBaby && (
+        <>
+          <QuickFeedingModal
+            isOpen={isQuickFeedingModalOpen}
+            onClose={() => setIsQuickFeedingModalOpen(false)}
+            onSave={() => {
+              // Refresh entries after successful save
+              // The useEntries query will automatically refetch
+            }}
+            onError={(error) => {
+              console.error('Quick feeding entry error:', error)
+              // Could add toast notification here
+            }}
+            babyId={activeBaby.id}
+          />
+
+          <QuickDiaperModal
+            isOpen={isQuickDiaperModalOpen}
+            onClose={() => setIsQuickDiaperModalOpen(false)}
+            onSave={() => {
+              // Refresh entries after successful save
+            }}
+            onError={(error) => {
+              console.error('Quick diaper entry error:', error)
+            }}
+            babyId={activeBaby.id}
+          />
+
+          <QuickSleepModal
+            isOpen={isQuickSleepModalOpen}
+            onClose={() => setIsQuickSleepModalOpen(false)}
+            onSave={() => {
+              // Refresh entries after successful save
+            }}
+            onError={(error) => {
+              console.error('Quick sleep entry error:', error)
+            }}
+            babyId={activeBaby.id}
+          />
+        </>
+      )}
+
+      {/* Quick Action Footer */}
+      <QuickActionFooter
+        onEntryCreated={() => {
+          // Entries will automatically refresh via React Query
+        }}
+        onManualEntry={() => setIsManualEntryModalOpen(true)}
+      />
 
       {/* Confirmation Modal */}
       {confirmationModal.config && (
