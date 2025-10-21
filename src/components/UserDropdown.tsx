@@ -43,9 +43,9 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
           <button
             onClick={() => setIsOpen(!isOpen)}
             aria-label={`User menu for ${userName}`}
-            className='cursor-pointer rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-gray-100'
+            className='cursor-pointer rounded-lg p-1.5 text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-gray-100'
           >
-            <User className='h-5 w-5' />
+            <User className='pointer-events-none h-4 w-4' />
           </button>
 
           {isOpen && (
@@ -64,8 +64,8 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
                   onClick={handleSignOut}
                   className='flex w-full cursor-pointer items-center gap-2 rounded-b-lg px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'
                 >
-                  <LogOut className='h-4 w-4' />
-                  Sign Out
+                  <LogOut className='pointer-events-none h-4 w-4' />
+                  <span className='pointer-events-none'>Sign Out</span>
                 </button>
               </div>
             </>
@@ -84,11 +84,13 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
           className='flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg px-3 py-2 text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-gray-100'
         >
           <div className='flex items-center gap-2'>
-            <User className='h-4 w-4' />
-            <span className='truncate font-medium'>{userName}</span>
+            <User className='pointer-events-none h-4 w-4' />
+            <span className='pointer-events-none truncate font-medium'>
+              {userName}
+            </span>
           </div>
           <ChevronDown
-            className={`h-4 w-4 transition-transform ${
+            className={`pointer-events-none h-4 w-4 transition-transform ${
               isOpen ? 'rotate-180' : ''
             }`}
           />
@@ -105,8 +107,8 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
                 onClick={handleSignOut}
                 className='flex w-full cursor-pointer items-center gap-2 rounded-lg px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'
               >
-                <LogOut className='h-4 w-4' />
-                Sign Out
+                <LogOut className='pointer-events-none h-4 w-4' />
+                <span className='pointer-events-none'>Sign Out</span>
               </button>
             </div>
           </>

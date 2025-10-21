@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Outlet, Navigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { migrateBabyData } from '../utils/migrateBabyData'
-import { NavBar } from './NavBar'
+
 import { Sidebar } from './Sidebar'
 import { MobileHeader } from './MobileHeader'
 import { Header } from './Header'
@@ -96,9 +96,7 @@ export const AppLayout: React.FC = () => {
               <Outlet />
             </div>
           </div>
-          <ComponentErrorBoundary componentName='NavBar'>
-            <NavBar />
-          </ComponentErrorBoundary>
+
           <ComponentErrorBoundary componentName='FloatingAIAssistant'>
             <FloatingAIAssistant />
           </ComponentErrorBoundary>
