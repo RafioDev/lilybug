@@ -38,7 +38,7 @@ const SettingsContent: React.FC = () => {
     const tabParam = searchParams.get('tab') as TabType
     return tabParam && tabs.some((tab) => tab.id === tabParam)
       ? tabParam
-      : 'babies'
+      : 'general'
   })()
 
   // Update URL when tab changes

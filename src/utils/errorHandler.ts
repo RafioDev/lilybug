@@ -9,7 +9,7 @@ export interface ErrorReport {
   url: string
   userAgent: string
   userId?: string
-  context?: Record<string, any>
+  context?: Record<string, unknown>
 }
 
 class ErrorHandler {
@@ -61,7 +61,7 @@ class ErrorHandler {
     })
   }
 
-  captureError(error: Error, context?: Record<string, any>) {
+  captureError(error: Error, context?: Record<string, unknown>) {
     const errorReport: ErrorReport = {
       message: error.message,
       stack: error.stack,
@@ -109,7 +109,7 @@ class ErrorHandler {
   }
 
   // Method to manually report errors from components
-  reportError(error: Error | string, context?: Record<string, any>) {
+  reportError(error: Error | string, context?: Record<string, unknown>) {
     const errorObj = error instanceof Error ? error : new Error(error)
     this.captureError(errorObj, context)
   }
@@ -126,7 +126,7 @@ export const errorHandler = new ErrorHandler()
 // Convenience function for manual error reporting
 export const reportError = (
   error: Error | string,
-  context?: Record<string, any>
+  context?: Record<string, unknown>
 ) => {
   errorHandler.reportError(error, context)
 }

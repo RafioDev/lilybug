@@ -247,7 +247,11 @@ export const activityUtils = {
    */
   getDateString(timestamp: string): string {
     const date = new Date(timestamp)
-    return date.toISOString().split('T')[0]
+    // Use local time instead of UTC to avoid timezone issues
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
   },
 
   /**
@@ -272,15 +276,12 @@ export const activityUtils = {
    * Format date string for display
    */
   formatDateForDisplay(dateString: string): string {
-    if (this.isToday(dateString)) {
-      return 'Today'
-    }
-
     if (this.isYesterday(dateString)) {
       return 'Yesterday'
     }
 
-    // Format as "Oct 14, 2024"
+    // Format as "Oct 14, 2024" for all dates including today
+    // Today will be indicated by the badge in the UI
     const date = new Date(dateString + 'T00:00:00')
     return date.toLocaleDateString('en-US', {
       month: 'short',

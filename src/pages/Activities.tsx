@@ -1,22 +1,14 @@
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  Suspense,
-} from 'react'
-import { Mic, MicOff, Send, Clock } from 'lucide-react'
+import React, { useState, useMemo, Suspense } from 'react'
+import { Clock } from 'lucide-react'
 import { Layout } from '../components/Layout'
 import { Card } from '../components/Card'
-import { Button, IconButton } from '../components/Button'
+import { Button } from '../components/Button'
 import { Input } from '../components/Input'
+
 import { AppErrorBoundary } from '../components/AppErrorBoundary'
 import { PageErrorBoundary } from '../components/PageErrorBoundary'
 import { SectionErrorBoundary } from '../components/SectionErrorBoundary'
 
-import { chatActionService } from '../services/chatActionService'
-import { smartSearchService } from '../services/smartSearchService'
-import { aiService } from '../services/aiService'
 import { useActiveBaby } from '../hooks/queries/useBabyQueries'
 import {
   useEntries,
@@ -28,74 +20,54 @@ import { dateUtils } from '../utils/dateUtils'
 import { Modal } from '../components/Modal'
 import { ActivityModal } from '../components/LazyModals'
 import { GroupedActivitiesList } from '../components/GroupedActivitiesList'
+import { QuickFeedingModal } from '../components/QuickFeedingModal'
+import { QuickDiaperModal } from '../components/QuickDiaperModal'
+import { QuickSleepModal } from '../components/QuickSleepModal'
+
 import { ConfirmationModal } from '../components/ConfirmationModal'
 import { useConfirmationModal } from '../hooks/useConfirmationModal'
 import { reportError } from '../utils/errorHandler'
 import type { TrackerEntry, EntryType, FeedingType, DiaperType } from '../types'
 
-// Speech Recognition types
-interface SpeechRecognitionResult {
-  transcript: string
-  confidence: number
-}
-
-interface SpeechRecognitionResultList {
-  [index: number]: SpeechRecognitionResult[]
-  length: number
-}
-
-interface SpeechRecognitionEvent {
-  results: SpeechRecognitionResultList
-}
-
-interface SpeechRecognitionErrorEvent {
-  error: string
-}
-
-interface SpeechRecognitionInterface {
-  continuous: boolean
-  interimResults: boolean
-  lang: string
-  onstart: (() => void) | null
-  onresult: ((event: SpeechRecognitionEvent) => void) | null
-  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null
-  onend: (() => void) | null
-  start(): void
-  stop(): void
-}
-
-declare global {
-  interface Window {
-    webkitSpeechRecognition?: new () => SpeechRecognitionInterface
-    SpeechRecognition?: new () => SpeechRecognitionInterface
-  }
-}
-
-interface AIMessage {
-  id: string
-  type: 'user' | 'assistant'
-  content: string
-  timestamp: Date
-  isVoice?: boolean
-}
+// Voice functionality types and interfaces are now handled by UnifiedActionFooter
 
 const ActivitiesContent: React.FC = () => {
-  const [isListening, setIsListening] = useState(false)
-  const [messages, setMessages] = useState<AIMessage[]>([])
-  const [inputText, setInputText] = useState('')
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [todayStats, setTodayStats] = useState({
-    feedings: 0,
-    sleepHours: 0,
-    diapers: 0,
-  })
-
+  // Voice interface state removed - now handled by UnifiedActionFooter system
   // Use React Query for data
   const { data: activeBaby, isLoading: babyLoading } = useActiveBaby()
   const { data: entries = [], isLoading: entriesLoading } = useEntries(
     100,
     activeBaby?.id
   )
+
+  // Calculate today's stats using useMemo for better performance
+  const todayStats = useMemo(() => {
+    if (entries.length === 0) {
+      return {
+        feedings: 0,
+        sleepHours: 0,
+        diapers: 0,
+      }
+    }
+
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const todayEntries = entries.filter(
+      (entry) => new Date(entry.start_time) >= today
+    )
+
+    return {
+      feedings: todayEntries.filter((e) => e.entry_type === 'feeding').length,
+      sleepHours: todayEntries
+        .filter((e) => e.entry_type === 'sleep' && e.end_time)
+        .reduce((total, entry) => {
+          const start = new Date(entry.start_time)
+          const end = new Date(entry.end_time!)
+          return total + (end.getTime() - start.getTime()) / (1000 * 60 * 60)
+        }, 0),
+      diapers: todayEntries.filter((e) => e.entry_type === 'diaper').length,
+    }
+  }, [entries])
   const createEntryMutation = useCreateEntry()
   const deleteEntryMutation = useDeleteEntry()
 
@@ -109,6 +81,11 @@ const ActivitiesContent: React.FC = () => {
   const [isManualEntryModalOpen, setIsManualEntryModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [selectedEntry, setSelectedEntry] = useState<TrackerEntry | null>(null)
+
+  // Quick entry modal states
+  const [isQuickFeedingModalOpen, setIsQuickFeedingModalOpen] = useState(false)
+  const [isQuickDiaperModalOpen, setIsQuickDiaperModalOpen] = useState(false)
+  const [isQuickSleepModalOpen, setIsQuickSleepModalOpen] = useState(false)
   const [formData, setFormData] = useState({
     entryType: 'feeding' as EntryType,
     startTime: dateUtils.getCurrentLocalDateTime(),
@@ -119,232 +96,13 @@ const ActivitiesContent: React.FC = () => {
     notes: '',
   })
 
-  const recognitionRef = useRef<SpeechRecognitionInterface | null>(null)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  // Voice-related refs are now handled by UnifiedActionFooter
 
-  // Calculate today's stats when entries change
-  useEffect(() => {
-    if (entries.length > 0) {
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
-      const todayEntries = entries.filter(
-        (entry) => new Date(entry.start_time) >= today
-      )
+  // Stats are now calculated using useMemo above
 
-      const stats = {
-        feedings: todayEntries.filter((e) => e.entry_type === 'feeding').length,
-        sleepHours: todayEntries
-          .filter((e) => e.entry_type === 'sleep' && e.end_time)
-          .reduce((total, entry) => {
-            const start = new Date(entry.start_time)
-            const end = new Date(entry.end_time!)
-            return total + (end.getTime() - start.getTime()) / (1000 * 60 * 60)
-          }, 0),
-        diapers: todayEntries.filter((e) => e.entry_type === 'diaper').length,
-      }
+  // Voice functionality is now handled by UnifiedActionFooter component
 
-      setTodayStats(stats)
-    }
-  }, [entries])
-
-  const processMessage = useCallback(
-    async (message: string) => {
-      setIsProcessing(true)
-
-      try {
-        const babyName = activeBaby?.name || 'your baby'
-
-        // Parse the action using AI
-        const action = await chatActionService.parseActionFromMessage(
-          message,
-          babyName
-        )
-
-        let responseContent = ''
-
-        if (action.type === 'create_entry') {
-          if (!activeBaby) {
-            responseContent =
-              'Please add a baby first before tracking activities.'
-          } else {
-            // Execute the action
-            const actionResult = await chatActionService.executeAction(
-              action,
-              babyName,
-              activeBaby.id
-            )
-            responseContent = actionResult
-
-            // React Query will automatically refetch after mutations
-          }
-        } else if (action.type === 'start_timer') {
-          const feedingTypeText =
-            action.feedingType === 'breast_left'
-              ? 'left breast'
-              : action.feedingType === 'breast_right'
-                ? 'right breast'
-                : action.feedingType === 'both'
-                  ? 'both breasts'
-                  : 'bottle'
-
-          responseContent = `I can't start live timers, but I can log completed feedings! Try saying "Log a ${feedingTypeText} feeding of 120ml" or just "Log ${feedingTypeText} feeding".`
-        } else {
-          // Handle as search query
-          try {
-            const parsedQuery =
-              smartSearchService.parseNaturalLanguageQuery(message)
-            const searchResult = smartSearchService.executeSearch(
-              entries,
-              parsedQuery
-            )
-
-            if (searchResult.totalCount === 0) {
-              responseContent = `I couldn't find any ${
-                parsedQuery.type === 'all' ? 'activities' : parsedQuery.type
-              } matching "${message}". ${babyName} might not have had any activities matching those criteria yet.`
-            } else {
-              responseContent = `Looking at ${babyName}'s data: ${searchResult.summary}`
-            }
-          } catch (error) {
-            console.error('Error generating response:', error)
-            responseContent = `I can help you track ${babyName}'s activities! Try saying things like "Log a bottle feeding of 120ml" or "How did ${babyName.toLowerCase()} sleep last night?"`
-          }
-        }
-
-        const assistantMessage: AIMessage = {
-          id: Date.now().toString() + '_assistant',
-          type: 'assistant',
-          content: responseContent,
-          timestamp: new Date(),
-        }
-
-        setMessages((prev) => [...prev, assistantMessage])
-      } catch (error) {
-        console.error('Error processing message:', error)
-        reportError(error instanceof Error ? error : new Error(String(error)), {
-          context: 'processMessage',
-          message,
-          babyId: activeBaby?.id,
-        })
-
-        const errorMessage: AIMessage = {
-          id: Date.now().toString() + '_error',
-          type: 'assistant',
-          content:
-            "I'm sorry, I had trouble with that request. Could you try again?",
-          timestamp: new Date(),
-        }
-
-        setMessages((prev) => [...prev, errorMessage])
-      } finally {
-        setIsProcessing(false)
-      }
-    },
-    [activeBaby, entries]
-  )
-
-  const handleVoiceInput = useCallback(
-    async (transcript: string) => {
-      const userMessage: AIMessage = {
-        id: Date.now().toString(),
-        type: 'user',
-        content: transcript,
-        timestamp: new Date(),
-        isVoice: true,
-      }
-
-      setMessages((prev) => [...prev, userMessage])
-      await processMessage(transcript)
-    },
-    [processMessage]
-  )
-
-  // Initial setup - runs only once
-  useEffect(() => {
-    // Initialize speech recognition
-    if (window.webkitSpeechRecognition || window.SpeechRecognition) {
-      const SpeechRecognitionClass =
-        window.webkitSpeechRecognition || window.SpeechRecognition
-      if (SpeechRecognitionClass) {
-        recognitionRef.current = new SpeechRecognitionClass()
-
-        recognitionRef.current.continuous = false
-        recognitionRef.current.interimResults = false
-        recognitionRef.current.lang = 'en-US'
-
-        recognitionRef.current.onstart = () => {
-          setIsListening(true)
-        }
-
-        recognitionRef.current.onerror = (
-          event: SpeechRecognitionErrorEvent
-        ) => {
-          console.error('Speech recognition error:', event.error)
-          setIsListening(false)
-        }
-
-        recognitionRef.current.onend = () => {
-          setIsListening(false)
-        }
-      }
-    }
-
-    // Add welcome message
-    const welcomeMessage: AIMessage = {
-      id: 'welcome',
-      type: 'assistant',
-      content: `Hi! I'm your AI baby tracking assistant. Just talk to me to log activities! Try saying "Log a bottle feeding of 4 ounces" or "Record a wet diaper change".`,
-      timestamp: new Date(),
-    }
-    setMessages([welcomeMessage])
-  }, []) // Empty dependency array - runs only once
-
-  // Update speech recognition handler when handleVoiceInput changes
-  useEffect(() => {
-    if (recognitionRef.current) {
-      recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
-        const transcript = event.results[0][0].transcript
-        handleVoiceInput(transcript)
-      }
-    }
-  }, [handleVoiceInput])
-
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
-
-  const startListening = () => {
-    if (recognitionRef.current && !isListening) {
-      recognitionRef.current.start()
-    }
-  }
-
-  const stopListening = () => {
-    if (recognitionRef.current && isListening) {
-      recognitionRef.current.stop()
-    }
-  }
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
-
-  const handleTextInput = async () => {
-    if (!inputText.trim()) return
-
-    const userMessage: AIMessage = {
-      id: Date.now().toString(),
-      type: 'user',
-      content: inputText,
-      timestamp: new Date(),
-      isVoice: false,
-    }
-
-    setMessages((prev) => [...prev, userMessage])
-    const message = inputText
-    setInputText('')
-    await processMessage(message)
-  }
+  // Voice functionality and speech recognition is now handled by UnifiedActionFooter
 
   // Activities functions
   const deleteEntry = async (id: string) => {
@@ -392,19 +150,6 @@ const ActivitiesContent: React.FC = () => {
   const handleEditError = (error: string) => {
     console.error('Edit error:', error)
     // You could add a toast notification here
-  }
-
-  const openManualEntryModal = () => {
-    setFormData({
-      entryType: 'feeding',
-      startTime: dateUtils.getCurrentLocalDateTime(),
-      endTime: '',
-      quantity: '',
-      feedingType: 'bottle',
-      diaperType: 'wet',
-      notes: '',
-    })
-    setIsManualEntryModalOpen(true)
   }
 
   const handleManualSubmit = async () => {
@@ -455,58 +200,49 @@ const ActivitiesContent: React.FC = () => {
   if (isLoading) {
     return (
       <Layout>
-        <div className='mx-auto max-w-4xl space-y-6'>
-          {/* Loading Stats */}
-          <div className='grid grid-cols-3 gap-4'>
-            <Card className='text-center'>
-              <div className='mx-auto mb-2 h-8 w-8 animate-pulse rounded bg-gray-200 dark:bg-gray-700'></div>
-              <div className='text-sm text-gray-400 dark:text-gray-500'>
-                Loading...
+        <div className='mx-auto max-w-4xl space-y-3 pb-20'>
+          {/* Loading Stats - Mobile Optimized */}
+          <Card className='p-2'>
+            <div className='grid grid-cols-3 gap-2'>
+              <div className='rounded-lg p-2 text-center'>
+                <div className='mx-auto mb-1 h-5 w-6 animate-pulse rounded bg-gray-200 dark:bg-gray-700'></div>
+                <div className='text-xs text-gray-400 dark:text-gray-500'>
+                  Loading...
+                </div>
               </div>
-            </Card>
-            <Card className='text-center'>
-              <div className='mx-auto mb-2 h-8 w-8 animate-pulse rounded bg-gray-200 dark:bg-gray-700'></div>
-              <div className='text-sm text-gray-400 dark:text-gray-500'>
-                Loading...
+              <div className='rounded-lg p-2 text-center'>
+                <div className='mx-auto mb-1 h-5 w-8 animate-pulse rounded bg-gray-200 dark:bg-gray-700'></div>
+                <div className='text-xs text-gray-400 dark:text-gray-500'>
+                  Loading...
+                </div>
               </div>
-            </Card>
-            <Card className='text-center'>
-              <div className='mx-auto mb-2 h-8 w-8 animate-pulse rounded bg-gray-200 dark:bg-gray-700'></div>
-              <div className='text-sm text-gray-400 dark:text-gray-500'>
-                Loading...
-              </div>
-            </Card>
-          </div>
-
-          {/* Loading Voice Interface */}
-          <Card className='p-8'>
-            <div className='flex flex-col items-center space-y-6'>
-              <div className='h-24 w-24 animate-pulse rounded-full bg-gray-200 dark:bg-gray-700'></div>
-              <div className='text-center'>
-                <div className='mx-auto mb-2 h-6 w-32 animate-pulse rounded bg-gray-200 dark:bg-gray-700'></div>
-                <div className='mx-auto h-4 w-48 animate-pulse rounded bg-gray-200 dark:bg-gray-700'></div>
+              <div className='rounded-lg p-2 text-center'>
+                <div className='mx-auto mb-1 h-5 w-6 animate-pulse rounded bg-gray-200 dark:bg-gray-700'></div>
+                <div className='text-xs text-gray-400 dark:text-gray-500'>
+                  Loading...
+                </div>
               </div>
             </div>
           </Card>
 
-          {/* Loading Activities */}
-          <Card>
-            <div className='mb-4 flex items-center justify-between'>
-              <div className='flex items-center gap-3'>
-                <Clock className='h-5 w-5 text-gray-400 dark:text-gray-500' />
-                <div className='h-5 w-32 animate-pulse rounded bg-gray-200 dark:bg-gray-700'></div>
+          {/* Loading Activities - Maximized */}
+          <Card className='p-3'>
+            <div className='mb-3 flex items-center justify-between'>
+              <div className='flex items-center gap-2'>
+                <Clock className='h-4 w-4 text-gray-400 dark:text-gray-500' />
+                <div className='h-4 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-700'></div>
               </div>
             </div>
-            <div className='space-y-3'>
-              {[1, 2, 3].map((i) => (
+            <div className='space-y-2'>
+              {[1, 2, 3, 4, 5, 6].map((i) => (
                 <div
                   key={i}
-                  className='flex items-center gap-3 rounded-lg bg-gray-50 p-3 dark:bg-gray-700'
+                  className='flex items-center gap-2 rounded-lg bg-gray-50 p-2 dark:bg-gray-700'
                 >
-                  <div className='h-8 w-8 animate-pulse rounded bg-gray-200 dark:bg-gray-600'></div>
+                  <div className='h-6 w-6 animate-pulse rounded bg-gray-200 dark:bg-gray-600'></div>
                   <div className='flex-1'>
-                    <div className='mb-1 h-4 w-48 animate-pulse rounded bg-gray-200 dark:bg-gray-600'></div>
-                    <div className='h-3 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-600'></div>
+                    <div className='mb-1 h-3 w-32 animate-pulse rounded bg-gray-200 dark:bg-gray-600'></div>
+                    <div className='h-2 w-16 animate-pulse rounded bg-gray-200 dark:bg-gray-600'></div>
                   </div>
                 </div>
               ))}
@@ -519,169 +255,97 @@ const ActivitiesContent: React.FC = () => {
 
   return (
     <Layout>
-      <div className='mx-auto max-w-4xl space-y-6'>
-        {/* Today's Summary */}
+      <div className='mx-auto max-w-4xl space-y-3 pb-20'>
+        {/* Mobile-Optimized Today's Summary */}
         {activeBaby && (
           <SectionErrorBoundary
             sectionName="Today's Stats"
             contextData={{ babyId: activeBaby.id }}
           >
-            <div className='grid grid-cols-3 gap-4'>
-              <Card className='text-center'>
-                <div className='text-2xl font-bold text-blue-600'>
-                  {todayStats.feedings}
-                </div>
-                <div className='text-sm text-gray-600 dark:text-gray-300'>
-                  Feedings Today
-                </div>
-              </Card>
-              <Card className='text-center'>
-                <div className='text-2xl font-bold text-cyan-600'>
-                  {`${todayStats.sleepHours.toFixed(1)}h`}
-                </div>
-                <div className='text-sm text-gray-600 dark:text-gray-300'>
-                  Sleep Today
-                </div>
-              </Card>
-              <Card className='text-center'>
-                <div className='text-2xl font-bold text-emerald-600'>
-                  {todayStats.diapers}
-                </div>
-                <div className='text-sm text-gray-600 dark:text-gray-300'>
-                  Diapers Today
-                </div>
-              </Card>
-            </div>
+            <Card className='p-2'>
+              <div className='grid grid-cols-3 gap-2'>
+                {/* Feeding Stats */}
+                <button
+                  className='group min-h-[44px] rounded-lg p-2 text-center transition-all duration-200 hover:bg-blue-50 active:scale-95 dark:hover:bg-blue-900/20'
+                  onClick={() => {
+                    // Future: Could open detailed feeding stats modal
+                    console.log('Feeding stats tapped')
+                  }}
+                  aria-label={`${todayStats.feedings} feedings today. Tap for details.`}
+                >
+                  <div className='text-lg font-bold text-blue-600 group-hover:text-blue-700 sm:text-xl'>
+                    {todayStats.feedings}
+                  </div>
+                  <div className='text-xs font-medium text-gray-600 dark:text-gray-300'>
+                    Feedings
+                  </div>
+                </button>
+
+                {/* Sleep Stats */}
+                <button
+                  className='group min-h-[44px] rounded-lg p-2 text-center transition-all duration-200 hover:bg-cyan-50 active:scale-95 dark:hover:bg-cyan-900/20'
+                  onClick={() => {
+                    // Future: Could open detailed sleep stats modal
+                    console.log('Sleep stats tapped')
+                  }}
+                  aria-label={`${todayStats.sleepHours.toFixed(1)} hours of sleep today. Tap for details.`}
+                >
+                  <div className='text-lg font-bold text-cyan-600 group-hover:text-cyan-700 sm:text-xl'>
+                    {`${todayStats.sleepHours.toFixed(1)}h`}
+                  </div>
+                  <div className='text-xs font-medium text-gray-600 dark:text-gray-300'>
+                    Sleep
+                  </div>
+                </button>
+
+                {/* Diaper Stats */}
+                <button
+                  className='group min-h-[44px] rounded-lg p-2 text-center transition-all duration-200 hover:bg-emerald-50 active:scale-95 dark:hover:bg-emerald-900/20'
+                  onClick={() => {
+                    // Future: Could open detailed diaper stats modal
+                    console.log('Diaper stats tapped')
+                  }}
+                  aria-label={`${todayStats.diapers} diaper changes today. Tap for details.`}
+                >
+                  <div className='text-lg font-bold text-emerald-600 group-hover:text-emerald-700 sm:text-xl'>
+                    {todayStats.diapers}
+                  </div>
+                  <div className='text-xs font-medium text-gray-600 dark:text-gray-300'>
+                    Diapers
+                  </div>
+                </button>
+              </div>
+            </Card>
           </SectionErrorBoundary>
         )}
 
-        {/* AI Voice Command Interface */}
-        <SectionErrorBoundary
-          sectionName='Voice Interface'
-          contextData={{ babyId: activeBaby?.id }}
-        >
-          <Card className='p-8'>
-            <div className='flex flex-col items-center space-y-6'>
-              {/* Primary Voice Button */}
-              <IconButton
-                icon={isListening ? <MicOff /> : <Mic />}
-                onClick={isListening ? stopListening : startListening}
-                disabled={isProcessing || isLoading}
-                variant={isListening ? 'danger' : 'primary'}
-                size='lg'
-                iconSize='2xl'
-                fullRounded
-                aria-label={
-                  isListening ? 'Stop listening' : 'Start voice input'
-                }
-                className={`h-24 w-24 transition-all duration-200 ${
-                  isListening
-                    ? 'scale-110 animate-pulse !bg-red-500 shadow-lg hover:!bg-red-600'
-                    : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 hover:shadow-lg'
-                }`}
-              />
+        {/* Voice functionality is now handled by UnifiedActionFooter */}
 
-              {/* Status Text */}
-              {isListening ? (
-                <div className='text-center'>
-                  <div className='animate-pulse text-lg font-medium text-blue-600 dark:text-blue-400'>
-                    🎤 Listening...
-                  </div>
-                  <div className='text-sm text-gray-500 dark:text-gray-400'>
-                    {aiService.isConfigured()
-                      ? "Say anything naturally - I'll understand!"
-                      : "Say something like 'Log a bottle feeding'"}
-                  </div>
-                </div>
-              ) : isProcessing ? (
-                <div className='text-center'>
-                  <div className='text-lg font-medium text-blue-600 dark:text-blue-400'>
-                    {aiService.isConfigured()
-                      ? '🤖 AI Processing...'
-                      : 'Processing...'}
-                  </div>
-                  <div className='mt-2 flex justify-center space-x-1'>
-                    <div className='h-2 w-2 animate-bounce rounded-full bg-blue-400'></div>
-                    <div
-                      className='h-2 w-2 animate-bounce rounded-full bg-blue-400'
-                      style={{ animationDelay: '0.1s' }}
-                    ></div>
-                    <div
-                      className='h-2 w-2 animate-bounce rounded-full bg-blue-400'
-                      style={{ animationDelay: '0.2s' }}
-                    ></div>
-                  </div>
-                </div>
-              ) : (
-                <div className='text-center'>
-                  <div className='text-lg font-medium text-gray-700 dark:text-gray-200'>
-                    Tap to speak
-                    {aiService.isConfigured() && (
-                      <span className='ml-2 text-green-600 dark:text-green-400'>
-                        🤖 AI Ready
-                      </span>
-                    )}
-                  </div>
-                  <div className='text-sm text-gray-500 dark:text-gray-400'>
-                    {aiService.isConfigured()
-                      ? 'Speak naturally - no specific phrases needed!'
-                      : 'Or type below if needed'}
-                  </div>
-                </div>
-              )}
-
-              {/* Secondary Text Input */}
-              <div className='flex w-full max-w-md gap-2'>
-                <Input
-                  type='text'
-                  value={inputText}
-                  onChange={setInputText}
-                  placeholder='Or type your request here...'
-                  className='flex-1'
-                  disabled={isLoading}
-                />
-                <IconButton
-                  icon={<Send />}
-                  onClick={handleTextInput}
-                  disabled={!inputText.trim() || isProcessing || isLoading}
-                  aria-label='Send message'
-                  className='min-w-[60px]'
-                />
-              </div>
-            </div>
-          </Card>
-        </SectionErrorBoundary>
-
-        {/* Activities List */}
+        {/* Activities List - Maximized Height */}
         <SectionErrorBoundary
           sectionName='Activities List'
           contextData={{ babyId: activeBaby?.id }}
         >
-          <Card>
-            <div className='mb-4 flex items-center justify-between'>
-              <div className='flex items-center gap-3'>
-                <Clock className='h-5 w-5 text-gray-600 dark:text-gray-400' />
-                <h3 className='font-semibold text-gray-800 dark:text-gray-200'>
+          <Card className='p-3'>
+            <div className='mb-3 flex items-center justify-between'>
+              <div className='flex items-center gap-2'>
+                <Clock className='h-4 w-4 text-gray-600 dark:text-gray-400' />
+                <h3 className='text-sm font-semibold text-gray-800 dark:text-gray-200'>
                   Recent Activities
                 </h3>
               </div>
-              <Button
-                onClick={openManualEntryModal}
-                variant='outline'
-                className='text-sm'
-                disabled={isLoading}
-              >
-                Manual Entry
-              </Button>
             </div>
 
             <GroupedActivitiesList
-              entries={entries.slice(0, 50)} // Show more entries with grouping
+              entries={entries} // Show all entries with lazy loading
               onEditEntry={openEditModal}
               onDeleteEntry={handleDeleteEntry}
               onViewDetails={openDetailsModal}
               isLoading={entriesLoading}
-              className='max-h-96 overflow-y-auto'
+              compactMode={true} // Enable compact mobile display
+              virtualScrolling={true} // Enable performance optimizations
+              maxInitialGroups={5} // Show more days initially for better mobile experience
+              className='max-h-[60vh] overflow-y-auto' // Increased height to utilize freed space
             />
           </Card>
         </SectionErrorBoundary>
@@ -810,6 +474,15 @@ const ActivitiesContent: React.FC = () => {
               💡 <strong>Tip:</strong> For faster tracking, try using the voice
               assistant above! Just say "Log a bottle feeding of 4 ounces" or
               similar.
+            </p>
+          </div>
+
+          {/* Smart Defaults Indicator */}
+          <div className='rounded-lg bg-emerald-50 p-3 dark:bg-emerald-900/30'>
+            <p className='text-sm text-emerald-800 dark:text-emerald-200'>
+              ✨ <strong>Smart defaults applied!</strong> Values are pre-filled
+              based on your recent patterns and time of day. Feel free to adjust
+              as needed.
             </p>
           </div>
 
@@ -974,6 +647,49 @@ const ActivitiesContent: React.FC = () => {
           />
         </Suspense>
       </AppErrorBoundary>
+
+      {/* Quick Entry Modals */}
+      {activeBaby && (
+        <>
+          <QuickFeedingModal
+            isOpen={isQuickFeedingModalOpen}
+            onClose={() => setIsQuickFeedingModalOpen(false)}
+            onSave={() => {
+              // Refresh entries after successful save
+              // The useEntries query will automatically refetch
+            }}
+            onError={(error) => {
+              console.error('Quick feeding entry error:', error)
+              // Could add toast notification here
+            }}
+            babyId={activeBaby.id}
+          />
+
+          <QuickDiaperModal
+            isOpen={isQuickDiaperModalOpen}
+            onClose={() => setIsQuickDiaperModalOpen(false)}
+            onSave={() => {
+              // Refresh entries after successful save
+            }}
+            onError={(error) => {
+              console.error('Quick diaper entry error:', error)
+            }}
+            babyId={activeBaby.id}
+          />
+
+          <QuickSleepModal
+            isOpen={isQuickSleepModalOpen}
+            onClose={() => setIsQuickSleepModalOpen(false)}
+            onSave={() => {
+              // Refresh entries after successful save
+            }}
+            onError={(error) => {
+              console.error('Quick sleep entry error:', error)
+            }}
+            babyId={activeBaby.id}
+          />
+        </>
+      )}
 
       {/* Confirmation Modal */}
       {confirmationModal.config && (

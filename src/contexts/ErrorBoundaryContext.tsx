@@ -205,7 +205,7 @@ export const useErrorBoundary = () => {
 
       return errorId
     },
-    [context]
+    [context, setError]
   )
 
   return {
