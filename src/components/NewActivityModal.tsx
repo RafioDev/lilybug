@@ -2,28 +2,36 @@ import React, { useEffect } from 'react'
 import { ModalForm } from './ModalForm'
 import { ActivityForm, type ActivityFormData } from './ActivityForm'
 import { useForm } from '../hooks/useForm'
-import { useUpdateEntry } from '../hooks/queries/useTrackerQueries'
+import { useCreateEntry } from '../hooks/queries/useTrackerQueries'
+import { useSmartDefaults } from '../hooks/useSmartDefaults'
 import { dateUtils } from '../utils/dateUtils'
 import { ComponentErrorBoundary } from './ComponentErrorBoundary'
 import { reportError } from '../utils/errorHandler'
-import type { TrackerEntry, UpdateTrackerEntry } from '../types'
+import type { EntryType, NewTrackerEntry } from '../types'
 
-interface ActivityModalProps {
+interface NewActivityModalProps {
   isOpen: boolean
   onClose: () => void
-  onSave: (updatedEntry: TrackerEntry) => void
+  onSave: () => void
   onError: (error: string) => void
-  entry: TrackerEntry | null
+  babyId: string
+  initialEntryType?: EntryType
 }
 
-export const ActivityModal: React.FC<ActivityModalProps> = ({
+export const NewActivityModal: React.FC<NewActivityModalProps> = ({
   isOpen,
   onClose,
   onSave,
   onError,
-  entry,
+  babyId,
+  initialEntryType = 'feeding',
 }) => {
-  const updateEntry = useUpdateEntry()
+  const createEntry = useCreateEntry()
+  const { smartDefaults, hasDefaults } = useSmartDefaults({
+    entryType: initialEntryType,
+    babyId,
+    enabled: isOpen,
+  })
 
   // Form validation
   const validateActivity = (values: ActivityFormData) => {
@@ -55,10 +63,8 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
 
   // Form submission handler
   const handleSubmit = async (values: ActivityFormData) => {
-    if (!entry) return
-
-    // Prepare updates object outside try block so it's accessible in catch
-    const updates: UpdateTrackerEntry = {
+    const newEntry: NewTrackerEntry = {
+      baby_id: babyId,
       entry_type: values.entryType,
       start_time: values.startTime,
       end_time: values.endTime || null,
@@ -68,65 +74,59 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
 
     // Add type-specific fields
     if (values.entryType === 'feeding') {
-      updates.feeding_type = values.feedingType
+      newEntry.feeding_type = values.feedingType
     }
     if (values.entryType === 'diaper') {
-      updates.diaper_type = values.diaperType
+      newEntry.diaper_type = values.diaperType
     }
 
     try {
-      const updatedEntry = await updateEntry.mutateAsync({
-        id: entry.id,
-        updates,
-      })
-      onSave(updatedEntry)
+      await createEntry.mutateAsync(newEntry)
+      onSave()
       onClose()
     } catch (error) {
-      console.error('Error updating activity:', error)
+      console.error('Error creating activity:', error)
       reportError(error instanceof Error ? error : new Error(String(error)), {
-        context: 'updateActivity',
-        entryId: entry.id,
-        updates,
+        context: 'createActivity',
+        babyId,
+        entryType: values.entryType,
       })
       const errorMessage =
-        error instanceof Error ? error.message : 'Failed to update activity'
+        error instanceof Error ? error.message : 'Failed to create activity'
       onError(errorMessage)
     }
   }
 
-  // Initialize form
+  // Initialize form with smart defaults
   const form = useForm<ActivityFormData>({
     initialValues: {
-      entryType: 'feeding',
-      startTime: '',
-      endTime: '',
-      quantity: '',
-      feedingType: 'bottle',
-      diaperType: 'wet',
-      notes: '',
+      entryType: smartDefaults.entryType || initialEntryType,
+      startTime: smartDefaults.startTime || dateUtils.getCurrentLocalDateTime(),
+      endTime: smartDefaults.endTime || '',
+      quantity: smartDefaults.quantity?.toString() || '',
+      feedingType: smartDefaults.feedingType || 'bottle',
+      diaperType: smartDefaults.diaperType || 'wet',
+      notes: smartDefaults.notes || '',
     },
     validate: validateActivity,
     onSubmit: handleSubmit,
   })
 
-  // Update form values when entry changes
+  // Update form values when smart defaults change
   useEffect(() => {
-    if (entry) {
+    if (Object.keys(smartDefaults).length > 0) {
       form.setValues({
-        entryType: entry.entry_type,
-        startTime: dateUtils.toLocalDateTimeString(entry.start_time),
-        endTime: entry.end_time
-          ? dateUtils.toLocalDateTimeString(entry.end_time)
-          : '',
-        quantity: entry.quantity?.toString() || '',
-        feedingType: entry.feeding_type || 'bottle',
-        diaperType: entry.diaper_type || 'wet',
-        notes: entry.notes || '',
+        entryType: smartDefaults.entryType || initialEntryType,
+        startTime:
+          smartDefaults.startTime || dateUtils.getCurrentLocalDateTime(),
+        endTime: smartDefaults.endTime || '',
+        quantity: smartDefaults.quantity?.toString() || '',
+        feedingType: smartDefaults.feedingType || 'bottle',
+        diaperType: smartDefaults.diaperType || 'wet',
+        notes: smartDefaults.notes || '',
       })
-    } else {
-      form.reset()
     }
-  }, [entry]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [smartDefaults, initialEntryType]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Reset form when modal closes
   useEffect(() => {
@@ -135,34 +135,33 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
     }
   }, [isOpen]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const isSubmitting = updateEntry.isPending
-
-  if (!entry) return null
+  const isSubmitting = createEntry.isPending
 
   return (
-    <ComponentErrorBoundary componentName='ActivityModal'>
+    <ComponentErrorBoundary componentName='NewActivityModal'>
       <ModalForm
         isOpen={isOpen}
         onClose={onClose}
-        title={`Edit ${
-          entry.entry_type.charAt(0).toUpperCase() + entry.entry_type.slice(1)
-        } Activity`}
+        title='New Activity Entry'
         onSubmit={form.handleSubmit}
         isSubmitting={isSubmitting}
-        submitText='Save'
+        submitText='Create Entry'
         submitDisabled={
           Object.keys(form.errors).length > 0 || !form.values.startTime
         }
         size='lg'
       >
-        <div className='mb-4'>
-          <p className='text-sm text-gray-500'>
-            Created: {new Date(entry.created_at).toLocaleString()}
-          </p>
-          <p className='text-xs text-gray-400 dark:text-gray-500'>
-            Editing existing entry - smart defaults not applied
-          </p>
-        </div>
+        {/* Smart Defaults Indicator */}
+        {hasDefaults && (
+          <div className='mb-4 rounded-lg bg-emerald-50 p-3 dark:bg-emerald-900/30'>
+            <p className='text-sm text-emerald-800 dark:text-emerald-200'>
+              ✨ <strong>Smart defaults applied!</strong> Values are pre-filled
+              based on your recent patterns and time of day. Feel free to adjust
+              as needed.
+            </p>
+          </div>
+        )}
+
         <ComponentErrorBoundary componentName='ActivityForm'>
           <ActivityForm
             values={form.values}

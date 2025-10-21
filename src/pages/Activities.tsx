@@ -17,6 +17,7 @@ import { SectionErrorBoundary } from '../components/SectionErrorBoundary'
 import { chatActionService } from '../services/chatActionService'
 import { smartSearchService } from '../services/smartSearchService'
 import { aiService } from '../services/aiService'
+import { smartDefaultsEngine } from '../services/smartDefaultsService'
 import { useActiveBaby } from '../hooks/queries/useBabyQueries'
 import {
   useEntries,
@@ -395,14 +396,22 @@ const ActivitiesContent: React.FC = () => {
   }
 
   const openManualEntryModal = () => {
+    // Calculate smart defaults based on recent entries
+    const timeContext = smartDefaultsEngine.createTimeContext(entries || [])
+    const smartDefaults = smartDefaultsEngine.calculateDefaults(
+      'feeding', // Default to feeding, but user can change
+      entries || [],
+      timeContext
+    )
+
     setFormData({
-      entryType: 'feeding',
-      startTime: dateUtils.getCurrentLocalDateTime(),
-      endTime: '',
-      quantity: '',
-      feedingType: 'bottle',
-      diaperType: 'wet',
-      notes: '',
+      entryType: smartDefaults.entryType || 'feeding',
+      startTime: smartDefaults.startTime || dateUtils.getCurrentLocalDateTime(),
+      endTime: smartDefaults.endTime || '',
+      quantity: smartDefaults.quantity?.toString() || '',
+      feedingType: smartDefaults.feedingType || 'bottle',
+      diaperType: smartDefaults.diaperType || 'wet',
+      notes: smartDefaults.notes || '',
     })
     setIsManualEntryModalOpen(true)
   }
@@ -810,6 +819,15 @@ const ActivitiesContent: React.FC = () => {
               💡 <strong>Tip:</strong> For faster tracking, try using the voice
               assistant above! Just say "Log a bottle feeding of 4 ounces" or
               similar.
+            </p>
+          </div>
+
+          {/* Smart Defaults Indicator */}
+          <div className='rounded-lg bg-emerald-50 p-3 dark:bg-emerald-900/30'>
+            <p className='text-sm text-emerald-800 dark:text-emerald-200'>
+              ✨ <strong>Smart defaults applied!</strong> Values are pre-filled
+              based on your recent patterns and time of day. Feel free to adjust
+              as needed.
             </p>
           </div>
 
