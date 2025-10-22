@@ -19,10 +19,18 @@ interface ActivityFormProps {
   onChange: (field: keyof ActivityFormData, value: unknown) => void
   disabled?: boolean
   quickEntryMode?: boolean
+  isEditMode?: boolean
 }
 
 export const ActivityForm: React.FC<ActivityFormProps> = memo(
-  ({ values, errors, onChange, disabled = false, quickEntryMode = false }) => {
+  ({
+    values,
+    errors,
+    onChange,
+    disabled = false,
+    quickEntryMode = false,
+    isEditMode = false,
+  }) => {
     const [showAdvancedOptions, setShowAdvancedOptions] = useState(false)
 
     const getFeedingTypeLabel = (type: FeedingType) => {
@@ -208,11 +216,13 @@ export const ActivityForm: React.FC<ActivityFormProps> = memo(
           />
         )}
 
-        {/* End Time (for sleep and feeding) - Hidden in quick entry mode unless advanced options shown */}
-        {(values.entryType === 'sleep' || values.entryType === 'feeding') &&
+        {/* End Time (for sleep and breast feeding only, not bottle feeding) - Hidden in quick entry mode unless advanced options shown */}
+        {(values.entryType === 'sleep' ||
+          (values.entryType === 'feeding' &&
+            values.feedingType !== 'bottle')) &&
           (!quickEntryMode || showAdvancedOptions) && (
             <Input
-              label='End Time (optional)'
+              label={isEditMode ? 'End Time' : 'End Time (optional)'}
               type='datetime-local'
               value={values.endTime}
               onChange={(val) => onChange('endTime', val)}
@@ -224,7 +234,7 @@ export const ActivityForm: React.FC<ActivityFormProps> = memo(
         {/* Notes - Hidden in quick entry mode unless advanced options shown */}
         {(!quickEntryMode || showAdvancedOptions) && (
           <Input
-            label='Notes (optional)'
+            label={isEditMode ? 'Notes' : 'Notes (optional)'}
             type='textarea'
             value={values.notes}
             onChange={(val) => onChange('notes', val)}

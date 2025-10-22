@@ -172,4 +172,15 @@ export const dateUtils = {
     const minutes = String(d.getMinutes()).padStart(2, '0')
     return `${year}-${month}-${day}T${hours}:${minutes}`
   },
+
+  /**
+   * Convert datetime-local string to ISO string
+   * This treats the datetime-local value as local time and converts to proper ISO format
+   */
+  fromLocalDateTimeString(localDateTimeString: string): string {
+    // Create a new Date object from the datetime-local string
+    // This will interpret it as local time
+    const date = new Date(localDateTimeString)
+    return date.toISOString()
+  },
 }

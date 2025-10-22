@@ -7,7 +7,7 @@ import { Sidebar } from './Sidebar'
 import { MobileHeader } from './MobileHeader'
 import { Header } from './Header'
 import { UnifiedActionFooter } from './UnifiedActionFooter'
-import { NewActivityModal } from './NewActivityModal'
+import { ActivityModal } from './ActivityModal'
 import { HeaderProvider } from '../contexts/HeaderContext'
 import { ComponentErrorBoundary } from './ComponentErrorBoundary'
 import { useUserProfile } from '../hooks/queries/useProfileQueries'
@@ -110,8 +110,8 @@ export const AppLayout: React.FC = () => {
 
         {/* Global Manual Entry Modal */}
         {activeBaby && (
-          <ComponentErrorBoundary componentName='NewActivityModal'>
-            <NewActivityModal
+          <ComponentErrorBoundary componentName='ActivityModal'>
+            <ActivityModal
               isOpen={isManualEntryModalOpen}
               onClose={() => setIsManualEntryModalOpen(false)}
               onSave={() => {

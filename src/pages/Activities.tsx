@@ -22,9 +22,6 @@ import { dateUtils } from '../utils/dateUtils'
 import { Modal } from '../components/Modal'
 import { ActivityModal } from '../components/LazyModals'
 import { GroupedActivitiesList } from '../components/GroupedActivitiesList'
-import { QuickFeedingModal } from '../components/QuickFeedingModal'
-import { QuickDiaperModal } from '../components/QuickDiaperModal'
-import { QuickSleepModal } from '../components/QuickSleepModal'
 
 import { ConfirmationModal } from '../components/ConfirmationModal'
 import { useConfirmationModal } from '../hooks/useConfirmationModal'
@@ -88,10 +85,6 @@ const ActivitiesContent: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [selectedEntry, setSelectedEntry] = useState<TrackerEntry | null>(null)
 
-  // Quick entry modal states
-  const [isQuickFeedingModalOpen, setIsQuickFeedingModalOpen] = useState(false)
-  const [isQuickDiaperModalOpen, setIsQuickDiaperModalOpen] = useState(false)
-  const [isQuickSleepModalOpen, setIsQuickSleepModalOpen] = useState(false)
   const [formData, setFormData] = useState({
     entryType: 'feeding' as EntryType,
     startTime: dateUtils.getCurrentLocalDateTime(),
@@ -183,8 +176,10 @@ const ActivitiesContent: React.FC = () => {
     // Prepare entry object outside try block so it's accessible in catch
     const entry = {
       entry_type: formData.entryType,
-      start_time: formData.startTime,
-      end_time: formData.endTime || null,
+      start_time: dateUtils.fromLocalDateTimeString(formData.startTime),
+      end_time: formData.endTime
+        ? dateUtils.fromLocalDateTimeString(formData.endTime)
+        : null,
       quantity: formData.quantity ? parseFloat(formData.quantity) : null,
       feeding_type:
         formData.entryType === 'feeding' ? formData.feedingType : null,
@@ -540,7 +535,9 @@ const ActivitiesContent: React.FC = () => {
             onChange={(val) => setFormData({ ...formData, startTime: val })}
           />
 
-          {formData.entryType === 'sleep' && (
+          {(formData.entryType === 'sleep' ||
+            (formData.entryType === 'feeding' &&
+              formData.feedingType !== 'bottle')) && (
             <Input
               label='End Time (optional)'
               type='datetime-local'
@@ -663,49 +660,6 @@ const ActivitiesContent: React.FC = () => {
           />
         </Suspense>
       </AppErrorBoundary>
-
-      {/* Quick Entry Modals */}
-      {activeBaby && (
-        <>
-          <QuickFeedingModal
-            isOpen={isQuickFeedingModalOpen}
-            onClose={() => setIsQuickFeedingModalOpen(false)}
-            onSave={() => {
-              // Refresh entries after successful save
-              // The useEntries query will automatically refetch
-            }}
-            onError={(error) => {
-              console.error('Quick feeding entry error:', error)
-              // Could add toast notification here
-            }}
-            babyId={activeBaby.id}
-          />
-
-          <QuickDiaperModal
-            isOpen={isQuickDiaperModalOpen}
-            onClose={() => setIsQuickDiaperModalOpen(false)}
-            onSave={() => {
-              // Refresh entries after successful save
-            }}
-            onError={(error) => {
-              console.error('Quick diaper entry error:', error)
-            }}
-            babyId={activeBaby.id}
-          />
-
-          <QuickSleepModal
-            isOpen={isQuickSleepModalOpen}
-            onClose={() => setIsQuickSleepModalOpen(false)}
-            onSave={() => {
-              // Refresh entries after successful save
-            }}
-            onError={(error) => {
-              console.error('Quick sleep entry error:', error)
-            }}
-            babyId={activeBaby.id}
-          />
-        </>
-      )}
 
       {/* Confirmation Modal */}
       {confirmationModal.config && (

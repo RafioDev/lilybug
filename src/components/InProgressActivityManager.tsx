@@ -57,7 +57,9 @@ export const useInProgressActivityManager = (babyId: string) => {
       return entries
         .filter(
           (entry) =>
-            (entry.entry_type === 'feeding' || entry.entry_type === 'sleep') &&
+            (entry.entry_type === 'sleep' ||
+              (entry.entry_type === 'feeding' &&
+                entry.feeding_type !== 'bottle')) &&
             !entry.end_time &&
             entry.baby_id === babyId
         )

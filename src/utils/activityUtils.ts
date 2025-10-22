@@ -115,14 +115,16 @@ export const activityUtils = {
           details.push(`Amount: ${quantity}`)
         }
 
-        if (!entry.end_time) {
+        // Only breast feeding can be in progress, bottle feeding is instantaneous
+        if (entry.feeding_type !== 'bottle' && !entry.end_time) {
           // In progress - show as ongoing
           primaryText += ' (in progress)'
           details.push('Status: In progress')
-        } else if (duration) {
-          // Completed - don't add duration to primary text, it will show in secondary
+        } else if (entry.feeding_type !== 'bottle' && duration) {
+          // Completed breast feeding - don't add duration to primary text, it will show in secondary
           details.push(`Duration: ${duration}`)
         }
+        // Bottle feeding doesn't show duration or in-progress status
 
         break
       }
@@ -260,8 +262,9 @@ export const activityUtils = {
    * Check if a date string represents today
    */
   isToday(dateString: string): boolean {
-    const today = new Date().toISOString().split('T')[0]
-    return dateString === today
+    const today = new Date()
+    const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+    return dateString === todayString
   },
 
   /**
@@ -270,7 +273,7 @@ export const activityUtils = {
   isYesterday(dateString: string): boolean {
     const yesterday = new Date()
     yesterday.setDate(yesterday.getDate() - 1)
-    const yesterdayString = yesterday.toISOString().split('T')[0]
+    const yesterdayString = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`
     return dateString === yesterdayString
   },
 
@@ -348,7 +351,8 @@ export const activityUtils = {
    */
   isInProgress(entry: TrackerEntry): boolean {
     return (
-      (entry.entry_type === 'feeding' || entry.entry_type === 'sleep') &&
+      (entry.entry_type === 'sleep' ||
+        (entry.entry_type === 'feeding' && entry.feeding_type !== 'bottle')) &&
       !entry.end_time
     )
   },
