@@ -45,8 +45,6 @@ export const activityUtils = {
    */
   getFeedingTypeLabel(type: FeedingType): string {
     switch (type) {
-      case 'both':
-        return 'Both Breasts'
       case 'breast_left':
         return 'Breast Left'
       case 'breast_right':
@@ -117,8 +115,12 @@ export const activityUtils = {
           details.push(`Amount: ${quantity}`)
         }
 
-        if (duration) {
-          primaryText += ` for ${duration}`
+        if (!entry.end_time) {
+          // In progress - show as ongoing
+          primaryText += ' (in progress)'
+          details.push('Status: In progress')
+        } else if (duration) {
+          // Completed - don't add duration to primary text, it will show in secondary
           details.push(`Duration: ${duration}`)
         }
 
@@ -128,13 +130,13 @@ export const activityUtils = {
       case 'sleep': {
         primaryText = 'Sleep'
 
-        if (duration) {
-          primaryText += ` for ${duration}`
-          details.push(`Duration: ${duration}`)
-        } else if (entry.end_time) {
-          primaryText += ' (completed)'
-        } else {
+        if (!entry.end_time) {
+          // In progress - show as ongoing
           primaryText += ' (in progress)'
+          details.push('Status: In progress')
+        } else if (duration) {
+          // Completed - don't add duration to primary text, it will show in secondary
+          details.push(`Duration: ${duration}`)
         }
 
         break
@@ -339,5 +341,47 @@ export const activityUtils = {
     return entries.filter(
       (entry) => this.getDateString(entry.start_time) === dateString
     )
+  },
+
+  /**
+   * Check if an entry is in progress
+   */
+  isInProgress(entry: TrackerEntry): boolean {
+    return (
+      (entry.entry_type === 'feeding' || entry.entry_type === 'sleep') &&
+      !entry.end_time
+    )
+  },
+
+  /**
+   * Calculate real-time elapsed duration for in-progress activities
+   */
+  calculateElapsedDuration(startTime: string): string {
+    const start = new Date(startTime)
+    const now = new Date()
+    const diffMs = now.getTime() - start.getTime()
+
+    const minutes = Math.floor(diffMs / (1000 * 60))
+    const hours = Math.floor(minutes / 60)
+    const remainingMinutes = minutes % 60
+
+    if (hours > 0) {
+      return `${hours}h ${remainingMinutes}min`
+    }
+    return `${minutes} min`
+  },
+
+  /**
+   * Format duration in human-readable format
+   */
+  formatDuration(durationMs: number): string {
+    const minutes = Math.floor(durationMs / (1000 * 60))
+    const hours = Math.floor(minutes / 60)
+    const remainingMinutes = minutes % 60
+
+    if (hours > 0) {
+      return `${hours}h ${remainingMinutes}min`
+    }
+    return `${minutes} min`
   },
 }

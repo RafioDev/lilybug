@@ -93,9 +93,7 @@ export const useVoiceProcessor = (
               ? 'left breast'
               : action.feedingType === 'breast_right'
                 ? 'right breast'
-                : action.feedingType === 'both'
-                  ? 'both breasts'
-                  : 'bottle'
+                : 'bottle'
 
           responseContent = `I can't start live timers, but I can log completed feedings! Try saying "Log a ${feedingTypeText} feeding of 120ml"`
           responseType = 'info'

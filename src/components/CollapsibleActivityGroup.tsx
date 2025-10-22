@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { ChevronDown, ChevronRight, Edit3, Trash2 } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { ChevronDown, ChevronRight, Edit3, Trash2, Square } from 'lucide-react'
 import { IconButton } from './Button'
 import { activityUtils } from '../utils/activityUtils'
 import type { DateGroup } from '../utils/activityUtils'
@@ -10,6 +10,7 @@ interface CollapsibleActivityGroupProps {
   onEditEntry: (entry: TrackerEntry) => void
   onDeleteEntry: (entry: TrackerEntry) => void
   onViewDetails: (entry: TrackerEntry) => void
+  onStopActivity?: (entry: TrackerEntry) => void
   defaultExpanded?: boolean
   className?: string
 }
@@ -21,10 +22,27 @@ export const CollapsibleActivityGroup: React.FC<
   onEditEntry,
   onDeleteEntry,
   onViewDetails,
+  onStopActivity,
   defaultExpanded = true,
   className = '',
 }) => {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded)
+  const [, setCurrentTime] = useState(new Date())
+
+  // Update current time every minute to refresh in-progress durations
+  useEffect(() => {
+    const hasInProgressActivities = dateGroup.entries.some((entry) =>
+      activityUtils.isInProgress(entry)
+    )
+
+    if (!hasInProgressActivities) return
+
+    const interval = setInterval(() => {
+      setCurrentTime(new Date())
+    }, 60000) // Update every minute
+
+    return () => clearInterval(interval)
+  }, [dateGroup.entries])
 
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded)
@@ -95,13 +113,24 @@ export const CollapsibleActivityGroup: React.FC<
                   <p className='text-sm font-medium text-gray-900 dark:text-gray-100'>
                     {activityUtils.getEntryDetails(entry)}
                   </p>
-                  <p className='text-xs text-gray-500 dark:text-gray-400'>
-                    {new Date(entry.start_time).toLocaleTimeString('en-US', {
-                      hour: 'numeric',
-                      minute: '2-digit',
-                      hour12: true,
-                    })}
-                  </p>
+                  <div className='flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400'>
+                    <span>
+                      {new Date(entry.start_time).toLocaleTimeString('en-US', {
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true,
+                      })}
+                    </span>
+                    {/* Show duration for completed activities or elapsed time for in-progress */}
+                    {(entry.entry_type === 'feeding' ||
+                      entry.entry_type === 'sleep') && (
+                      <span className='font-medium text-blue-600 dark:text-blue-400'>
+                        {entry.end_time
+                          ? `• ${activityUtils.calculateEntryDuration(entry) || '0 min'}`
+                          : `• ${activityUtils.calculateElapsedDuration(entry.start_time)} (ongoing)`}
+                      </span>
+                    )}
+                  </div>
                   {entry.notes && (
                     <p className='mt-1 text-xs text-gray-400 italic dark:text-gray-500'>
                       "{entry.notes}"
@@ -112,6 +141,19 @@ export const CollapsibleActivityGroup: React.FC<
 
               {/* Action buttons */}
               <div className='flex items-center gap-2'>
+                {/* Stop button for in-progress feeding and sleep activities */}
+                {activityUtils.isInProgress(entry) && onStopActivity && (
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <IconButton
+                      onClick={() => onStopActivity(entry)}
+                      variant='secondary'
+                      size='sm'
+                      icon={<Square />}
+                      aria-label={`Stop ${entry.entry_type} activity`}
+                      className='border-emerald-300 text-emerald-600 hover:border-emerald-400 hover:text-emerald-700 dark:border-emerald-600 dark:text-emerald-400 dark:hover:border-emerald-500 dark:hover:text-emerald-300'
+                    />
+                  </div>
+                )}
                 <div onClick={(e) => e.stopPropagation()}>
                   <IconButton
                     onClick={() => onEditEntry(entry)}

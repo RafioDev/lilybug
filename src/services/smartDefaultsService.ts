@@ -119,12 +119,7 @@ export class SmartDefaultsEngine {
       }
     }
 
-    // Suggest end time for breast feeding (typical duration: 15-30 minutes)
-    if (defaults.feedingType !== 'bottle' && defaults.startTime) {
-      const startTime = new Date(defaults.startTime)
-      const endTime = new Date(startTime.getTime() + 20 * 60 * 1000) // 20 minutes
-      defaults.endTime = endTime.toISOString().slice(0, 16)
-    }
+    // Don't auto-set end time for feeding - let user track in-progress activities
 
     return defaults
   }
@@ -157,34 +152,10 @@ export class SmartDefaultsEngine {
    */
   private calculateSleepDefaults(
     defaults: SmartDefaults,
-    sleepEntries: TrackerEntry[],
-    timeContext: TimeContext
+    _sleepEntries: TrackerEntry[],
+    _timeContext: TimeContext
   ): SmartDefaults {
-    // Calculate typical sleep duration
-    const sleepDurations = sleepEntries
-      .filter((entry) => entry.end_time)
-      .map((entry) => {
-        const start = new Date(entry.start_time)
-        const end = new Date(entry.end_time!)
-        return end.getTime() - start.getTime()
-      })
-
-    if (sleepDurations.length > 0 && defaults.startTime) {
-      const avgDuration =
-        sleepDurations.reduce((sum, duration) => sum + duration, 0) /
-        sleepDurations.length
-      const startTime = new Date(defaults.startTime)
-      const endTime = new Date(startTime.getTime() + avgDuration)
-      defaults.endTime = endTime.toISOString().slice(0, 16)
-    } else if (defaults.startTime) {
-      // Default sleep duration based on time of day
-      const startTime = new Date(defaults.startTime)
-      const defaultDuration = timeContext.isNightTime
-        ? 8 * 60 * 60 * 1000
-        : 2 * 60 * 60 * 1000 // 8 hours night, 2 hours day
-      const endTime = new Date(startTime.getTime() + defaultDuration)
-      defaults.endTime = endTime.toISOString().slice(0, 16)
-    }
+    // Don't auto-set end time for sleep - let user track in-progress activities
 
     return defaults
   }

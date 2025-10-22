@@ -5,7 +5,7 @@ export interface UserConfig {
 }
 
 const DEFAULT_CONFIG: UserConfig = {
-  feedingTypeOrder: ['both', 'breast_left', 'breast_right', 'bottle'],
+  feedingTypeOrder: ['breast_left', 'breast_right', 'bottle'],
 }
 
 const CONFIG_KEY = 'baby_tracker_config'
@@ -18,7 +18,6 @@ export const configService = {
         const parsed = JSON.parse(stored)
         // Ensure all required feeding types are present
         const allTypes: FeedingType[] = [
-          'both',
           'breast_left',
           'breast_right',
           'bottle',

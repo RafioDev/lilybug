@@ -14,7 +14,9 @@ import {
   useEntries,
   useCreateEntry,
   useDeleteEntry,
+  useUpdateEntry,
 } from '../hooks/queries/useTrackerQueries'
+import { useInProgressActivityManager } from '../components/InProgressActivityManager'
 import { activityUtils } from '../utils/activityUtils'
 import { dateUtils } from '../utils/dateUtils'
 import { Modal } from '../components/Modal'
@@ -70,6 +72,10 @@ const ActivitiesContent: React.FC = () => {
   }, [entries])
   const createEntryMutation = useCreateEntry()
   const deleteEntryMutation = useDeleteEntry()
+  const updateEntryMutation = useUpdateEntry()
+
+  // In-progress activity management (for future use)
+  useInProgressActivityManager(activeBaby?.id || '')
 
   const isLoading = babyLoading || entriesLoading
 
@@ -152,6 +158,22 @@ const ActivitiesContent: React.FC = () => {
     // You could add a toast notification here
   }
 
+  const handleStopActivity = async (entry: TrackerEntry) => {
+    try {
+      const now = new Date().toISOString()
+      await updateEntryMutation.mutateAsync({
+        id: entry.id,
+        updates: { end_time: now },
+      })
+    } catch (error) {
+      console.error('Error stopping activity:', error)
+      reportError(error instanceof Error ? error : new Error(String(error)), {
+        context: 'stopActivity',
+        entryId: entry.id,
+      })
+    }
+  }
+
   const handleManualSubmit = async () => {
     if (!activeBaby) {
       console.error('No active baby selected')
@@ -185,8 +207,6 @@ const ActivitiesContent: React.FC = () => {
 
   const getFeedingTypeLabel = (type: FeedingType) => {
     switch (type) {
-      case 'both':
-        return 'Both Breasts'
       case 'breast_left':
         return 'Breast Left'
       case 'breast_right':
@@ -341,6 +361,7 @@ const ActivitiesContent: React.FC = () => {
               onEditEntry={openEditModal}
               onDeleteEntry={handleDeleteEntry}
               onViewDetails={openDetailsModal}
+              onStopActivity={handleStopActivity}
               isLoading={entriesLoading}
               compactMode={true} // Enable compact mobile display
               virtualScrolling={true} // Enable performance optimizations
@@ -536,12 +557,7 @@ const ActivitiesContent: React.FC = () => {
                 </label>
                 <div className='grid grid-cols-2 gap-2'>
                   {(
-                    [
-                      'both',
-                      'breast_left',
-                      'breast_right',
-                      'bottle',
-                    ] as FeedingType[]
+                    ['breast_left', 'breast_right', 'bottle'] as FeedingType[]
                   ).map((type) => (
                     <button
                       key={type}

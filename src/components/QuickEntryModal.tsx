@@ -229,12 +229,7 @@ export const QuickEntryModal: React.FC<QuickEntryModalProps> = ({
               </label>
               <div className='grid grid-cols-2 gap-2'>
                 {(
-                  [
-                    'bottle',
-                    'breast_left',
-                    'breast_right',
-                    'both',
-                  ] as FeedingType[]
+                  ['bottle', 'breast_left', 'breast_right'] as FeedingType[]
                 ).map((type) => (
                   <Button
                     key={type}
@@ -247,13 +242,11 @@ export const QuickEntryModal: React.FC<QuickEntryModalProps> = ({
                     disabled={isSubmitting}
                     className='text-xs'
                   >
-                    {type === 'both'
-                      ? 'Both Breasts'
-                      : type === 'breast_left'
-                        ? 'Left Breast'
-                        : type === 'breast_right'
-                          ? 'Right Breast'
-                          : 'Bottle'}
+                    {type === 'breast_left'
+                      ? 'Left Breast'
+                      : type === 'breast_right'
+                        ? 'Right Breast'
+                        : 'Bottle'}
                   </Button>
                 ))}
               </div>

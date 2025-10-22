@@ -136,7 +136,7 @@ export const chatActionService = {
       message.includes('both breast') ||
       message.includes('both sides')
     ) {
-      feedingType = 'both'
+      feedingType = 'breast_left' // Default to left breast when both is mentioned
     } else if (message.includes('bottle')) {
       feedingType = 'bottle'
     } else if (message.includes('breast') || message.includes('nursing')) {
@@ -199,7 +199,7 @@ export const chatActionService = {
       message.includes('both breast') ||
       message.includes('both sides')
     ) {
-      return 'both'
+      return 'breast_left' // Default to left breast when both is mentioned
     } else if (message.includes('bottle')) {
       return 'bottle'
     } else if (message.includes('breast') || message.includes('nursing')) {
@@ -422,9 +422,7 @@ export const chatActionService = {
         ? 'left breast'
         : action.feedingType === 'breast_right'
           ? 'right breast'
-          : action.feedingType === 'both'
-            ? 'both breasts'
-            : 'bottle'
+          : 'bottle'
 
     return `I can't start live timers from chat, but I can help you log feeding entries! Try saying:
 
@@ -449,9 +447,7 @@ For live timers with real-time tracking, visit the tracker page where you can st
             ? 'left breast'
             : action.feedingType === 'breast_right'
               ? 'right breast'
-              : action.feedingType === 'both'
-                ? 'both breasts'
-                : 'bottle'
+              : 'bottle'
         const quantityText = action.quantity ? ` (${action.quantity}ml)` : ''
         return `✅ Logged ${feedingTypeText} feeding for ${babyName}${quantityText}${timeText}!`
       }

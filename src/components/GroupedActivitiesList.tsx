@@ -11,6 +11,7 @@ interface GroupedActivitiesListProps {
   onEditEntry: (entry: TrackerEntry) => void
   onDeleteEntry: (entry: TrackerEntry) => void
   onViewDetails: (entry: TrackerEntry) => void
+  onStopActivity?: (entry: TrackerEntry) => void
   isLoading?: boolean
   className?: string
   compactMode?: boolean
@@ -27,6 +28,7 @@ export const GroupedActivitiesList: React.FC<GroupedActivitiesListProps> = ({
   onEditEntry,
   onDeleteEntry,
   onViewDetails,
+  onStopActivity,
   isLoading = false,
   className = '',
   compactMode = false,
@@ -74,6 +76,13 @@ export const GroupedActivitiesList: React.FC<GroupedActivitiesListProps> = ({
       onViewDetails(entry)
     },
     [onViewDetails]
+  )
+
+  const handleStopActivity = useCallback(
+    (entry: TrackerEntry) => {
+      onStopActivity?.(entry)
+    },
+    [onStopActivity]
   )
 
   // Load more groups function
@@ -146,6 +155,7 @@ export const GroupedActivitiesList: React.FC<GroupedActivitiesListProps> = ({
                 onEditEntry={handleEditEntry}
                 onDeleteEntry={handleDeleteEntry}
                 onViewDetails={handleViewDetails}
+                onStopActivity={handleStopActivity}
                 defaultExpanded={index < 2} // Keep first 2 groups expanded by default
               />
             ) : (
@@ -154,6 +164,7 @@ export const GroupedActivitiesList: React.FC<GroupedActivitiesListProps> = ({
                 onEditEntry={handleEditEntry}
                 onDeleteEntry={handleDeleteEntry}
                 onViewDetails={handleViewDetails}
+                onStopActivity={handleStopActivity}
               />
             )}
           </ComponentErrorBoundary>
