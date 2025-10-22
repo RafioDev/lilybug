@@ -80,7 +80,6 @@ const ActivitiesContent: React.FC = () => {
   const confirmationModal = useConfirmationModal()
 
   // Activities state
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
   const [isManualEntryModalOpen, setIsManualEntryModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [selectedEntry, setSelectedEntry] = useState<TrackerEntry | null>(null)
@@ -129,11 +128,6 @@ const ActivitiesContent: React.FC = () => {
         await deleteEntry(entry.id)
       },
     })
-  }
-
-  const openDetailsModal = (entry: TrackerEntry) => {
-    setSelectedEntry(entry)
-    setIsDetailsModalOpen(true)
   }
 
   const openEditModal = (entry: TrackerEntry) => {
@@ -355,128 +349,15 @@ const ActivitiesContent: React.FC = () => {
               entries={entries} // Show all entries with lazy loading
               onEditEntry={openEditModal}
               onDeleteEntry={handleDeleteEntry}
-              onViewDetails={openDetailsModal}
               onStopActivity={handleStopActivity}
               isLoading={entriesLoading}
-              compactMode={true} // Enable compact mobile display
               virtualScrolling={true} // Enable performance optimizations
               maxInitialGroups={5} // Show more days initially for better mobile experience
-              className='max-h-[60vh] overflow-y-auto' // Increased height to utilize freed space
+              className='max-h-[60vh] overflow-y-auto' // Scrollable activities list
             />
           </Card>
         </SectionErrorBoundary>
       </div>
-
-      {/* Entry Details Modal */}
-      <Modal
-        isOpen={isDetailsModalOpen}
-        onClose={() => setIsDetailsModalOpen(false)}
-        title='Activity Details'
-      >
-        {selectedEntry && (
-          <div className='space-y-4'>
-            <div className='flex items-center gap-3 rounded-lg bg-gray-100 p-3 dark:bg-gray-700'>
-              <span className='text-3xl'>
-                {activityUtils.getActivityIcon(selectedEntry.entry_type)}
-              </span>
-              <div>
-                <p className='font-medium text-gray-900 capitalize dark:text-gray-100'>
-                  {selectedEntry.entry_type}
-                </p>
-                <p className='text-sm text-gray-500 dark:text-gray-400'>
-                  {new Date(selectedEntry.start_time).toLocaleString()}
-                </p>
-              </div>
-            </div>
-
-            <div className='space-y-3'>
-              {selectedEntry.feeding_type && (
-                <div>
-                  <label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
-                    Feeding Type
-                  </label>
-                  <p className='text-gray-900 capitalize dark:text-gray-100'>
-                    {selectedEntry.feeding_type.replace('_', ' ')}
-                  </p>
-                </div>
-              )}
-
-              {selectedEntry.quantity && (
-                <div>
-                  <label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
-                    Quantity
-                  </label>
-                  <p className='text-gray-900 dark:text-gray-100'>
-                    {selectedEntry.quantity}
-                    {selectedEntry.entry_type === 'pumping' ? 'oz' : 'ml'}
-                  </p>
-                </div>
-              )}
-
-              {selectedEntry.diaper_type && (
-                <div>
-                  <label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
-                    Diaper Type
-                  </label>
-                  <p className='text-gray-900 capitalize dark:text-gray-100'>
-                    {selectedEntry.diaper_type}
-                  </p>
-                </div>
-              )}
-
-              {selectedEntry.end_time && (
-                <div>
-                  <label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
-                    Duration
-                  </label>
-                  <p className='text-gray-900 dark:text-gray-100'>
-                    {(() => {
-                      const start = new Date(selectedEntry.start_time)
-                      const end = new Date(selectedEntry.end_time!)
-                      const duration = Math.round(
-                        (end.getTime() - start.getTime()) / (1000 * 60)
-                      )
-                      const hours = Math.floor(duration / 60)
-                      const minutes = duration % 60
-                      return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`
-                    })()}
-                  </p>
-                </div>
-              )}
-
-              {selectedEntry.notes && (
-                <div>
-                  <label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
-                    Notes
-                  </label>
-                  <p className='text-gray-900 dark:text-gray-100'>
-                    {selectedEntry.notes}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <div className='flex gap-2 pt-4'>
-              <Button
-                onClick={() => {
-                  setIsDetailsModalOpen(false)
-                  handleDeleteEntry(selectedEntry)
-                }}
-                variant='outline'
-                className='flex-1 border-red-200 text-red-600 hover:bg-red-50'
-              >
-                Delete Entry
-              </Button>
-              <Button
-                onClick={() => setIsDetailsModalOpen(false)}
-                className='flex-1'
-              >
-                Close
-              </Button>
-            </div>
-          </div>
-        )}
-      </Modal>
 
       {/* Manual Entry Modal */}
       <Modal

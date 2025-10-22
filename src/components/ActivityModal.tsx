@@ -1,29 +1,23 @@
-import React, { useEffect } from 'react'
-import { ModalForm } from './ModalForm'
-import { ActivityForm, type ActivityFormData } from './ActivityForm'
-import { useForm } from '../hooks/useForm'
-import {
-  useUpdateEntry,
-  useCreateEntry,
-} from '../hooks/queries/useTrackerQueries'
+import React, { useState } from 'react'
+import { Modal } from './Modal'
+import { Button } from './Button'
+import { Input } from './Input'
+import { activityUtils } from '../utils/activityUtils'
 import { dateUtils } from '../utils/dateUtils'
-import { ComponentErrorBoundary } from './ComponentErrorBoundary'
-import { reportError } from '../utils/errorHandler'
-import type {
-  TrackerEntry,
-  UpdateTrackerEntry,
-  NewTrackerEntry,
-  EntryType,
-} from '../types'
+import {
+  useCreateEntry,
+  useUpdateEntry,
+} from '../hooks/queries/useTrackerQueries'
+import { useActiveBaby } from '../hooks/queries/useBabyQueries'
+import type { TrackerEntry, EntryType, FeedingType, DiaperType } from '../types'
 
 interface ActivityModalProps {
   isOpen: boolean
   onClose: () => void
-  onSave: (entry?: TrackerEntry) => void
-  onError: (error: string) => void
-  entry?: TrackerEntry | null // Optional - if provided, edit mode; if not, create mode
-  babyId?: string // Required for create mode
-  initialEntryType?: EntryType // For create mode
+  onSave?: () => void
+  onError?: (error: string) => void
+  entry?: TrackerEntry | null
+  babyId?: string
 }
 
 export const ActivityModal: React.FC<ActivityModalProps> = ({
@@ -33,199 +27,232 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
   onError,
   entry,
   babyId,
-  initialEntryType = 'feeding',
 }) => {
-  const updateEntry = useUpdateEntry()
-  const createEntry = useCreateEntry()
+  const { data: activeBaby } = useActiveBaby()
+  const createEntryMutation = useCreateEntry()
+  const updateEntryMutation = useUpdateEntry()
 
-  const isEditMode = Boolean(entry)
-  const isCreateMode = !isEditMode
+  const isEditMode = !!entry
+  const effectiveBabyId = babyId || activeBaby?.id
 
-  // Form validation
-  const validateActivity = (values: ActivityFormData) => {
-    const errors: Record<string, string> = {}
-
-    if (!values.startTime) {
-      errors.startTime = 'Start time is required'
-    }
-
-    if (values.endTime && values.startTime) {
-      const startDate = new Date(values.startTime)
-      const endDate = new Date(values.endTime)
-      if (endDate <= startDate) {
-        errors.endTime = 'End time must be after start time'
-      }
-    }
-
-    if (
-      (values.entryType === 'feeding' && values.feedingType === 'bottle') ||
-      values.entryType === 'pumping'
-    ) {
-      if (values.quantity && parseFloat(values.quantity) <= 0) {
-        errors.quantity = 'Quantity must be greater than 0'
-      }
-    }
-
-    return errors
-  }
-
-  // Form submission handler
-  const handleSubmit = async (values: ActivityFormData) => {
-    if (isEditMode && !entry) return
-    if (isCreateMode && !babyId) return
-
-    try {
-      if (isEditMode) {
-        // Update existing entry
-        const updates: UpdateTrackerEntry = {
-          entry_type: values.entryType,
-          start_time: dateUtils.fromLocalDateTimeString(values.startTime),
-          end_time: values.endTime
-            ? dateUtils.fromLocalDateTimeString(values.endTime)
-            : null,
-          quantity: values.quantity ? parseFloat(values.quantity) : null,
-          notes: values.notes || null,
-        }
-
-        // Add type-specific fields
-        if (values.entryType === 'feeding') {
-          updates.feeding_type = values.feedingType
-        }
-        if (values.entryType === 'diaper') {
-          updates.diaper_type = values.diaperType
-        }
-
-        const updatedEntry = await updateEntry.mutateAsync({
-          id: entry!.id,
-          updates,
-        })
-        onSave(updatedEntry)
-      } else {
-        // Create new entry
-        const newEntry: NewTrackerEntry = {
-          baby_id: babyId!,
-          entry_type: values.entryType,
-          start_time: dateUtils.fromLocalDateTimeString(values.startTime),
-          end_time: values.endTime
-            ? dateUtils.fromLocalDateTimeString(values.endTime)
-            : null,
-          quantity: values.quantity ? parseFloat(values.quantity) : null,
-          notes: values.notes || null,
-        }
-
-        // Add type-specific fields
-        if (values.entryType === 'feeding') {
-          newEntry.feeding_type = values.feedingType
-        }
-        if (values.entryType === 'diaper') {
-          newEntry.diaper_type = values.diaperType
-        }
-
-        await createEntry.mutateAsync(newEntry)
-        onSave()
-      }
-
-      onClose()
-    } catch (error) {
-      console.error(
-        `Error ${isEditMode ? 'updating' : 'creating'} activity:`,
-        error
-      )
-      reportError(error instanceof Error ? error : new Error(String(error)), {
-        context: isEditMode ? 'updateActivity' : 'createActivity',
-        entryId: entry?.id,
-        babyId,
-      })
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : `Failed to ${isEditMode ? 'update' : 'create'} activity`
-      onError(errorMessage)
-    }
-  }
-
-  // Initialize form
-  const form = useForm<ActivityFormData>({
-    initialValues: {
-      entryType: initialEntryType,
-      startTime: dateUtils.getCurrentLocalDateTime(),
-      endTime: '',
-      quantity: '',
-      feedingType: 'bottle',
-      diaperType: 'wet',
-      notes: '',
-    },
-    validate: validateActivity,
-    onSubmit: handleSubmit,
-  })
-
-  // Update form values when entry changes (edit mode) or reset for create mode
-  useEffect(() => {
-    if (isEditMode && entry) {
-      // Edit mode - populate with existing entry data
-      form.setValues({
+  // Initialize form data based on entry prop
+  const getInitialFormData = () => {
+    if (entry) {
+      return {
         entryType: entry.entry_type,
         startTime: dateUtils.toLocalDateTimeString(entry.start_time),
         endTime: entry.end_time
           ? dateUtils.toLocalDateTimeString(entry.end_time)
           : '',
         quantity: entry.quantity?.toString() || '',
-        feedingType: entry.feeding_type || 'bottle',
-        diaperType: entry.diaper_type || 'wet',
+        feedingType: entry.feeding_type || ('bottle' as FeedingType),
+        diaperType: entry.diaper_type || ('wet' as DiaperType),
         notes: entry.notes || '',
-      })
-    } else if (isCreateMode) {
-      // Create mode - simple defaults (current time)
-      form.setValues({
-        entryType: initialEntryType,
-        startTime: dateUtils.getCurrentLocalDateTime(),
-        endTime: '',
-        quantity: '',
-        feedingType: 'bottle',
-        diaperType: 'wet',
-        notes: '',
-      })
+      }
     }
-  }, [entry, isEditMode, isCreateMode, initialEntryType]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Reset form when modal closes
-  useEffect(() => {
-    if (!isOpen) {
-      form.reset()
+    return {
+      entryType: 'feeding' as EntryType,
+      startTime: dateUtils.getCurrentLocalDateTime(),
+      endTime: '',
+      quantity: '',
+      feedingType: 'bottle' as FeedingType,
+      diaperType: 'wet' as DiaperType,
+      notes: '',
     }
-  }, [isOpen]) // eslint-disable-line react-hooks/exhaustive-deps
+  }
 
-  const isSubmitting = updateEntry.isPending || createEntry.isPending
+  const [formData, setFormData] = useState(getInitialFormData)
+
+  const handleSubmit = async () => {
+    if (!effectiveBabyId) {
+      onError?.('No baby selected')
+      return
+    }
+
+    try {
+      const entryData = {
+        entry_type: formData.entryType,
+        start_time: dateUtils.fromLocalDateTimeString(formData.startTime),
+        end_time: formData.endTime
+          ? dateUtils.fromLocalDateTimeString(formData.endTime)
+          : null,
+        quantity: formData.quantity ? parseFloat(formData.quantity) : null,
+        feeding_type:
+          formData.entryType === 'feeding' ? formData.feedingType : null,
+        diaper_type:
+          formData.entryType === 'diaper' ? formData.diaperType : null,
+        notes: formData.notes || null,
+        baby_id: effectiveBabyId,
+      }
+
+      if (isEditMode && entry) {
+        await updateEntryMutation.mutateAsync({
+          id: entry.id,
+          updates: entryData,
+        })
+      } else {
+        await createEntryMutation.mutateAsync(entryData)
+      }
+
+      onSave?.()
+      onClose()
+    } catch (error) {
+      onError?.(error instanceof Error ? error.message : 'An error occurred')
+    }
+  }
+
+  const getFeedingTypeLabel = (type: FeedingType) => {
+    switch (type) {
+      case 'breast_left':
+        return 'Breast Left'
+      case 'breast_right':
+        return 'Breast Right'
+      case 'bottle':
+        return 'Bottle'
+    }
+  }
 
   return (
-    <ComponentErrorBoundary componentName='ActivityModal'>
-      <ModalForm
-        isOpen={isOpen}
-        onClose={onClose}
-        title={
-          isEditMode
-            ? `Edit ${entry!.entry_type.charAt(0).toUpperCase() + entry!.entry_type.slice(1)} Activity`
-            : 'New Activity Entry'
-        }
-        onSubmit={form.handleSubmit}
-        isSubmitting={isSubmitting}
-        submitText={isEditMode ? 'Save' : 'Create Entry'}
-        submitDisabled={
-          Object.keys(form.errors).length > 0 || !form.values.startTime
-        }
-        size='lg'
-      >
-        <ComponentErrorBoundary componentName='ActivityForm'>
-          <ActivityForm
-            values={form.values}
-            errors={form.errors}
-            onChange={form.handleChange}
-            disabled={isSubmitting}
-            quickEntryMode={isCreateMode}
-            isEditMode={isEditMode}
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={isEditMode ? 'Edit Activity' : 'Add Activity'}
+    >
+      <div className='space-y-4'>
+        {/* Entry Type Selection */}
+        <div>
+          <label className='mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300'>
+            Activity Type
+          </label>
+          <div className='grid grid-cols-2 gap-2'>
+            {(['feeding', 'sleep', 'diaper', 'pumping'] as EntryType[]).map(
+              (type) => (
+                <button
+                  key={type}
+                  onClick={() => setFormData({ ...formData, entryType: type })}
+                  className={`rounded-xl border-2 p-3 capitalize transition-all ${
+                    formData.entryType === type
+                      ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                      : 'border-gray-200 text-gray-600 hover:border-gray-300 dark:border-gray-600 dark:text-gray-300 dark:hover:border-gray-500'
+                  }`}
+                >
+                  {activityUtils.getActivityIcon(type)} {type}
+                </button>
+              )
+            )}
+          </div>
+        </div>
+
+        <Input
+          label='Start Time'
+          type='datetime-local'
+          value={formData.startTime}
+          onChange={(val) => setFormData({ ...formData, startTime: val })}
+        />
+
+        {(formData.entryType === 'sleep' ||
+          (formData.entryType === 'feeding' &&
+            formData.feedingType !== 'bottle')) && (
+          <Input
+            label='End Time (optional)'
+            type='datetime-local'
+            value={formData.endTime}
+            onChange={(val) => setFormData({ ...formData, endTime: val })}
           />
-        </ComponentErrorBoundary>
-      </ModalForm>
-    </ComponentErrorBoundary>
+        )}
+
+        {formData.entryType === 'feeding' && (
+          <>
+            <div>
+              <label className='mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300'>
+                Feeding Type
+              </label>
+              <div className='grid grid-cols-2 gap-2'>
+                {(
+                  ['breast_left', 'breast_right', 'bottle'] as FeedingType[]
+                ).map((type) => (
+                  <button
+                    key={type}
+                    onClick={() =>
+                      setFormData({ ...formData, feedingType: type })
+                    }
+                    className={`rounded-xl border-2 p-3 text-sm transition-all ${
+                      formData.feedingType === type
+                        ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                        : 'border-gray-200 text-gray-600 hover:border-gray-300 dark:border-gray-600 dark:text-gray-300 dark:hover:border-gray-500'
+                    }`}
+                  >
+                    {getFeedingTypeLabel(type)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {formData.feedingType === 'bottle' && (
+              <Input
+                label='Amount (oz)'
+                type='number'
+                step='0.5'
+                value={formData.quantity}
+                onChange={(val) => setFormData({ ...formData, quantity: val })}
+                placeholder='e.g., 4'
+              />
+            )}
+          </>
+        )}
+
+        {formData.entryType === 'pumping' && (
+          <Input
+            label='Amount (oz)'
+            type='number'
+            step='0.5'
+            value={formData.quantity}
+            onChange={(val) => setFormData({ ...formData, quantity: val })}
+            placeholder='e.g., 4'
+          />
+        )}
+
+        {formData.entryType === 'diaper' && (
+          <div>
+            <label className='mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300'>
+              Diaper Type
+            </label>
+            <div className='grid grid-cols-3 gap-2'>
+              {(['wet', 'dirty', 'both'] as DiaperType[]).map((type) => (
+                <button
+                  key={type}
+                  onClick={() => setFormData({ ...formData, diaperType: type })}
+                  className={`rounded-xl border-2 p-3 capitalize transition-all ${
+                    formData.diaperType === type
+                      ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                      : 'border-gray-200 text-gray-600 hover:border-gray-300 dark:border-gray-600 dark:text-gray-300 dark:hover:border-gray-500'
+                  }`}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <Input
+          label='Notes (optional)'
+          type='textarea'
+          value={formData.notes}
+          onChange={(val) => setFormData({ ...formData, notes: val })}
+          placeholder='Any additional details...'
+          rows={2}
+        />
+
+        <div className='flex gap-3'>
+          <Button onClick={onClose} variant='outline' fullWidth>
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit} fullWidth>
+            {isEditMode ? 'Update' : 'Save'} Activity
+          </Button>
+        </div>
+      </div>
+    </Modal>
   )
 }

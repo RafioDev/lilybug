@@ -3,7 +3,7 @@ import { cn } from '../utils/cn'
 
 interface ButtonProps {
   children?: React.ReactNode
-  onClick?: () => void
+  onClick?: (event?: React.MouseEvent<HTMLButtonElement>) => void
   variant?: 'primary' | 'secondary' | 'outline' | 'danger'
   size?: 'sm' | 'md' | 'lg'
   fullWidth?: boolean
@@ -129,17 +129,20 @@ interface IconButtonProps
 }
 
 // Memoized IconButton Component
-export const IconButton = React.memo<IconButtonProps>(
-  ({ icon, 'aria-label': ariaLabel, ...props }) => {
-    return (
-      <Button
-        {...props}
-        leftIcon={icon}
-        iconOnly={true}
-        aria-label={ariaLabel}
-      />
-    )
-  }
+export const IconButton = React.memo(
+  React.forwardRef<HTMLButtonElement, IconButtonProps>(
+    ({ icon, 'aria-label': ariaLabel, ...props }, ref) => {
+      return (
+        <Button
+          ref={ref}
+          {...props}
+          leftIcon={icon}
+          iconOnly={true}
+          aria-label={ariaLabel}
+        />
+      )
+    }
+  )
 )
 
 // Export ButtonGroup components
@@ -151,171 +154,180 @@ export {
 } from './ButtonGroup'
 
 // Memoized Button Component with performance optimizations
-export const Button = React.memo<ButtonProps>(
-  ({
-    children,
-    onClick,
-    variant = 'primary',
-    size = 'md',
-    fullWidth = false,
-    disabled = false,
-    type = 'button',
-    className = '',
-    fullRounded = false,
-    leftIcon,
-    rightIcon,
-    iconOnly = false,
-    iconSize,
-    loading = false,
-    loadingText,
-    'aria-label': ariaLabel,
-    'aria-describedby': ariaDescribedBy,
-  }) => {
-    // Accessibility warning for icon-only buttons (only in development)
-    React.useEffect(() => {
-      if (process.env.NODE_ENV === 'development' && iconOnly && !ariaLabel) {
-        console.warn(
-          'Icon-only buttons require an aria-label for accessibility'
-        )
-      }
-    }, [iconOnly, ariaLabel])
+export const Button = React.memo(
+  React.forwardRef<HTMLButtonElement, ButtonProps>(
+    (
+      {
+        children,
+        onClick,
+        variant = 'primary',
+        size = 'md',
+        fullWidth = false,
+        disabled = false,
+        type = 'button',
+        className = '',
+        fullRounded = false,
+        leftIcon,
+        rightIcon,
+        iconOnly = false,
+        iconSize,
+        loading = false,
+        loadingText,
+        'aria-label': ariaLabel,
+        'aria-describedby': ariaDescribedBy,
+      },
+      ref
+    ) => {
+      // Accessibility warning for icon-only buttons (only in development)
+      React.useEffect(() => {
+        if (process.env.NODE_ENV === 'development' && iconOnly && !ariaLabel) {
+          console.warn(
+            'Icon-only buttons require an aria-label for accessibility'
+          )
+        }
+      }, [iconOnly, ariaLabel])
 
-    // Memoized event handler to prevent unnecessary re-renders
-    const handleClick = React.useCallback(() => {
-      if (!disabled && !loading && onClick) {
-        onClick()
-      }
-    }, [onClick, disabled, loading])
-
-    // Memoized computed values for better performance
-    const computedValues = React.useMemo(() => {
-      const isDisabled = disabled || loading
-      const sizeClass = iconOnly
-        ? BUTTON_SIZE_CLASSES[size].iconOnly
-        : BUTTON_SIZE_CLASSES[size].default
-      // Use cn function to merge classes and resolve conflicts
-      const finalClassName = cn(
-        BUTTON_BASE_CLASSES,
-        BUTTON_VARIANT_CLASSES[variant],
-        sizeClass,
-        {
-          'w-full': fullWidth,
+      // Memoized event handler to prevent unnecessary re-renders
+      const handleClick = React.useCallback(
+        (event: React.MouseEvent<HTMLButtonElement>) => {
+          if (!disabled && !loading && onClick) {
+            onClick(event)
+          }
         },
-        fullRounded
-          ? BUTTON_ROUNDED_CLASSES.full
-          : BUTTON_ROUNDED_CLASSES.default,
-        className
+        [onClick, disabled, loading]
       )
 
-      return {
-        isDisabled,
-        finalClassName,
-        ariaLabel: iconOnly
-          ? ariaLabel
-          : loading && loadingText
-            ? loadingText
-            : loading
-              ? 'Loading'
-              : undefined,
-        ariaDisabled: isDisabled ? true : undefined,
-      }
-    }, [
-      disabled,
-      loading,
-      iconOnly,
-      size,
-      fullWidth,
-      variant,
-      fullRounded,
-      className,
-      ariaLabel,
-      loadingText,
-    ])
+      // Memoized computed values for better performance
+      const computedValues = React.useMemo(() => {
+        const isDisabled = disabled || loading
+        const sizeClass = iconOnly
+          ? BUTTON_SIZE_CLASSES[size].iconOnly
+          : BUTTON_SIZE_CLASSES[size].default
+        // Use cn function to merge classes and resolve conflicts
+        const finalClassName = cn(
+          BUTTON_BASE_CLASSES,
+          BUTTON_VARIANT_CLASSES[variant],
+          sizeClass,
+          {
+            'w-full': fullWidth,
+          },
+          fullRounded
+            ? BUTTON_ROUNDED_CLASSES.full
+            : BUTTON_ROUNDED_CLASSES.default,
+          className
+        )
 
-    // Memoized icon renderer
-    const renderIcon = React.useCallback(
-      (icon: React.ReactNode) => {
-        if (!icon) return null
-        const effectiveIconSize = iconSize || DEFAULT_ICON_SIZES[size]
+        return {
+          isDisabled,
+          finalClassName,
+          ariaLabel: iconOnly
+            ? ariaLabel
+            : loading && loadingText
+              ? loadingText
+              : loading
+                ? 'Loading'
+                : undefined,
+          ariaDisabled: isDisabled ? true : undefined,
+        }
+      }, [
+        disabled,
+        loading,
+        iconOnly,
+        size,
+        fullWidth,
+        variant,
+        fullRounded,
+        className,
+        ariaLabel,
+        loadingText,
+      ])
 
-        // Only apply custom sizing when iconSize is explicitly provided
-        const shouldOverrideSize = iconSize !== undefined
+      // Memoized icon renderer
+      const renderIcon = React.useCallback(
+        (icon: React.ReactNode) => {
+          if (!icon) return null
+          const effectiveIconSize = iconSize || DEFAULT_ICON_SIZES[size]
+
+          // Only apply custom sizing when iconSize is explicitly provided
+          const shouldOverrideSize = iconSize !== undefined
+
+          return (
+            <span
+              className={`inline-flex items-center justify-center ${ICON_SIZE_CLASSES[effectiveIconSize]}`}
+            >
+              {React.isValidElement(icon) && shouldOverrideSize
+                ? React.cloneElement(icon, {
+                    style: { width: '100%', height: '100%' },
+                  } as React.HTMLAttributes<HTMLElement>)
+                : icon}
+            </span>
+          )
+        },
+        [size, iconSize]
+      )
+
+      // Memoized content renderer
+      const renderContent = React.useMemo(() => {
+        if (loading) {
+          return (
+            <span
+              className={`inline-flex items-center justify-center ${
+                iconOnly ? '' : GAP_CLASSES[size]
+              }`}
+            >
+              <LoadingSpinner size={size} iconSize={iconSize} />
+              {!iconOnly && (loadingText || children)}
+            </span>
+          )
+        }
+
+        if (iconOnly) {
+          return (
+            <span className='inline-flex h-full w-full items-center justify-center'>
+              {renderIcon(leftIcon || rightIcon)}
+            </span>
+          )
+        }
 
         return (
           <span
-            className={`inline-flex items-center justify-center ${ICON_SIZE_CLASSES[effectiveIconSize]}`}
+            className={`inline-flex items-center justify-center ${GAP_CLASSES[size]}`}
           >
-            {React.isValidElement(icon) && shouldOverrideSize
-              ? React.cloneElement(icon, {
-                  style: { width: '100%', height: '100%' },
-                } as React.HTMLAttributes<HTMLElement>)
-              : icon}
+            {leftIcon && renderIcon(leftIcon)}
+            <span className='inline-flex items-center justify-center'>
+              {children}
+            </span>
+            {rightIcon && renderIcon(rightIcon)}
           </span>
         )
-      },
-      [size, iconSize]
-    )
-
-    // Memoized content renderer
-    const renderContent = React.useMemo(() => {
-      if (loading) {
-        return (
-          <span
-            className={`inline-flex items-center justify-center ${
-              iconOnly ? '' : GAP_CLASSES[size]
-            }`}
-          >
-            <LoadingSpinner size={size} iconSize={iconSize} />
-            {!iconOnly && (loadingText || children)}
-          </span>
-        )
-      }
-
-      if (iconOnly) {
-        return (
-          <span className='inline-flex h-full w-full items-center justify-center'>
-            {renderIcon(leftIcon || rightIcon)}
-          </span>
-        )
-      }
+      }, [
+        loading,
+        iconOnly,
+        size,
+        iconSize,
+        loadingText,
+        children,
+        leftIcon,
+        rightIcon,
+        renderIcon,
+      ])
 
       return (
-        <span
-          className={`inline-flex items-center justify-center ${GAP_CLASSES[size]}`}
+        <button
+          ref={ref}
+          type={type}
+          onClick={handleClick}
+          disabled={computedValues.isDisabled}
+          aria-label={computedValues.ariaLabel}
+          aria-describedby={ariaDescribedBy}
+          aria-disabled={computedValues.ariaDisabled}
+          role='button'
+          tabIndex={computedValues.isDisabled ? -1 : 0}
+          className={computedValues.finalClassName}
         >
-          {leftIcon && renderIcon(leftIcon)}
-          <span className='inline-flex items-center justify-center'>
-            {children}
-          </span>
-          {rightIcon && renderIcon(rightIcon)}
-        </span>
+          {renderContent}
+        </button>
       )
-    }, [
-      loading,
-      iconOnly,
-      size,
-      iconSize,
-      loadingText,
-      children,
-      leftIcon,
-      rightIcon,
-      renderIcon,
-    ])
-
-    return (
-      <button
-        type={type}
-        onClick={handleClick}
-        disabled={computedValues.isDisabled}
-        aria-label={computedValues.ariaLabel}
-        aria-describedby={ariaDescribedBy}
-        aria-disabled={computedValues.ariaDisabled}
-        role='button'
-        tabIndex={computedValues.isDisabled ? -1 : 0}
-        className={computedValues.finalClassName}
-      >
-        {renderContent}
-      </button>
-    )
-  }
+    }
+  )
 )

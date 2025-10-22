@@ -1,7 +1,6 @@
 import React, { useMemo, useCallback, useState, useEffect } from 'react'
 import { Clock } from 'lucide-react'
 import { ActivityGroup } from './ActivityGroup'
-import { CollapsibleActivityGroup } from './CollapsibleActivityGroup'
 import { ComponentErrorBoundary } from './ComponentErrorBoundary'
 import { activityUtils } from '../utils/activityUtils'
 import type { TrackerEntry } from '../types'
@@ -10,28 +9,23 @@ interface GroupedActivitiesListProps {
   entries: TrackerEntry[]
   onEditEntry: (entry: TrackerEntry) => void
   onDeleteEntry: (entry: TrackerEntry) => void
-  onViewDetails: (entry: TrackerEntry) => void
   onStopActivity?: (entry: TrackerEntry) => void
   isLoading?: boolean
   className?: string
-  compactMode?: boolean
   virtualScrolling?: boolean
   maxInitialGroups?: number
 }
 
 // Memoized components for performance
 const MemoizedActivityGroup = React.memo(ActivityGroup)
-const MemoizedCollapsibleActivityGroup = React.memo(CollapsibleActivityGroup)
 
 export const GroupedActivitiesList: React.FC<GroupedActivitiesListProps> = ({
   entries,
   onEditEntry,
   onDeleteEntry,
-  onViewDetails,
   onStopActivity,
   isLoading = false,
   className = '',
-  compactMode = false,
   virtualScrolling = false,
   maxInitialGroups = 5,
 }) => {
@@ -69,13 +63,6 @@ export const GroupedActivitiesList: React.FC<GroupedActivitiesListProps> = ({
       onDeleteEntry(entry)
     },
     [onDeleteEntry]
-  )
-
-  const handleViewDetails = useCallback(
-    (entry: TrackerEntry) => {
-      onViewDetails(entry)
-    },
-    [onViewDetails]
   )
 
   const handleStopActivity = useCallback(
@@ -145,28 +132,15 @@ export const GroupedActivitiesList: React.FC<GroupedActivitiesListProps> = ({
         {displayedGroups.map((dateGroup, index) => (
           <ComponentErrorBoundary
             key={dateGroup.date}
-            componentName={
-              compactMode ? 'CollapsibleActivityGroup' : 'ActivityGroup'
-            }
+            componentName='ActivityGroup'
           >
-            {compactMode ? (
-              <MemoizedCollapsibleActivityGroup
-                dateGroup={dateGroup}
-                onEditEntry={handleEditEntry}
-                onDeleteEntry={handleDeleteEntry}
-                onViewDetails={handleViewDetails}
-                onStopActivity={handleStopActivity}
-                defaultExpanded={index < 2} // Keep first 2 groups expanded by default
-              />
-            ) : (
-              <MemoizedActivityGroup
-                dateGroup={dateGroup}
-                onEditEntry={handleEditEntry}
-                onDeleteEntry={handleDeleteEntry}
-                onViewDetails={handleViewDetails}
-                onStopActivity={handleStopActivity}
-              />
-            )}
+            <MemoizedActivityGroup
+              dateGroup={dateGroup}
+              onEditEntry={handleEditEntry}
+              onDeleteEntry={handleDeleteEntry}
+              onStopActivity={handleStopActivity}
+              defaultExpanded={index < 2} // Keep first 2 groups expanded by default
+            />
           </ComponentErrorBoundary>
         ))}
 
