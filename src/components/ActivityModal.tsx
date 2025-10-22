@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { Modal } from './Modal'
 import { Button } from './Button'
 import { Input } from './Input'
@@ -64,9 +64,24 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
   }
 
   const [formData, setFormData] = useState(getInitialFormData)
+  const advancedOptionsRef = useRef<HTMLDivElement>(null)
 
   // For edit mode, always show advanced options
   const shouldShowAdvanced = isEditMode || showAdvancedOptions
+
+  const handleShowMoreOptions = () => {
+    setShowAdvancedOptions(!showAdvancedOptions)
+
+    // Scroll to advanced options on mobile after they're shown
+    if (!showAdvancedOptions) {
+      setTimeout(() => {
+        advancedOptionsRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        })
+      }, 100)
+    }
+  }
 
   const handleSubmit = async () => {
     if (!effectiveBabyId) {
@@ -132,49 +147,45 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
       onClose={onClose}
       title={isEditMode ? 'Edit Activity' : 'Add Activity'}
     >
-      <div className='space-y-4'>
-        {!isEditMode && (
-          <div className='rounded-lg bg-blue-50 p-3 dark:bg-blue-900/30'>
-            <p className='text-sm text-blue-800 dark:text-blue-200'>
-              💡 <strong>Quick Entry:</strong> Just select the activity type and
-              save! Use "Show more options" below for detailed tracking.
-            </p>
-          </div>
-        )}
-
-        {/* Entry Type Selection */}
-        <div>
-          <label className='mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300'>
-            Activity Type
-          </label>
-          <div className='grid grid-cols-2 gap-2'>
-            {(['feeding', 'sleep', 'diaper', 'pumping'] as EntryType[]).map(
-              (type) => (
-                <button
-                  key={type}
-                  onClick={() => setFormData({ ...formData, entryType: type })}
-                  className={`rounded-xl border-2 p-3 capitalize transition-all ${
-                    formData.entryType === type
-                      ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                      : 'border-gray-200 text-gray-600 hover:border-gray-300 dark:border-gray-600 dark:text-gray-300 dark:hover:border-gray-500'
-                  }`}
-                >
-                  {activityUtils.getActivityIcon(type)} {type}
-                </button>
-              )
-            )}
-          </div>
-        </div>
-
-        {/* Essential fields for feeding */}
-        {formData.entryType === 'feeding' && (
+      {/* Content area with bottom padding for sticky buttons on mobile */}
+      <div className='pb-20 sm:pb-0'>
+        <div className='space-y-4'>
+          {/* Entry Type Selection */}
           <div>
             <label className='mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300'>
-              Feeding Type
+              Activity Type
             </label>
             <div className='grid grid-cols-2 gap-2'>
-              {(['breast_left', 'breast_right', 'bottle'] as FeedingType[]).map(
+              {(['feeding', 'sleep', 'diaper', 'pumping'] as EntryType[]).map(
                 (type) => (
+                  <button
+                    key={type}
+                    onClick={() =>
+                      setFormData({ ...formData, entryType: type })
+                    }
+                    className={`rounded-xl border-2 p-3 capitalize transition-all ${
+                      formData.entryType === type
+                        ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                        : 'border-gray-200 text-gray-600 hover:border-gray-300 dark:border-gray-600 dark:text-gray-300 dark:hover:border-gray-500'
+                    }`}
+                  >
+                    {activityUtils.getActivityIcon(type)} {type}
+                  </button>
+                )
+              )}
+            </div>
+          </div>
+
+          {/* Essential fields for feeding */}
+          {formData.entryType === 'feeding' && (
+            <div>
+              <label className='mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300'>
+                Feeding Type
+              </label>
+              <div className='grid grid-cols-2 gap-2'>
+                {(
+                  ['breast_left', 'breast_right', 'bottle'] as FeedingType[]
+                ).map((type) => (
                   <button
                     key={type}
                     onClick={() =>
@@ -188,15 +199,26 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
                   >
                     {getFeedingTypeLabel(type)}
                   </button>
-                )
-              )}
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Essential fields for bottle feeding */}
-        {formData.entryType === 'feeding' &&
-          formData.feedingType === 'bottle' && (
+          {/* Essential fields for bottle feeding */}
+          {formData.entryType === 'feeding' &&
+            formData.feedingType === 'bottle' && (
+              <Input
+                label='Amount (oz)'
+                type='number'
+                step='0.5'
+                value={formData.quantity}
+                onChange={(val) => setFormData({ ...formData, quantity: val })}
+                placeholder='e.g., 4'
+              />
+            )}
+
+          {/* Essential fields for pumping */}
+          {formData.entryType === 'pumping' && (
             <Input
               label='Amount (oz)'
               type='number'
@@ -207,88 +229,85 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
             />
           )}
 
-        {/* Essential fields for pumping */}
-        {formData.entryType === 'pumping' && (
-          <Input
-            label='Amount (oz)'
-            type='number'
-            step='0.5'
-            value={formData.quantity}
-            onChange={(val) => setFormData({ ...formData, quantity: val })}
-            placeholder='e.g., 4'
-          />
-        )}
-
-        {/* Essential fields for diaper */}
-        {formData.entryType === 'diaper' && (
-          <div>
-            <label className='mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300'>
-              Diaper Type
-            </label>
-            <div className='grid grid-cols-3 gap-2'>
-              {(['wet', 'dirty', 'both'] as DiaperType[]).map((type) => (
-                <button
-                  key={type}
-                  onClick={() => setFormData({ ...formData, diaperType: type })}
-                  className={`rounded-xl border-2 p-3 capitalize transition-all ${
-                    formData.diaperType === type
-                      ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
-                      : 'border-gray-200 text-gray-600 hover:border-gray-300 dark:border-gray-600 dark:text-gray-300 dark:hover:border-gray-500'
-                  }`}
-                >
-                  {type}
-                </button>
-              ))}
+          {/* Essential fields for diaper */}
+          {formData.entryType === 'diaper' && (
+            <div>
+              <label className='mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300'>
+                Diaper Type
+              </label>
+              <div className='grid grid-cols-3 gap-2'>
+                {(['wet', 'dirty', 'both'] as DiaperType[]).map((type) => (
+                  <button
+                    key={type}
+                    onClick={() =>
+                      setFormData({ ...formData, diaperType: type })
+                    }
+                    className={`rounded-xl border-2 p-3 capitalize transition-all ${
+                      formData.diaperType === type
+                        ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                        : 'border-gray-200 text-gray-600 hover:border-gray-300 dark:border-gray-600 dark:text-gray-300 dark:hover:border-gray-500'
+                    }`}
+                  >
+                    {type}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Show more options toggle for new activities */}
-        {!isEditMode && (
-          <button
-            onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
-            className='flex w-full items-center justify-center gap-2 rounded-lg border border-gray-200 p-3 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700'
-          >
-            {showAdvancedOptions ? 'Hide' : 'Show more'} options
-          </button>
-        )}
+          {/* Show more options toggle for new activities */}
+          {!isEditMode && (
+            <button
+              onClick={handleShowMoreOptions}
+              className='flex w-full items-center justify-center gap-2 rounded-lg border border-gray-200 p-3 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700'
+            >
+              {showAdvancedOptions ? 'Hide' : 'Show more'} options
+            </button>
+          )}
 
-        {/* Advanced options */}
-        {shouldShowAdvanced && (
-          <div className='space-y-4 border-t border-gray-200 pt-4 dark:border-gray-600'>
-            <Input
-              label='Start Time'
-              type='datetime-local'
-              value={formData.startTime}
-              onChange={(val) => {
-                setFormData({ ...formData, startTime: val })
-                setHasUserModifiedTime(true)
-              }}
-            />
-
-            {(formData.entryType === 'sleep' ||
-              (formData.entryType === 'feeding' &&
-                formData.feedingType !== 'bottle')) && (
+          {/* Advanced options */}
+          {shouldShowAdvanced && (
+            <div
+              ref={advancedOptionsRef}
+              className='space-y-4 border-t border-gray-200 pt-4 dark:border-gray-600'
+            >
               <Input
-                label='End Time (optional)'
+                label='Start Time'
                 type='datetime-local'
-                value={formData.endTime}
-                onChange={(val) => setFormData({ ...formData, endTime: val })}
+                value={formData.startTime}
+                onChange={(val) => {
+                  setFormData({ ...formData, startTime: val })
+                  setHasUserModifiedTime(true)
+                }}
               />
-            )}
 
-            <Input
-              label='Notes (optional)'
-              type='textarea'
-              value={formData.notes}
-              onChange={(val) => setFormData({ ...formData, notes: val })}
-              placeholder='Any additional details...'
-              rows={2}
-            />
-          </div>
-        )}
+              {(formData.entryType === 'sleep' ||
+                (formData.entryType === 'feeding' &&
+                  formData.feedingType !== 'bottle')) && (
+                <Input
+                  label='End Time (optional)'
+                  type='datetime-local'
+                  value={formData.endTime}
+                  onChange={(val) => setFormData({ ...formData, endTime: val })}
+                />
+              )}
 
-        <div className='flex gap-3'>
+              <Input
+                label='Notes (optional)'
+                type='textarea'
+                value={formData.notes}
+                onChange={(val) => setFormData({ ...formData, notes: val })}
+                placeholder='Any additional details...'
+                rows={2}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Sticky button footer - only on mobile */}
+      <div className='fixed right-0 bottom-0 left-0 border-t border-gray-200 bg-white p-4 sm:relative sm:border-t-0 sm:bg-transparent sm:p-0 dark:border-gray-600 dark:bg-gray-800 sm:dark:bg-transparent'>
+        <div className='flex gap-3 sm:mt-4'>
           <Button
             onClick={() => {
               setHasUserModifiedTime(false)
