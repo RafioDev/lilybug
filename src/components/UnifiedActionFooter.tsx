@@ -198,18 +198,17 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
   const { isListening, isProcessing } = voiceState
 
   return (
-    <div className='fixed right-6 bottom-6 z-40'>
-      <div className='flex flex-col gap-3'>
-        {/* Voice Assistant Button - Primary action */}
+    <div className='fixed right-0 bottom-6 left-64 z-40 flex justify-center'>
+      <div className='flex gap-4'>
+        {/* Voice Assistant Button - Primary action on the left */}
         <Button
           onClick={onVoiceClick}
           variant={isListening ? 'danger' : 'primary'}
           size='lg'
           disabled={isProcessing}
-          fullRounded
           className={cn(
-            'group flex h-14 w-14 items-center justify-center shadow-lg transition-all duration-200',
-            'hover:scale-110 hover:shadow-xl focus:scale-110 focus:shadow-xl',
+            'group flex h-14 items-center justify-center gap-3 px-6 shadow-lg transition-all duration-200',
+            'hover:scale-105 hover:shadow-xl focus:scale-105 focus:shadow-xl',
             isListening && 'animate-pulse ring-2 ring-red-500 ring-offset-2'
           )}
           aria-label={
@@ -221,31 +220,38 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
           }
         >
           {isListening ? (
-            <MicOff className='h-6 w-6 transition-transform group-hover:scale-110' />
+            <MicOff className='h-5 w-5 transition-transform group-hover:scale-110' />
           ) : isProcessing ? (
             <div className='animate-spin'>
-              <Sparkles className='h-6 w-6' />
+              <Sparkles className='h-5 w-5' />
             </div>
           ) : (
-            <Mic className='h-6 w-6 transition-transform group-hover:scale-110' />
+            <Mic className='h-5 w-5 transition-transform group-hover:scale-110' />
           )}
+          <span className='font-medium'>
+            {isListening
+              ? 'Stop Recording'
+              : isProcessing
+                ? 'Processing...'
+                : 'Voice Assistant'}
+          </span>
         </Button>
 
-        {/* Manual Entry Button - Secondary action */}
+        {/* Manual Entry Button - Secondary action on the right */}
         <Button
           onClick={onManualEntry}
           variant='outline'
           size='lg'
           disabled={isListening || isProcessing}
-          fullRounded
           className={cn(
-            'group flex h-12 w-12 items-center justify-center shadow-lg transition-all duration-200',
-            'hover:scale-110 hover:shadow-xl focus:scale-110 focus:shadow-xl',
+            'group flex h-14 items-center justify-center gap-3 px-6 shadow-lg transition-all duration-200',
+            'hover:scale-105 hover:shadow-xl focus:scale-105 focus:shadow-xl',
             'disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-lg'
           )}
           aria-label='Open manual entry form'
         >
           <Plus className='h-5 w-5 transition-transform group-hover:scale-110' />
+          <span className='font-medium'>Manual Entry</span>
         </Button>
       </div>
     </div>
