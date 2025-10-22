@@ -1,9 +1,11 @@
 import React from 'react'
 import { useLocation } from 'react-router-dom'
-import { Baby as BabyIcon } from 'lucide-react'
+import { Baby as BabyIcon, Sparkles } from 'lucide-react'
 import { dateUtils } from '../utils/dateUtils'
 import { useActiveBaby } from '../hooks/queries/useBabyQueries'
 import { useHeader } from '../contexts/HeaderContext'
+import { useUserProfile } from '../hooks/queries/useProfileQueries'
+import { UserDropdown } from './UserDropdown'
 
 interface HeaderProps {
   title?: string
@@ -33,6 +35,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const location = useLocation()
   const { data: activeBaby, isLoading } = useActiveBaby()
+  const { data: profileData, isLoading: profileLoading } = useUserProfile()
   const {
     title: contextTitle,
     subtitle: contextSubtitle,
@@ -47,32 +50,33 @@ export const Header: React.FC<HeaderProps> = ({
   const renderBabyInfo = () => {
     if (isLoading) {
       return (
-        <div className='flex items-center gap-2'>
-          <div className='h-4 w-4 animate-pulse rounded bg-gray-200 dark:bg-gray-600'></div>
-          <div className='h-4 w-20 animate-pulse rounded bg-gray-200 dark:bg-gray-600'></div>
+        <div className='flex items-center gap-1.5 sm:gap-2'>
+          <div className='h-3 w-3 animate-pulse rounded bg-gray-200 sm:h-4 sm:w-4 dark:bg-gray-600'></div>
+          <div className='h-3 w-12 animate-pulse rounded bg-gray-200 sm:h-4 sm:w-20 dark:bg-gray-600'></div>
         </div>
       )
     }
 
     if (!activeBaby) {
       return (
-        <div className='flex items-center gap-2'>
-          <BabyIcon className='h-4 w-4 text-gray-400 dark:text-gray-500' />
-          <span className='text-sm text-gray-500 dark:text-gray-400'>
-            No baby selected
+        <div className='flex items-center gap-1.5 sm:gap-2'>
+          <BabyIcon className='h-3 w-3 text-gray-400 sm:h-4 sm:w-4 dark:text-gray-500' />
+          <span className='text-xs text-gray-500 sm:text-sm dark:text-gray-400'>
+            <span className='hidden sm:inline'>No baby selected</span>
+            <span className='sm:hidden'>No baby</span>
           </span>
         </div>
       )
     }
 
     return (
-      <div className='flex items-center gap-2'>
-        <BabyIcon className='h-4 w-4 text-blue-600 dark:text-blue-400' />
-        <div className='flex items-center gap-2'>
-          <span className='font-medium text-gray-900 dark:text-gray-100'>
+      <div className='flex items-center gap-1.5 sm:gap-2'>
+        <BabyIcon className='h-3 w-3 text-blue-600 sm:h-4 sm:w-4 dark:text-blue-400' />
+        <div className='flex items-center gap-1 sm:gap-2'>
+          <span className='max-w-16 truncate text-xs font-medium text-gray-900 sm:max-w-none sm:text-sm dark:text-gray-100'>
             {activeBaby.name}
           </span>
-          <span className='text-sm text-gray-600 dark:text-gray-400'>
+          <span className='text-xs whitespace-nowrap text-gray-600 sm:text-sm dark:text-gray-400'>
             {dateUtils.calculateAge(activeBaby.birthdate)}
           </span>
         </div>
@@ -82,27 +86,52 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header
-      className={`sticky top-0 z-30 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-6 dark:border-gray-700 dark:bg-gray-800 ${className}`}
+      className={`sticky top-0 z-30 flex h-14 items-center justify-between border-b border-gray-200 bg-white px-3 sm:h-16 sm:px-6 dark:border-gray-700 dark:bg-gray-800 ${className}`}
     >
-      {/* Left side - Page title */}
-      <div className='flex items-center'>
-        <div>
-          <h1 className='text-xl font-bold text-gray-900 dark:text-gray-100'>
-            {title}
-          </h1>
-          {subtitle && (
-            <p className='text-sm text-gray-600 dark:text-gray-400'>
-              {subtitle}
-            </p>
+      {/* Left side - Logo (mobile) and Page title */}
+      <div className='flex items-center gap-2'>
+        {/* Mobile logo - only show on small screens */}
+        <div className='flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 sm:hidden'>
+          <Sparkles size={16} className='text-white' />
+        </div>
+
+        <div className='flex items-center'>
+          <div>
+            <h1 className='text-base font-bold text-gray-800 sm:text-xl dark:text-gray-100'>
+              {title}
+            </h1>
+            {subtitle && (
+              <p className='text-xs text-gray-600 sm:text-sm dark:text-gray-400'>
+                {subtitle}
+              </p>
+            )}
+          </div>
+          {actions && (
+            <div className='ml-2 flex items-center gap-2 sm:ml-4'>
+              {actions}
+            </div>
           )}
         </div>
-        {actions && (
-          <div className='ml-4 flex items-center gap-2'>{actions}</div>
-        )}
       </div>
 
-      {/* Right side - Baby info */}
-      <div className='flex items-center'>{renderBabyInfo()}</div>
+      {/* Right side - Baby info and User Dropdown */}
+      <div className='flex items-center gap-2 sm:gap-3'>
+        {renderBabyInfo()}
+        {!profileLoading && profileData && (
+          <UserDropdown
+            userName={profileData.displayName}
+            variant='mobile'
+            className='sm:hidden'
+          />
+        )}
+        {!profileLoading && profileData && (
+          <UserDropdown
+            userName={profileData.displayName}
+            variant='desktop'
+            className='hidden sm:block'
+          />
+        )}
+      </div>
     </header>
   )
 }

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { User, LogOut, ChevronDown } from 'lucide-react'
+import { User, LogOut, Settings } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { ComponentErrorBoundary } from './ComponentErrorBoundary'
 import { supabase } from '../lib/supabase'
 
@@ -16,6 +17,7 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -36,6 +38,11 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
     setIsOpen(false)
   }
 
+  const handleSettings = () => {
+    navigate('/settings')
+    setIsOpen(false)
+  }
+
   if (variant === 'mobile') {
     return (
       <ComponentErrorBoundary componentName='UserDropdown'>
@@ -43,7 +50,7 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
           <button
             onClick={() => setIsOpen(!isOpen)}
             aria-label={`User menu for ${userName}`}
-            className='cursor-pointer rounded-lg p-1.5 text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-gray-100'
+            className='cursor-pointer rounded-lg p-1.5 text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-800 active:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-gray-100 dark:active:bg-gray-600'
           >
             <User className='pointer-events-none h-4 w-4' />
           </button>
@@ -60,13 +67,22 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
                     {userName}
                   </p>
                 </div>
-                <button
-                  onClick={handleSignOut}
-                  className='flex w-full cursor-pointer items-center gap-2 rounded-b-lg px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'
-                >
-                  <LogOut className='pointer-events-none h-4 w-4' />
-                  <span className='pointer-events-none'>Sign Out</span>
-                </button>
+                <div className='py-1'>
+                  <button
+                    onClick={handleSettings}
+                    className='flex w-full cursor-pointer items-center gap-2 px-4 py-3 text-sm text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 dark:active:bg-gray-600'
+                  >
+                    <Settings className='pointer-events-none h-4 w-4' />
+                    <span className='pointer-events-none'>Settings</span>
+                  </button>
+                  <button
+                    onClick={handleSignOut}
+                    className='flex w-full cursor-pointer items-center gap-2 px-4 py-3 text-sm text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 dark:active:bg-gray-600'
+                  >
+                    <LogOut className='pointer-events-none h-4 w-4' />
+                    <span className='pointer-events-none'>Sign Out</span>
+                  </button>
+                </div>
               </div>
             </>
           )}
@@ -75,25 +91,16 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
     )
   }
 
-  // Desktop variant
+  // Desktop variant - compact for header use
   return (
     <ComponentErrorBoundary componentName='UserDropdown'>
       <div className={`relative ${className}`} ref={dropdownRef}>
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className='flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg px-3 py-2 text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-gray-100'
+          aria-label={`User menu for ${userName}`}
+          className='cursor-pointer rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-gray-100'
         >
-          <div className='flex items-center gap-2'>
-            <User className='pointer-events-none h-4 w-4' />
-            <span className='pointer-events-none truncate font-medium'>
-              {userName}
-            </span>
-          </div>
-          <ChevronDown
-            className={`pointer-events-none h-4 w-4 transition-transform ${
-              isOpen ? 'rotate-180' : ''
-            }`}
-          />
+          <User className='pointer-events-none h-4 w-4' />
         </button>
 
         {isOpen && (
@@ -102,14 +109,28 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
               className='fixed inset-0 z-10'
               onClick={() => setIsOpen(false)}
             />
-            <div className='absolute bottom-full left-0 z-20 mb-2 w-full rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800'>
-              <button
-                onClick={handleSignOut}
-                className='flex w-full cursor-pointer items-center gap-2 rounded-lg px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'
-              >
-                <LogOut className='pointer-events-none h-4 w-4' />
-                <span className='pointer-events-none'>Sign Out</span>
-              </button>
+            <div className='absolute top-full right-0 z-20 mt-2 w-48 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800'>
+              <div className='border-b border-gray-100 px-4 py-3 dark:border-gray-700'>
+                <p className='truncate text-sm font-medium text-gray-900 dark:text-gray-100'>
+                  {userName}
+                </p>
+              </div>
+              <div className='py-1'>
+                <button
+                  onClick={handleSettings}
+                  className='flex w-full cursor-pointer items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'
+                >
+                  <Settings className='pointer-events-none h-4 w-4' />
+                  <span className='pointer-events-none'>Settings</span>
+                </button>
+                <button
+                  onClick={handleSignOut}
+                  className='flex w-full cursor-pointer items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'
+                >
+                  <LogOut className='pointer-events-none h-4 w-4' />
+                  <span className='pointer-events-none'>Sign Out</span>
+                </button>
+              </div>
             </div>
           </>
         )}
