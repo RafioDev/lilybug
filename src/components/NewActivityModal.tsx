@@ -27,7 +27,7 @@ export const NewActivityModal: React.FC<NewActivityModalProps> = ({
   initialEntryType = 'feeding',
 }) => {
   const createEntry = useCreateEntry()
-  const { smartDefaults, hasDefaults } = useSmartDefaults({
+  const { smartDefaults } = useSmartDefaults({
     entryType: initialEntryType,
     babyId,
     enabled: isOpen,
@@ -151,23 +151,13 @@ export const NewActivityModal: React.FC<NewActivityModalProps> = ({
         }
         size='lg'
       >
-        {/* Smart Defaults Indicator */}
-        {hasDefaults && (
-          <div className='mb-4 rounded-lg bg-emerald-50 p-3 dark:bg-emerald-900/30'>
-            <p className='text-sm text-emerald-800 dark:text-emerald-200'>
-              ✨ <strong>Smart defaults applied!</strong> Values are pre-filled
-              based on your recent patterns and time of day. Feel free to adjust
-              as needed.
-            </p>
-          </div>
-        )}
-
         <ComponentErrorBoundary componentName='ActivityForm'>
           <ActivityForm
             values={form.values}
             errors={form.errors}
             onChange={form.handleChange}
             disabled={isSubmitting}
+            quickEntryMode={true}
           />
         </ComponentErrorBoundary>
       </ModalForm>

@@ -1,4 +1,4 @@
-import React, { memo } from 'react'
+import React, { memo, useState } from 'react'
 import { Input } from './Input'
 import type { EntryType, FeedingType, DiaperType } from '../types'
 
@@ -18,20 +18,23 @@ interface ActivityFormProps {
   errors: Record<string, string>
   onChange: (field: keyof ActivityFormData, value: unknown) => void
   disabled?: boolean
+  quickEntryMode?: boolean
 }
 
 export const ActivityForm: React.FC<ActivityFormProps> = memo(
-  ({ values, errors, onChange, disabled = false }) => {
+  ({ values, errors, onChange, disabled = false, quickEntryMode = false }) => {
+    const [showAdvancedOptions, setShowAdvancedOptions] = useState(false)
+
     const getFeedingTypeLabel = (type: FeedingType) => {
       switch (type) {
-        case 'both':
-          return 'Both Breasts'
         case 'breast_left':
           return 'Breast Left'
         case 'breast_right':
           return 'Breast Right'
         case 'bottle':
           return 'Bottle'
+        default:
+          return type
       }
     }
 
@@ -50,16 +53,6 @@ export const ActivityForm: React.FC<ActivityFormProps> = memo(
 
     return (
       <div className='space-y-4'>
-        {/* Activity Type Display */}
-        <div className='flex items-center gap-3 rounded-lg bg-gray-50 p-3 dark:bg-gray-700'>
-          <span className='text-2xl'>{getActivityIcon(values.entryType)}</span>
-          <div>
-            <p className='font-medium text-gray-900 capitalize dark:text-gray-100'>
-              {values.entryType} Activity
-            </p>
-          </div>
-        </div>
-
         {/* Entry Type Selection */}
         <div>
           <label className='mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300'>
@@ -91,29 +84,6 @@ export const ActivityForm: React.FC<ActivityFormProps> = memo(
           )}
         </div>
 
-        {/* Start Time */}
-        <Input
-          label='Start Time'
-          type='datetime-local'
-          value={values.startTime}
-          onChange={(val) => onChange('startTime', val)}
-          disabled={disabled}
-          required
-          error={errors.startTime}
-        />
-
-        {/* End Time (for sleep and feeding) */}
-        {(values.entryType === 'sleep' || values.entryType === 'feeding') && (
-          <Input
-            label='End Time (optional)'
-            type='datetime-local'
-            value={values.endTime}
-            onChange={(val) => onChange('endTime', val)}
-            disabled={disabled}
-            error={errors.endTime}
-          />
-        )}
-
         {/* Feeding-specific fields */}
         {values.entryType === 'feeding' && (
           <>
@@ -121,14 +91,9 @@ export const ActivityForm: React.FC<ActivityFormProps> = memo(
               <label className='mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300'>
                 Feeding Type
               </label>
-              <div className='grid grid-cols-2 gap-2'>
+              <div className='grid grid-cols-3 gap-2'>
                 {(
-                  [
-                    'both',
-                    'breast_left',
-                    'breast_right',
-                    'bottle',
-                  ] as FeedingType[]
+                  ['breast_left', 'breast_right', 'bottle'] as FeedingType[]
                 ).map((type) => (
                   <button
                     key={type}
@@ -212,17 +177,63 @@ export const ActivityForm: React.FC<ActivityFormProps> = memo(
           </div>
         )}
 
-        {/* Notes */}
-        <Input
-          label='Notes (optional)'
-          type='textarea'
-          value={values.notes}
-          onChange={(val) => onChange('notes', val)}
-          placeholder='Any additional details...'
-          rows={3}
-          disabled={disabled}
-          error={errors.notes}
-        />
+        {/* Advanced Options Toggle */}
+        {quickEntryMode && (
+          <div className='flex justify-center'>
+            <button
+              type='button'
+              onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+              className='flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300'
+              disabled={disabled}
+            >
+              {showAdvancedOptions ? '▼' : '▶'} Show More Options
+            </button>
+          </div>
+        )}
+
+        {/* Start Time - Hidden in quick entry mode unless advanced options shown */}
+        {(!quickEntryMode || showAdvancedOptions) && (
+          <Input
+            label={
+              values.entryType === 'feeding' || values.entryType === 'sleep'
+                ? 'Start Time'
+                : 'Time'
+            }
+            type='datetime-local'
+            value={values.startTime}
+            onChange={(val) => onChange('startTime', val)}
+            disabled={disabled}
+            required
+            error={errors.startTime}
+          />
+        )}
+
+        {/* End Time (for sleep and feeding) - Hidden in quick entry mode unless advanced options shown */}
+        {(values.entryType === 'sleep' || values.entryType === 'feeding') &&
+          (!quickEntryMode || showAdvancedOptions) && (
+            <Input
+              label='End Time (optional)'
+              type='datetime-local'
+              value={values.endTime}
+              onChange={(val) => onChange('endTime', val)}
+              disabled={disabled}
+              error={errors.endTime}
+            />
+          )}
+
+        {/* Notes - Hidden in quick entry mode unless advanced options shown */}
+        {(!quickEntryMode || showAdvancedOptions) && (
+          <Input
+            label='Notes (optional)'
+            type='textarea'
+            value={values.notes}
+            onChange={(val) => onChange('notes', val)}
+            placeholder='Any additional details...'
+            rows={3}
+            disabled={disabled}
+            error={errors.notes}
+          />
+        )}
       </div>
     )
   }
