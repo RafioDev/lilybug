@@ -46,9 +46,9 @@ export const activityUtils = {
   getFeedingTypeLabel(type: FeedingType): string {
     switch (type) {
       case 'breast_left':
-        return 'Breast Left'
+        return 'Left Breast'
       case 'breast_right':
-        return 'Breast Right'
+        return 'Right Breast'
       case 'bottle':
         return 'Bottle'
       default:

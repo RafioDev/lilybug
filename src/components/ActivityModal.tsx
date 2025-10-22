@@ -34,6 +34,8 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
 
   const isEditMode = !!entry
   const effectiveBabyId = babyId || activeBaby?.id
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false)
+  const [hasUserModifiedTime, setHasUserModifiedTime] = useState(isEditMode)
 
   // Initialize form data based on entry prop
   const getInitialFormData = () => {
@@ -63,6 +65,9 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
 
   const [formData, setFormData] = useState(getInitialFormData)
 
+  // For edit mode, always show advanced options
+  const shouldShowAdvanced = isEditMode || showAdvancedOptions
+
   const handleSubmit = async () => {
     if (!effectiveBabyId) {
       onError?.('No baby selected')
@@ -70,9 +75,15 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
     }
 
     try {
+      // For new activities, use current time unless user has explicitly modified it
+      const shouldUseCurrentTime = !isEditMode && !hasUserModifiedTime
+      const actualStartTime = shouldUseCurrentTime
+        ? dateUtils.getCurrentLocalDateTime()
+        : formData.startTime
+
       const entryData = {
         entry_type: formData.entryType,
-        start_time: dateUtils.fromLocalDateTimeString(formData.startTime),
+        start_time: dateUtils.fromLocalDateTimeString(actualStartTime),
         end_time: formData.endTime
           ? dateUtils.fromLocalDateTimeString(formData.endTime)
           : null,
@@ -95,6 +106,9 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
       }
 
       onSave?.()
+      // Reset flags for next time
+      setHasUserModifiedTime(false)
+      setShowAdvancedOptions(false)
       onClose()
     } catch (error) {
       onError?.(error instanceof Error ? error.message : 'An error occurred')
@@ -104,9 +118,9 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
   const getFeedingTypeLabel = (type: FeedingType) => {
     switch (type) {
       case 'breast_left':
-        return 'Breast Left'
+        return 'Left Breast'
       case 'breast_right':
-        return 'Breast Right'
+        return 'Right Breast'
       case 'bottle':
         return 'Bottle'
     }
@@ -119,6 +133,15 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
       title={isEditMode ? 'Edit Activity' : 'Add Activity'}
     >
       <div className='space-y-4'>
+        {!isEditMode && (
+          <div className='rounded-lg bg-blue-50 p-3 dark:bg-blue-900/30'>
+            <p className='text-sm text-blue-800 dark:text-blue-200'>
+              💡 <strong>Quick Entry:</strong> Just select the activity type and
+              save! Use "Show more options" below for detailed tracking.
+            </p>
+          </div>
+        )}
+
         {/* Entry Type Selection */}
         <div>
           <label className='mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300'>
@@ -143,34 +166,15 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
           </div>
         </div>
 
-        <Input
-          label='Start Time'
-          type='datetime-local'
-          value={formData.startTime}
-          onChange={(val) => setFormData({ ...formData, startTime: val })}
-        />
-
-        {(formData.entryType === 'sleep' ||
-          (formData.entryType === 'feeding' &&
-            formData.feedingType !== 'bottle')) && (
-          <Input
-            label='End Time (optional)'
-            type='datetime-local'
-            value={formData.endTime}
-            onChange={(val) => setFormData({ ...formData, endTime: val })}
-          />
-        )}
-
+        {/* Essential fields for feeding */}
         {formData.entryType === 'feeding' && (
-          <>
-            <div>
-              <label className='mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300'>
-                Feeding Type
-              </label>
-              <div className='grid grid-cols-2 gap-2'>
-                {(
-                  ['breast_left', 'breast_right', 'bottle'] as FeedingType[]
-                ).map((type) => (
+          <div>
+            <label className='mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300'>
+              Feeding Type
+            </label>
+            <div className='grid grid-cols-2 gap-2'>
+              {(['breast_left', 'breast_right', 'bottle'] as FeedingType[]).map(
+                (type) => (
                   <button
                     key={type}
                     onClick={() =>
@@ -184,23 +188,26 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
                   >
                     {getFeedingTypeLabel(type)}
                   </button>
-                ))}
-              </div>
+                )
+              )}
             </div>
-
-            {formData.feedingType === 'bottle' && (
-              <Input
-                label='Amount (oz)'
-                type='number'
-                step='0.5'
-                value={formData.quantity}
-                onChange={(val) => setFormData({ ...formData, quantity: val })}
-                placeholder='e.g., 4'
-              />
-            )}
-          </>
+          </div>
         )}
 
+        {/* Essential fields for bottle feeding */}
+        {formData.entryType === 'feeding' &&
+          formData.feedingType === 'bottle' && (
+            <Input
+              label='Amount (oz)'
+              type='number'
+              step='0.5'
+              value={formData.quantity}
+              onChange={(val) => setFormData({ ...formData, quantity: val })}
+              placeholder='e.g., 4'
+            />
+          )}
+
+        {/* Essential fields for pumping */}
         {formData.entryType === 'pumping' && (
           <Input
             label='Amount (oz)'
@@ -212,6 +219,7 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
           />
         )}
 
+        {/* Essential fields for diaper */}
         {formData.entryType === 'diaper' && (
           <div>
             <label className='mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300'>
@@ -235,17 +243,61 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
           </div>
         )}
 
-        <Input
-          label='Notes (optional)'
-          type='textarea'
-          value={formData.notes}
-          onChange={(val) => setFormData({ ...formData, notes: val })}
-          placeholder='Any additional details...'
-          rows={2}
-        />
+        {/* Show more options toggle for new activities */}
+        {!isEditMode && (
+          <button
+            onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+            className='flex w-full items-center justify-center gap-2 rounded-lg border border-gray-200 p-3 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700'
+          >
+            {showAdvancedOptions ? 'Hide' : 'Show more'} options
+          </button>
+        )}
+
+        {/* Advanced options */}
+        {shouldShowAdvanced && (
+          <div className='space-y-4 border-t border-gray-200 pt-4 dark:border-gray-600'>
+            <Input
+              label='Start Time'
+              type='datetime-local'
+              value={formData.startTime}
+              onChange={(val) => {
+                setFormData({ ...formData, startTime: val })
+                setHasUserModifiedTime(true)
+              }}
+            />
+
+            {(formData.entryType === 'sleep' ||
+              (formData.entryType === 'feeding' &&
+                formData.feedingType !== 'bottle')) && (
+              <Input
+                label='End Time (optional)'
+                type='datetime-local'
+                value={formData.endTime}
+                onChange={(val) => setFormData({ ...formData, endTime: val })}
+              />
+            )}
+
+            <Input
+              label='Notes (optional)'
+              type='textarea'
+              value={formData.notes}
+              onChange={(val) => setFormData({ ...formData, notes: val })}
+              placeholder='Any additional details...'
+              rows={2}
+            />
+          </div>
+        )}
 
         <div className='flex gap-3'>
-          <Button onClick={onClose} variant='outline' fullWidth>
+          <Button
+            onClick={() => {
+              setHasUserModifiedTime(false)
+              setShowAdvancedOptions(false)
+              onClose()
+            }}
+            variant='outline'
+            fullWidth
+          >
             Cancel
           </Button>
           <Button onClick={handleSubmit} fullWidth>

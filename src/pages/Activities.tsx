@@ -197,9 +197,9 @@ const ActivitiesContent: React.FC = () => {
   const getFeedingTypeLabel = (type: FeedingType) => {
     switch (type) {
       case 'breast_left':
-        return 'Breast Left'
+        return 'Left Breast'
       case 'breast_right':
-        return 'Breast Right'
+        return 'Right Breast'
       case 'bottle':
         return 'Bottle'
     }
