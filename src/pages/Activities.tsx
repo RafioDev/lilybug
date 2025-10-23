@@ -37,7 +37,6 @@ import type { TrackerEntry, EntryType, FeedingType, DiaperType } from '../types'
 
 // Import insights functionality
 import { AIInsights } from '../components/AIInsights'
-import { trackerService } from '../services/trackerService'
 import { aiPatternService } from '../services/aiPatternService'
 import { aiAssistantService } from '../services/aiAssistantService'
 import type { Baby } from '../types'
@@ -47,7 +46,10 @@ import type { ContextualGuidance } from '../services/aiAssistantService'
 // Voice functionality types and interfaces are now handled by UnifiedActionFooter
 
 // Insights Tab Component
-const InsightsTab: React.FC<{ activeBaby: Baby | null }> = ({ activeBaby }) => {
+const InsightsTab: React.FC<{
+  activeBaby: Baby | null
+  entries: TrackerEntry[]
+}> = ({ activeBaby, entries }) => {
   const [aiInsights, setAiInsights] = useState<PatternInsights | null>(null)
   const [contextualGuidance, setContextualGuidance] = useState<
     ContextualGuidance[]
@@ -59,17 +61,43 @@ const InsightsTab: React.FC<{ activeBaby: Baby | null }> = ({ activeBaby }) => {
   } | null>(null)
   const [loading, setLoading] = useState(true)
 
+  // Calculate today's stats using useMemo for better performance
+  const todayStats = React.useMemo(() => {
+    if (entries.length === 0) {
+      return {
+        feedings: 0,
+        sleepHours: 0,
+        diapers: 0,
+      }
+    }
+
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const todayEntries = entries.filter(
+      (entry) => new Date(entry.start_time) >= today
+    )
+
+    return {
+      feedings: todayEntries.filter((e) => e.entry_type === 'feeding').length,
+      sleepHours: todayEntries
+        .filter((e) => e.entry_type === 'sleep' && e.end_time)
+        .reduce((total, entry) => {
+          const start = new Date(entry.start_time)
+          const end = new Date(entry.end_time!)
+          return total + (end.getTime() - start.getTime()) / (1000 * 60 * 60)
+        }, 0),
+      diapers: todayEntries.filter((e) => e.entry_type === 'diaper').length,
+    }
+  }, [entries])
+
   React.useEffect(() => {
     const loadInsightsData = async () => {
-      if (!activeBaby) {
+      if (!activeBaby || entries.length === 0) {
         setLoading(false)
         return
       }
 
       try {
-        // Load tracker data for AI analysis
-        const entries = await trackerService.getEntries(100, activeBaby.id)
-
         // Generate AI insights
         const insights = aiPatternService.generateInsights(entries, [])
         setAiInsights(insights)
@@ -90,7 +118,7 @@ const InsightsTab: React.FC<{ activeBaby: Baby | null }> = ({ activeBaby }) => {
     }
 
     loadInsightsData()
-  }, [activeBaby])
+  }, [activeBaby, entries])
 
   if (loading) {
     return (
@@ -118,6 +146,67 @@ const InsightsTab: React.FC<{ activeBaby: Baby | null }> = ({ activeBaby }) => {
 
   return (
     <div className='space-y-6'>
+      {/* Today's Summary Stats */}
+      <SectionErrorBoundary
+        sectionName="Today's Stats"
+        contextData={{ babyId: activeBaby?.id }}
+      >
+        <Card className='p-2'>
+          <div className='grid grid-cols-3 gap-2'>
+            {/* Feeding Stats */}
+            <button
+              className='group min-h-[44px] rounded-lg p-2 text-center transition-all duration-200 hover:bg-blue-50 active:scale-95 dark:hover:bg-blue-900/20'
+              onClick={() => {
+                // Future: Could open detailed feeding stats modal
+                console.log('Feeding stats tapped')
+              }}
+              aria-label={`${todayStats.feedings} feedings today. Tap for details.`}
+            >
+              <div className='text-lg font-bold text-blue-600 group-hover:text-blue-700 sm:text-xl'>
+                {todayStats.feedings}
+              </div>
+              <div className='text-xs font-medium text-gray-600 dark:text-gray-300'>
+                Feedings
+              </div>
+            </button>
+
+            {/* Sleep Stats */}
+            <button
+              className='group min-h-[44px] rounded-lg p-2 text-center transition-all duration-200 hover:bg-cyan-50 active:scale-95 dark:hover:bg-cyan-900/20'
+              onClick={() => {
+                // Future: Could open detailed sleep stats modal
+                console.log('Sleep stats tapped')
+              }}
+              aria-label={`${todayStats.sleepHours.toFixed(1)} hours of sleep today. Tap for details.`}
+            >
+              <div className='text-lg font-bold text-cyan-600 group-hover:text-cyan-700 sm:text-xl'>
+                {`${todayStats.sleepHours.toFixed(1)}h`}
+              </div>
+              <div className='text-xs font-medium text-gray-600 dark:text-gray-300'>
+                Sleep
+              </div>
+            </button>
+
+            {/* Diaper Stats */}
+            <button
+              className='group min-h-[44px] rounded-lg p-2 text-center transition-all duration-200 hover:bg-emerald-50 active:scale-95 dark:hover:bg-emerald-900/20'
+              onClick={() => {
+                // Future: Could open detailed diaper stats modal
+                console.log('Diaper stats tapped')
+              }}
+              aria-label={`${todayStats.diapers} diaper changes today. Tap for details.`}
+            >
+              <div className='text-lg font-bold text-emerald-600 group-hover:text-emerald-700 sm:text-xl'>
+                {todayStats.diapers}
+              </div>
+              <div className='text-xs font-medium text-gray-600 dark:text-gray-300'>
+                Diapers
+              </div>
+            </button>
+          </div>
+        </Card>
+      </SectionErrorBoundary>
+
       {/* AI Insights Section */}
       {aiInsights && (
         <SectionErrorBoundary
@@ -423,7 +512,7 @@ const ActivitiesContent: React.FC = () => {
           </TabsContent>
 
           <TabsContent value='insights'>
-            <InsightsTab activeBaby={activeBaby || null} />
+            <InsightsTab activeBaby={activeBaby || null} entries={entries} />
           </TabsContent>
         </Tabs>
       </div>
