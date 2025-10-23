@@ -150,7 +150,7 @@ export const ActivityGroup: React.FC<ActivityGroupProps> = ({
                     </p>
                   )}
 
-                  {/* Mobile: I'm Done button under text content */}
+                  {/* Mobile: Mark Complete button under text content */}
                   {activityUtils.isInProgress(entry) && onStopActivity && (
                     <div
                       className='mt-3 lg:hidden'
@@ -173,7 +173,7 @@ export const ActivityGroup: React.FC<ActivityGroupProps> = ({
 
               {/* Action buttons */}
               <div className='ml-3 flex flex-shrink-0 items-center gap-2'>
-                {/* Desktop: I'm Done button in action area */}
+                {/* Desktop: Mark Complete button in action area */}
                 {activityUtils.isInProgress(entry) && onStopActivity && (
                   <div
                     className='hidden lg:block'

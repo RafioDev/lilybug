@@ -10,7 +10,11 @@ import { HeaderProvider } from '../contexts/HeaderContext'
 import { ComponentErrorBoundary } from './ComponentErrorBoundary'
 import { useUserProfile } from '../hooks/queries/useProfileQueries'
 import { useActiveBaby } from '../hooks/queries/useBabyQueries'
+import { useEntries, useUpdateEntry } from '../hooks/queries/useTrackerQueries'
+import { activityUtils } from '../utils/activityUtils'
+import { reportError } from '../utils/errorHandler'
 import type { User } from '@supabase/supabase-js'
+import type { TrackerEntry } from '../types'
 
 export const AppLayout: React.FC = () => {
   const [user, setUser] = useState<User | null>(null)
@@ -20,6 +24,29 @@ export const AppLayout: React.FC = () => {
   // Use React Query for profile data
   const { data: profileData, isLoading: profileLoading } = useUserProfile()
   const { data: activeBaby } = useActiveBaby()
+  const { data: entries = [] } = useEntries(50, activeBaby?.id) // Get recent entries to check for in-progress activities
+  const updateEntryMutation = useUpdateEntry()
+
+  // Find any in-progress activity
+  const inProgressActivity =
+    entries.find((entry) => activityUtils.isInProgress(entry)) || null
+
+  // Handle stopping an activity
+  const handleStopActivity = async (entry: TrackerEntry) => {
+    try {
+      const now = new Date().toISOString()
+      await updateEntryMutation.mutateAsync({
+        id: entry.id,
+        updates: { end_time: now },
+      })
+    } catch (error) {
+      console.error('Error stopping activity:', error)
+      reportError(error instanceof Error ? error : new Error(String(error)), {
+        context: 'stopActivity',
+        entryId: entry.id,
+      })
+    }
+  }
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -85,6 +112,8 @@ export const AppLayout: React.FC = () => {
           <ComponentErrorBoundary componentName='UnifiedActionFooter'>
             <UnifiedActionFooter
               onManualEntry={() => setIsManualEntryModalOpen(true)}
+              onStopActivity={handleStopActivity}
+              inProgressActivity={inProgressActivity}
             />
           </ComponentErrorBoundary>
         </div>

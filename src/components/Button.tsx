@@ -79,12 +79,6 @@ const DEFAULT_ICON_SIZES = {
   lg: 'lg' as const,
 } as const
 
-const GAP_CLASSES = {
-  sm: 'gap-1.5',
-  md: 'gap-2',
-  lg: 'gap-2.5',
-} as const
-
 // Memoized Loading Spinner Component
 const LoadingSpinner = React.memo<{
   size: 'sm' | 'md' | 'lg'
@@ -272,7 +266,7 @@ export const Button = React.memo(
           return (
             <span
               className={`inline-flex items-center justify-center ${
-                iconOnly ? '' : GAP_CLASSES[size]
+                iconOnly ? '' : 'gap-1'
               }`}
             >
               <LoadingSpinner size={size} iconSize={iconSize} />
@@ -290,13 +284,9 @@ export const Button = React.memo(
         }
 
         return (
-          <span
-            className={`inline-flex items-center justify-center ${GAP_CLASSES[size]}`}
-          >
+          <span className='inline-flex items-center justify-center gap-1'>
             {leftIcon && renderIcon(leftIcon)}
-            <span className='inline-flex items-center justify-center'>
-              {children}
-            </span>
+            {children}
             {rightIcon && renderIcon(rightIcon)}
           </span>
         )

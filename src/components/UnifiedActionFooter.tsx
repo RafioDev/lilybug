@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react'
-import { Mic, MicOff, Plus, Sparkles } from 'lucide-react'
+import { Mic, MicOff, Plus, Sparkles, CheckCircle } from 'lucide-react'
 import { Button } from './Button'
 import { ComponentErrorBoundary } from './ComponentErrorBoundary'
 import { useVoiceProcessor, VoiceState } from '../hooks/useVoiceProcessor'
 import { cn } from '../utils/cn'
+import type { TrackerEntry } from '../types'
 
 // Component interfaces
 interface UnifiedActionFooterProps {
   onEntryCreated?: () => void
   onManualEntry?: () => void
+  onStopActivity?: (entry: TrackerEntry) => void
+  inProgressActivity?: TrackerEntry | null
   className?: string
 }
 
@@ -117,14 +120,41 @@ interface MobileLayoutProps {
   voiceState: VoiceState
   onVoiceClick: () => void
   onManualEntry?: () => void
+  onStopActivity?: (entry: TrackerEntry) => void
+  inProgressActivity?: TrackerEntry | null
 }
 
 const MobileLayout: React.FC<MobileLayoutProps> = ({
   voiceState,
   onVoiceClick,
   onManualEntry,
+  onStopActivity,
+  inProgressActivity,
 }) => {
   const { isListening, isProcessing } = voiceState
+
+  // If there's an in-progress activity, show Mark Complete button
+  if (inProgressActivity && onStopActivity) {
+    return (
+      <div className='fixed right-0 bottom-0 left-0 z-40 border-t border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800'>
+        <div className='pb-safe-area-inset-bottom px-4 pt-4 pb-4'>
+          <div className='mx-auto max-w-md'>
+            <Button
+              onClick={() => onStopActivity(inProgressActivity)}
+              variant='outline'
+              size='lg'
+              fullWidth
+              className='flex h-14 transform items-center justify-center gap-3 border-2 border-orange-500 font-medium text-orange-600 shadow-lg transition-all duration-200 hover:scale-105 hover:border-orange-600 hover:bg-orange-50 hover:shadow-xl'
+              aria-label={`Complete ${inProgressActivity.entry_type} activity`}
+            >
+              <CheckCircle className='h-5 w-5' />
+              <span className='font-medium'>Mark Complete</span>
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className='fixed right-0 bottom-0 left-0 z-40 border-t border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800'>
@@ -190,14 +220,36 @@ interface DesktopLayoutProps {
   voiceState: VoiceState
   onVoiceClick: () => void
   onManualEntry?: () => void
+  onStopActivity?: (entry: TrackerEntry) => void
+  inProgressActivity?: TrackerEntry | null
 }
 
 const DesktopLayout: React.FC<DesktopLayoutProps> = ({
   voiceState,
   onVoiceClick,
   onManualEntry,
+  onStopActivity,
+  inProgressActivity,
 }) => {
   const { isListening, isProcessing } = voiceState
+
+  // If there's an in-progress activity, show Mark Complete button
+  if (inProgressActivity && onStopActivity) {
+    return (
+      <div className='fixed right-0 bottom-6 left-0 z-40 flex justify-center'>
+        <Button
+          onClick={() => onStopActivity(inProgressActivity)}
+          variant='outline'
+          size='lg'
+          leftIcon={<CheckCircle className='h-5 w-5' />}
+          className='group flex h-14 items-center justify-center border-2 border-orange-500 px-6 text-orange-600 shadow-lg transition-all duration-200 hover:scale-105 hover:border-orange-600 hover:bg-orange-50 hover:shadow-xl focus:scale-105 focus:shadow-xl'
+          aria-label={`Complete ${inProgressActivity.entry_type} activity`}
+        >
+          Mark Complete
+        </Button>
+      </div>
+    )
+  }
 
   return (
     <div className='fixed right-0 bottom-6 left-0 z-40 flex justify-center'>
@@ -266,6 +318,8 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
 export const UnifiedActionFooter: React.FC<UnifiedActionFooterProps> = ({
   onEntryCreated,
   onManualEntry,
+  onStopActivity,
+  inProgressActivity,
   className = '',
 }) => {
   const layout = useResponsiveLayout()
@@ -306,12 +360,16 @@ export const UnifiedActionFooter: React.FC<UnifiedActionFooterProps> = ({
             voiceState={voiceState}
             onVoiceClick={handleVoiceClick}
             onManualEntry={onManualEntry}
+            onStopActivity={onStopActivity}
+            inProgressActivity={inProgressActivity}
           />
         ) : (
           <DesktopLayout
             voiceState={voiceState}
             onVoiceClick={handleVoiceClick}
             onManualEntry={onManualEntry}
+            onStopActivity={onStopActivity}
+            inProgressActivity={inProgressActivity}
           />
         )}
       </div>
