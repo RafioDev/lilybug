@@ -3,8 +3,6 @@ import { Outlet, Navigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { migrateBabyData } from '../utils/migrateBabyData'
 
-import { Sidebar } from './Sidebar'
-import { MobileHeader } from './MobileHeader'
 import { Header } from './Header'
 import { UnifiedActionFooter } from './UnifiedActionFooter'
 import { ActivityModal } from './ActivityModal'
@@ -67,38 +65,21 @@ export const AppLayout: React.FC = () => {
     return <Navigate to='/onboarding' replace />
   }
 
-  const userProfileForProps = {
-    profile: profileData.profile,
-    userEmail: profileData.userEmail,
-    displayName: profileData.displayName,
-    loading: false,
-  }
-
   return (
     <ComponentErrorBoundary
       componentName='AppLayout'
       contextData={{ userId: user?.id }}
     >
       <HeaderProvider>
-        <div className='min-h-screen lg:flex'>
-          <ComponentErrorBoundary componentName='Sidebar'>
-            <Sidebar userProfile={userProfileForProps} />
+        <div className='flex min-h-screen flex-col'>
+          {/* Unified Header for both desktop and mobile */}
+          <ComponentErrorBoundary componentName='Header'>
+            <Header />
           </ComponentErrorBoundary>
-          <div className='flex-1 lg:ml-64'>
-            {/* Desktop: Create a scrollable container for sticky header */}
-            <div className='hidden h-screen overflow-y-auto lg:block'>
-              <ComponentErrorBoundary componentName='Header'>
-                <Header />
-              </ComponentErrorBoundary>
-              <Outlet />
-            </div>
-            {/* Mobile: Create a scrollable container for sticky header */}
-            <div className='h-screen overflow-y-auto lg:hidden'>
-              <ComponentErrorBoundary componentName='MobileHeader'>
-                <MobileHeader userProfile={userProfileForProps} />
-              </ComponentErrorBoundary>
-              <Outlet />
-            </div>
+
+          {/* Main content area */}
+          <div className='flex-1 overflow-y-auto'>
+            <Outlet />
           </div>
 
           <ComponentErrorBoundary componentName='UnifiedActionFooter'>

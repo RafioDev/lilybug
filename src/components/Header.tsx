@@ -1,49 +1,28 @@
 import React from 'react'
-import { useLocation } from 'react-router-dom'
 import { Baby as BabyIcon, Sparkles } from 'lucide-react'
 import { dateUtils } from '../utils/dateUtils'
 import { useActiveBaby } from '../hooks/queries/useBabyQueries'
 import { useHeader } from '../contexts/HeaderContext'
 import { useUserProfile } from '../hooks/queries/useProfileQueries'
 import { UserDropdown } from './UserDropdown'
+import { Breadcrumbs } from './Breadcrumbs'
 
 interface HeaderProps {
-  title?: string
   subtitle?: string
   actions?: React.ReactNode
   className?: string
 }
 
-const getPageTitle = (pathname: string): string => {
-  switch (pathname) {
-    case '/':
-      return 'Activities'
-    case '/insights':
-      return 'Insights'
-    case '/settings':
-      return 'Settings'
-    default:
-      return 'App'
-  }
-}
-
 export const Header: React.FC<HeaderProps> = ({
-  title: propTitle,
   subtitle: propSubtitle,
   actions: propActions,
   className = '',
 }) => {
-  const location = useLocation()
   const { data: activeBaby, isLoading } = useActiveBaby()
   const { data: profileData, isLoading: profileLoading } = useUserProfile()
-  const {
-    title: contextTitle,
-    subtitle: contextSubtitle,
-    actions: contextActions,
-  } = useHeader()
+  const { subtitle: contextSubtitle, actions: contextActions } = useHeader()
 
-  // Use context values if available, otherwise fall back to props, then to auto-detected title
-  const title = contextTitle || propTitle || getPageTitle(location.pathname)
+  // Use context values if available, otherwise fall back to props
   const subtitle = contextSubtitle || propSubtitle
   const actions = contextActions || propActions
 
@@ -97,9 +76,8 @@ export const Header: React.FC<HeaderProps> = ({
 
         <div className='flex items-center'>
           <div>
-            <h1 className='text-base font-bold text-gray-800 sm:text-xl dark:text-gray-100'>
-              {title}
-            </h1>
+            {/* Breadcrumbs handle both navigation and page title display */}
+            <Breadcrumbs />
             {subtitle && (
               <p className='text-xs text-gray-600 sm:text-sm dark:text-gray-400'>
                 {subtitle}

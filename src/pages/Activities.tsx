@@ -1,4 +1,5 @@
-import React, { useState, useMemo, Suspense } from 'react'
+import React, { useState, Suspense } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Clock, BarChart3, Activity } from 'lucide-react'
 import { Layout } from '../components/Layout'
 import { Card } from '../components/Card'
@@ -136,7 +137,6 @@ const ActivitiesTab: React.FC<{
   activeBaby: Baby | null
   entries: TrackerEntry[]
   entriesLoading: boolean
-  todayStats: { feedings: number; sleepHours: number; diapers: number }
   onEditEntry: (entry: TrackerEntry) => void
   onDeleteEntry: (entry: TrackerEntry) => void
   onStopActivity: (entry: TrackerEntry) => void
@@ -144,76 +144,12 @@ const ActivitiesTab: React.FC<{
   activeBaby,
   entries,
   entriesLoading,
-  todayStats,
   onEditEntry,
   onDeleteEntry,
   onStopActivity,
 }) => {
   return (
     <div className='space-y-3'>
-      {/* Mobile-Optimized Today's Summary */}
-      {activeBaby && (
-        <SectionErrorBoundary
-          sectionName="Today's Stats"
-          contextData={{ babyId: activeBaby.id }}
-        >
-          <Card className='p-2'>
-            <div className='grid grid-cols-3 gap-2'>
-              {/* Feeding Stats */}
-              <button
-                className='group min-h-[44px] rounded-lg p-2 text-center transition-all duration-200 hover:bg-blue-50 active:scale-95 dark:hover:bg-blue-900/20'
-                onClick={() => {
-                  // Future: Could open detailed feeding stats modal
-                  console.log('Feeding stats tapped')
-                }}
-                aria-label={`${todayStats.feedings} feedings today. Tap for details.`}
-              >
-                <div className='text-lg font-bold text-blue-600 group-hover:text-blue-700 sm:text-xl'>
-                  {todayStats.feedings}
-                </div>
-                <div className='text-xs font-medium text-gray-600 dark:text-gray-300'>
-                  Feedings
-                </div>
-              </button>
-
-              {/* Sleep Stats */}
-              <button
-                className='group min-h-[44px] rounded-lg p-2 text-center transition-all duration-200 hover:bg-cyan-50 active:scale-95 dark:hover:bg-cyan-900/20'
-                onClick={() => {
-                  // Future: Could open detailed sleep stats modal
-                  console.log('Sleep stats tapped')
-                }}
-                aria-label={`${todayStats.sleepHours.toFixed(1)} hours of sleep today. Tap for details.`}
-              >
-                <div className='text-lg font-bold text-cyan-600 group-hover:text-cyan-700 sm:text-xl'>
-                  {`${todayStats.sleepHours.toFixed(1)}h`}
-                </div>
-                <div className='text-xs font-medium text-gray-600 dark:text-gray-300'>
-                  Sleep
-                </div>
-              </button>
-
-              {/* Diaper Stats */}
-              <button
-                className='group min-h-[44px] rounded-lg p-2 text-center transition-all duration-200 hover:bg-emerald-50 active:scale-95 dark:hover:bg-emerald-900/20'
-                onClick={() => {
-                  // Future: Could open detailed diaper stats modal
-                  console.log('Diaper stats tapped')
-                }}
-                aria-label={`${todayStats.diapers} diaper changes today. Tap for details.`}
-              >
-                <div className='text-lg font-bold text-emerald-600 group-hover:text-emerald-700 sm:text-xl'>
-                  {todayStats.diapers}
-                </div>
-                <div className='text-xs font-medium text-gray-600 dark:text-gray-300'>
-                  Diapers
-                </div>
-              </button>
-            </div>
-          </Card>
-        </SectionErrorBoundary>
-      )}
-
       {/* Activities List - Maximized Height */}
       <SectionErrorBoundary
         sectionName='Activities List'
@@ -245,11 +181,18 @@ const ActivitiesTab: React.FC<{
   )
 }
 
+type TabType = 'activities' | 'insights'
+
 const ActivitiesContent: React.FC = () => {
-  // Tab state management with "Activities" as default active tab
-  const [activeTab, setActiveTab] = useState<'activities' | 'insights'>(
-    'activities'
-  )
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  // Derive active tab from URL parameters instead of storing in state
+  const activeTab: TabType = (() => {
+    const tabParam = searchParams.get('tab') as TabType
+    return tabParam && ['activities', 'insights'].includes(tabParam)
+      ? tabParam
+      : 'activities'
+  })()
 
   // Voice interface state removed - now handled by UnifiedActionFooter system
   // Use React Query for data
@@ -259,34 +202,6 @@ const ActivitiesContent: React.FC = () => {
     activeBaby?.id
   )
 
-  // Calculate today's stats using useMemo for better performance
-  const todayStats = useMemo(() => {
-    if (entries.length === 0) {
-      return {
-        feedings: 0,
-        sleepHours: 0,
-        diapers: 0,
-      }
-    }
-
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    const todayEntries = entries.filter(
-      (entry) => new Date(entry.start_time) >= today
-    )
-
-    return {
-      feedings: todayEntries.filter((e) => e.entry_type === 'feeding').length,
-      sleepHours: todayEntries
-        .filter((e) => e.entry_type === 'sleep' && e.end_time)
-        .reduce((total, entry) => {
-          const start = new Date(entry.start_time)
-          const end = new Date(entry.end_time!)
-          return total + (end.getTime() - start.getTime()) / (1000 * 60 * 60)
-        }, 0),
-      diapers: todayEntries.filter((e) => e.entry_type === 'diaper').length,
-    }
-  }, [entries])
   const createEntryMutation = useCreateEntry()
   const deleteEntryMutation = useDeleteEntry()
   const updateEntryMutation = useUpdateEntry()
@@ -425,9 +340,9 @@ const ActivitiesContent: React.FC = () => {
     }
   }
 
-  // Handle tab change
+  // Update URL when tab changes
   const handleTabChange = (value: string) => {
-    setActiveTab(value as 'activities' | 'insights')
+    setSearchParams({ tab: value })
   }
 
   // Show loading state while data is being fetched
@@ -435,31 +350,7 @@ const ActivitiesContent: React.FC = () => {
     return (
       <Layout>
         <div className='mx-auto max-w-4xl space-y-3 pb-20'>
-          {/* Loading Stats - Mobile Optimized */}
-          <Card className='p-2'>
-            <div className='grid grid-cols-3 gap-2'>
-              <div className='rounded-lg p-2 text-center'>
-                <div className='mx-auto mb-1 h-5 w-6 animate-pulse rounded bg-gray-200 dark:bg-gray-700'></div>
-                <div className='text-xs text-gray-400 dark:text-gray-500'>
-                  Loading...
-                </div>
-              </div>
-              <div className='rounded-lg p-2 text-center'>
-                <div className='mx-auto mb-1 h-5 w-8 animate-pulse rounded bg-gray-200 dark:bg-gray-700'></div>
-                <div className='text-xs text-gray-400 dark:text-gray-500'>
-                  Loading...
-                </div>
-              </div>
-              <div className='rounded-lg p-2 text-center'>
-                <div className='mx-auto mb-1 h-5 w-6 animate-pulse rounded bg-gray-200 dark:bg-gray-700'></div>
-                <div className='text-xs text-gray-400 dark:text-gray-500'>
-                  Loading...
-                </div>
-              </div>
-            </div>
-          </Card>
-
-          {/* Loading Activities - Maximized */}
+          {/* Loading Activities */}
           <Card className='p-3'>
             <div className='mb-3 flex items-center justify-between'>
               <div className='flex items-center gap-2'>
@@ -512,7 +403,6 @@ const ActivitiesContent: React.FC = () => {
               activeBaby={activeBaby || null}
               entries={entries}
               entriesLoading={entriesLoading}
-              todayStats={todayStats}
               onEditEntry={openEditModal}
               onDeleteEntry={handleDeleteEntry}
               onStopActivity={handleStopActivity}
