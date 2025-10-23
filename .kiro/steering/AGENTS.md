@@ -82,3 +82,62 @@ function handleUnknownData(data: unknown): string {
 ```
 
 This ensures better type safety, improved IDE support, and fewer runtime errors.
+
+## UI Components
+
+**Always use Shadcn/ui components instead of creating new components from scratch.**
+
+When building UI components, prioritize using existing Shadcn/ui components:
+
+- Reference the official Shadcn/ui documentation: https://ui.shadcn.com/docs/components
+- Use existing Shadcn components as the foundation for UI elements
+- Customize Shadcn components with Tailwind CSS classes as needed
+- Only create new components when Shadcn doesn't provide a suitable alternative
+- Follow Shadcn's component patterns and conventions
+
+**Available Shadcn components to use:**
+
+- `Button` - For all button interactions
+- `Input` - For form inputs
+- `Card` - For content containers
+- `Modal/Dialog` - For overlays and modals
+- `Tabs` - For tabbed interfaces
+- `Select` - For dropdown selections
+- `Checkbox` - For boolean inputs
+- `RadioGroup` - For single-choice selections
+- `Switch` - For toggle controls
+- `Badge` - For status indicators
+- `Alert` - For notifications and messages
+- `Separator` - For visual dividers
+- `Avatar` - For user profile images
+- `Dropdown Menu` - For contextual menus
+- `Navigation Menu` - For site navigation
+- `Sheet` - For slide-out panels
+- `Tooltip` - For helpful hints
+- `Progress` - For loading states
+- `Skeleton` - For loading placeholders
+
+**Examples:**
+
+```typescript
+// ❌ Avoid creating custom components
+const CustomButton = ({ children, onClick }) => (
+  <button className="px-4 py-2 bg-blue-500 text-white rounded" onClick={onClick}>
+    {children}
+  </button>
+)
+
+// ✅ Use Shadcn Button component
+import { Button } from "@/components/ui/button"
+
+<Button variant="default" onClick={onClick}>
+  {children}
+</Button>
+
+// ✅ Customize with Tailwind if needed
+<Button variant="default" className="bg-blue-500 hover:bg-blue-600" onClick={onClick}>
+  {children}
+</Button>
+```
+
+This approach ensures consistency, accessibility, and reduces maintenance overhead.

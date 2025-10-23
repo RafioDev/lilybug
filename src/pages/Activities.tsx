@@ -1,9 +1,16 @@
-import React, { useState, useMemo, Suspense } from 'react'
-import { Clock } from 'lucide-react'
+import React, { useState, Suspense } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import { Clock, BarChart3, Activity } from 'lucide-react'
 import { Layout } from '../components/Layout'
 import { Card } from '../components/Card'
 import { Button } from '../components/Button'
 import { Input } from '../components/Input'
+import {
+  Tabs,
+  AnimatedTabsList,
+  AnimatedTabsTrigger,
+  TabsContent,
+} from '../components/ui/tabs'
 
 import { AppErrorBoundary } from '../components/AppErrorBoundary'
 import { PageErrorBoundary } from '../components/PageErrorBoundary'
@@ -28,9 +35,170 @@ import { useConfirmationModal } from '../hooks/useConfirmationModal'
 import { reportError } from '../utils/errorHandler'
 import type { TrackerEntry, EntryType, FeedingType, DiaperType } from '../types'
 
+// Import insights functionality
+import { AIInsights } from '../components/AIInsights'
+import { trackerService } from '../services/trackerService'
+import { aiPatternService } from '../services/aiPatternService'
+import { aiAssistantService } from '../services/aiAssistantService'
+import type { Baby } from '../types'
+import type { PatternInsights } from '../services/aiPatternService'
+import type { ContextualGuidance } from '../services/aiAssistantService'
+
 // Voice functionality types and interfaces are now handled by UnifiedActionFooter
 
+// Insights Tab Component
+const InsightsTab: React.FC<{ activeBaby: Baby | null }> = ({ activeBaby }) => {
+  const [aiInsights, setAiInsights] = useState<PatternInsights | null>(null)
+  const [contextualGuidance, setContextualGuidance] = useState<
+    ContextualGuidance[]
+  >([])
+  const [nextActivityPrediction, setNextActivityPrediction] = useState<{
+    activity: 'feeding' | 'sleep' | 'diaper'
+    estimatedTime: Date
+    confidence: number
+  } | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  React.useEffect(() => {
+    const loadInsightsData = async () => {
+      if (!activeBaby) {
+        setLoading(false)
+        return
+      }
+
+      try {
+        // Load tracker data for AI analysis
+        const entries = await trackerService.getEntries(100, activeBaby.id)
+
+        // Generate AI insights
+        const insights = aiPatternService.generateInsights(entries, [])
+        setAiInsights(insights)
+
+        const guidance = aiAssistantService.generateContextualGuidance(
+          entries,
+          activeBaby
+        )
+        setContextualGuidance(guidance)
+
+        const prediction = aiAssistantService.predictNextActivity(entries)
+        setNextActivityPrediction(prediction)
+      } catch (error) {
+        console.error('Error loading insights:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadInsightsData()
+  }, [activeBaby])
+
+  if (loading) {
+    return (
+      <div className='space-y-6'>
+        <Card>
+          <p className='text-center text-gray-500 dark:text-gray-400'>
+            Loading insights...
+          </p>
+        </Card>
+      </div>
+    )
+  }
+
+  if (!activeBaby) {
+    return (
+      <div className='space-y-6'>
+        <Card>
+          <p className='text-center text-gray-500'>
+            Please add a baby first to see insights.
+          </p>
+        </Card>
+      </div>
+    )
+  }
+
+  return (
+    <div className='space-y-6'>
+      {/* AI Insights Section */}
+      {aiInsights && (
+        <SectionErrorBoundary
+          sectionName='AI Insights'
+          contextData={{ babyId: activeBaby?.id }}
+        >
+          <Card className='lg:p-8'>
+            <AIInsights
+              insights={aiInsights}
+              contextualGuidance={contextualGuidance}
+              nextActivityPrediction={nextActivityPrediction}
+            />
+          </Card>
+        </SectionErrorBoundary>
+      )}
+    </div>
+  )
+}
+
+// Activities Tab Component
+const ActivitiesTab: React.FC<{
+  activeBaby: Baby | null
+  entries: TrackerEntry[]
+  entriesLoading: boolean
+  onEditEntry: (entry: TrackerEntry) => void
+  onDeleteEntry: (entry: TrackerEntry) => void
+  onStopActivity: (entry: TrackerEntry) => void
+}> = ({
+  activeBaby,
+  entries,
+  entriesLoading,
+  onEditEntry,
+  onDeleteEntry,
+  onStopActivity,
+}) => {
+  return (
+    <div className='space-y-3'>
+      {/* Activities List - Maximized Height */}
+      <SectionErrorBoundary
+        sectionName='Activities List'
+        contextData={{ babyId: activeBaby?.id }}
+      >
+        <Card className='p-3'>
+          <div className='mb-3 flex items-center justify-between'>
+            <div className='flex items-center gap-2'>
+              <Clock className='h-4 w-4 text-gray-600 dark:text-gray-400' />
+              <h3 className='text-sm font-semibold text-gray-800 dark:text-gray-200'>
+                Recent Activities
+              </h3>
+            </div>
+          </div>
+
+          <GroupedActivitiesList
+            entries={entries} // Show all entries with lazy loading
+            onEditEntry={onEditEntry}
+            onDeleteEntry={onDeleteEntry}
+            onStopActivity={onStopActivity}
+            isLoading={entriesLoading}
+            virtualScrolling={true} // Enable performance optimizations
+            maxInitialGroups={5} // Show more days initially for better mobile experience
+            className='max-h-[60vh] overflow-y-auto' // Scrollable activities list
+          />
+        </Card>
+      </SectionErrorBoundary>
+    </div>
+  )
+}
+
+type TabType = 'activities' | 'insights'
+
 const ActivitiesContent: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  // Derive active tab from URL parameters instead of storing in state
+  const activeTab: TabType = (() => {
+    const tabParam = searchParams.get('tab') as TabType
+    return tabParam && ['activities', 'insights'].includes(tabParam)
+      ? tabParam
+      : 'activities'
+  })()
+
   // Voice interface state removed - now handled by UnifiedActionFooter system
   // Use React Query for data
   const { data: activeBaby, isLoading: babyLoading } = useActiveBaby()
@@ -39,34 +207,6 @@ const ActivitiesContent: React.FC = () => {
     activeBaby?.id
   )
 
-  // Calculate today's stats using useMemo for better performance
-  const todayStats = useMemo(() => {
-    if (entries.length === 0) {
-      return {
-        feedings: 0,
-        sleepHours: 0,
-        diapers: 0,
-      }
-    }
-
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    const todayEntries = entries.filter(
-      (entry) => new Date(entry.start_time) >= today
-    )
-
-    return {
-      feedings: todayEntries.filter((e) => e.entry_type === 'feeding').length,
-      sleepHours: todayEntries
-        .filter((e) => e.entry_type === 'sleep' && e.end_time)
-        .reduce((total, entry) => {
-          const start = new Date(entry.start_time)
-          const end = new Date(entry.end_time!)
-          return total + (end.getTime() - start.getTime()) / (1000 * 60 * 60)
-        }, 0),
-      diapers: todayEntries.filter((e) => e.entry_type === 'diaper').length,
-    }
-  }, [entries])
   const createEntryMutation = useCreateEntry()
   const deleteEntryMutation = useDeleteEntry()
   const updateEntryMutation = useUpdateEntry()
@@ -205,36 +345,17 @@ const ActivitiesContent: React.FC = () => {
     }
   }
 
+  // Update URL when tab changes
+  const handleTabChange = (value: string) => {
+    setSearchParams({ tab: value })
+  }
+
   // Show loading state while data is being fetched
   if (isLoading) {
     return (
       <Layout>
         <div className='mx-auto max-w-4xl space-y-3 pb-20'>
-          {/* Loading Stats - Mobile Optimized */}
-          <Card className='p-2'>
-            <div className='grid grid-cols-3 gap-2'>
-              <div className='rounded-lg p-2 text-center'>
-                <div className='mx-auto mb-1 h-5 w-6 animate-pulse rounded bg-gray-200 dark:bg-gray-700'></div>
-                <div className='text-xs text-gray-400 dark:text-gray-500'>
-                  Loading...
-                </div>
-              </div>
-              <div className='rounded-lg p-2 text-center'>
-                <div className='mx-auto mb-1 h-5 w-8 animate-pulse rounded bg-gray-200 dark:bg-gray-700'></div>
-                <div className='text-xs text-gray-400 dark:text-gray-500'>
-                  Loading...
-                </div>
-              </div>
-              <div className='rounded-lg p-2 text-center'>
-                <div className='mx-auto mb-1 h-5 w-6 animate-pulse rounded bg-gray-200 dark:bg-gray-700'></div>
-                <div className='text-xs text-gray-400 dark:text-gray-500'>
-                  Loading...
-                </div>
-              </div>
-            </div>
-          </Card>
-
-          {/* Loading Activities - Maximized */}
+          {/* Loading Activities */}
           <Card className='p-3'>
             <div className='mb-3 flex items-center justify-between'>
               <div className='flex items-center gap-2'>
@@ -265,98 +386,46 @@ const ActivitiesContent: React.FC = () => {
   return (
     <Layout>
       <div className='mx-auto max-w-4xl space-y-3 pb-20'>
-        {/* Mobile-Optimized Today's Summary */}
-        {activeBaby && (
-          <SectionErrorBoundary
-            sectionName="Today's Stats"
-            contextData={{ babyId: activeBaby.id }}
-          >
-            <Card className='p-2'>
-              <div className='grid grid-cols-3 gap-2'>
-                {/* Feeding Stats */}
-                <button
-                  className='group min-h-[44px] rounded-lg p-2 text-center transition-all duration-200 hover:bg-blue-50 active:scale-95 dark:hover:bg-blue-900/20'
-                  onClick={() => {
-                    // Future: Could open detailed feeding stats modal
-                    console.log('Feeding stats tapped')
-                  }}
-                  aria-label={`${todayStats.feedings} feedings today. Tap for details.`}
-                >
-                  <div className='text-lg font-bold text-blue-600 group-hover:text-blue-700 sm:text-xl'>
-                    {todayStats.feedings}
-                  </div>
-                  <div className='text-xs font-medium text-gray-600 dark:text-gray-300'>
-                    Feedings
-                  </div>
-                </button>
-
-                {/* Sleep Stats */}
-                <button
-                  className='group min-h-[44px] rounded-lg p-2 text-center transition-all duration-200 hover:bg-cyan-50 active:scale-95 dark:hover:bg-cyan-900/20'
-                  onClick={() => {
-                    // Future: Could open detailed sleep stats modal
-                    console.log('Sleep stats tapped')
-                  }}
-                  aria-label={`${todayStats.sleepHours.toFixed(1)} hours of sleep today. Tap for details.`}
-                >
-                  <div className='text-lg font-bold text-cyan-600 group-hover:text-cyan-700 sm:text-xl'>
-                    {`${todayStats.sleepHours.toFixed(1)}h`}
-                  </div>
-                  <div className='text-xs font-medium text-gray-600 dark:text-gray-300'>
-                    Sleep
-                  </div>
-                </button>
-
-                {/* Diaper Stats */}
-                <button
-                  className='group min-h-[44px] rounded-lg p-2 text-center transition-all duration-200 hover:bg-emerald-50 active:scale-95 dark:hover:bg-emerald-900/20'
-                  onClick={() => {
-                    // Future: Could open detailed diaper stats modal
-                    console.log('Diaper stats tapped')
-                  }}
-                  aria-label={`${todayStats.diapers} diaper changes today. Tap for details.`}
-                >
-                  <div className='text-lg font-bold text-emerald-600 group-hover:text-emerald-700 sm:text-xl'>
-                    {todayStats.diapers}
-                  </div>
-                  <div className='text-xs font-medium text-gray-600 dark:text-gray-300'>
-                    Diapers
-                  </div>
-                </button>
-              </div>
-            </Card>
-          </SectionErrorBoundary>
-        )}
-
-        {/* Voice functionality is now handled by UnifiedActionFooter */}
-
-        {/* Activities List - Maximized Height */}
-        <SectionErrorBoundary
-          sectionName='Activities List'
-          contextData={{ babyId: activeBaby?.id }}
+        {/* ShadCN Tabs */}
+        <Tabs
+          value={activeTab}
+          onValueChange={handleTabChange}
+          className='w-full'
         >
-          <Card className='p-3'>
-            <div className='mb-3 flex items-center justify-between'>
-              <div className='flex items-center gap-2'>
-                <Clock className='h-4 w-4 text-gray-600 dark:text-gray-400' />
-                <h3 className='text-sm font-semibold text-gray-800 dark:text-gray-200'>
-                  Recent Activities
-                </h3>
-              </div>
-            </div>
+          <AnimatedTabsList variant='underline' className='w-full'>
+            <AnimatedTabsTrigger
+              variant='underline'
+              value='activities'
+              className='flex items-center gap-2'
+            >
+              <Activity className='h-4 w-4' />
+              Activities
+            </AnimatedTabsTrigger>
+            <AnimatedTabsTrigger
+              variant='underline'
+              value='insights'
+              className='flex items-center gap-2'
+            >
+              <BarChart3 className='h-4 w-4' />
+              Insights
+            </AnimatedTabsTrigger>
+          </AnimatedTabsList>
 
-            <GroupedActivitiesList
-              entries={entries} // Show all entries with lazy loading
+          <TabsContent value='activities'>
+            <ActivitiesTab
+              activeBaby={activeBaby || null}
+              entries={entries}
+              entriesLoading={entriesLoading}
               onEditEntry={openEditModal}
               onDeleteEntry={handleDeleteEntry}
               onStopActivity={handleStopActivity}
-              isLoading={entriesLoading}
-              virtualScrolling={true} // Enable performance optimizations
-              maxInitialGroups={5} // Show more days initially for better mobile experience
-              className='max-h-[60vh] overflow-y-auto' // Scrollable activities list
             />
-          </Card>
-        </SectionErrorBoundary>
+          </TabsContent>
+
+          <TabsContent value='insights'>
+            <InsightsTab activeBaby={activeBaby || null} />
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Manual Entry Modal */}
