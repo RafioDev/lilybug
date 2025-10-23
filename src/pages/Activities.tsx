@@ -5,7 +5,12 @@ import { Layout } from '../components/Layout'
 import { Card } from '../components/Card'
 import { Button } from '../components/Button'
 import { Input } from '../components/Input'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs'
+import {
+  Tabs,
+  AnimatedTabsList,
+  AnimatedTabsTrigger,
+  TabsContent,
+} from '../components/ui/tabs'
 
 import { AppErrorBoundary } from '../components/AppErrorBoundary'
 import { PageErrorBoundary } from '../components/PageErrorBoundary'
@@ -387,16 +392,27 @@ const ActivitiesContent: React.FC = () => {
           onValueChange={handleTabChange}
           className='w-full'
         >
-          <TabsList className='grid w-full grid-cols-2'>
-            <TabsTrigger value='activities' className='flex items-center gap-2'>
+          <AnimatedTabsList
+            variant='default'
+            className='grid w-full grid-cols-2'
+          >
+            <AnimatedTabsTrigger
+              variant='default'
+              value='activities'
+              className='flex items-center gap-2'
+            >
               <Activity className='h-4 w-4' />
               Activities
-            </TabsTrigger>
-            <TabsTrigger value='insights' className='flex items-center gap-2'>
+            </AnimatedTabsTrigger>
+            <AnimatedTabsTrigger
+              variant='default'
+              value='insights'
+              className='flex items-center gap-2'
+            >
               <BarChart3 className='h-4 w-4' />
               Insights
-            </TabsTrigger>
-          </TabsList>
+            </AnimatedTabsTrigger>
+          </AnimatedTabsList>
 
           <TabsContent value='activities'>
             <ActivitiesTab

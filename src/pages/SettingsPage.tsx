@@ -5,7 +5,12 @@ import { PageErrorBoundary } from '../components/PageErrorBoundary'
 import { SectionErrorBoundary } from '../components/SectionErrorBoundary'
 import { BabiesTab } from '../components/SettingsPage/BabiesTab'
 import { GeneralTab } from '../components/SettingsPage/GeneralTab'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs'
+import {
+  Tabs,
+  AnimatedTabsList,
+  AnimatedTabsTrigger,
+  TabsContent,
+} from '../components/ui/tabs'
 
 type TabType = 'babies' | 'general'
 
@@ -35,16 +40,27 @@ const SettingsContent: React.FC = () => {
             onValueChange={handleTabChange}
             className='w-full'
           >
-            <TabsList className='mb-8 grid w-full grid-cols-2'>
-              <TabsTrigger value='general' className='flex items-center gap-2'>
+            <AnimatedTabsList
+              variant='default'
+              className='mb-8 grid w-full grid-cols-2'
+            >
+              <AnimatedTabsTrigger
+                variant='default'
+                value='general'
+                className='flex items-center gap-2'
+              >
                 <Settings className='h-4 w-4' />
                 General
-              </TabsTrigger>
-              <TabsTrigger value='babies' className='flex items-center gap-2'>
+              </AnimatedTabsTrigger>
+              <AnimatedTabsTrigger
+                variant='default'
+                value='babies'
+                className='flex items-center gap-2'
+              >
                 <BabyIcon className='h-4 w-4' />
                 Babies
-              </TabsTrigger>
-            </TabsList>
+              </AnimatedTabsTrigger>
+            </AnimatedTabsList>
 
             <TabsContent value='general'>
               <SectionErrorBoundary sectionName='Settings General Tab'>

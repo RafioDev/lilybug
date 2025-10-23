@@ -2,7 +2,6 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { AuthPage } from './pages/AuthPage'
 import { OnboardingPage } from './pages/OnboardingPage'
 import { Activities } from './pages/Activities'
-
 import { SettingsPage } from './pages/SettingsPage'
 import { AppLayout } from './components/AppLayout'
 

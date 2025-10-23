@@ -35,6 +35,151 @@ const TabsTrigger = React.forwardRef<
 ))
 TabsTrigger.displayName = TabsPrimitive.Trigger.displayName
 
+// Animated Tabs Components
+interface AnimatedTabsListProps
+  extends React.ComponentPropsWithoutRef<typeof TabsPrimitive.List> {
+  variant?: 'default' | 'underline'
+}
+
+const AnimatedTabsList = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.List>,
+  AnimatedTabsListProps
+>(({ className, variant = 'default', ...props }, ref) => {
+  const [activeTabRect, setActiveTabRect] = React.useState<DOMRect | null>(null)
+  const [listRect, setListRect] = React.useState<DOMRect | null>(null)
+  const listRef = React.useRef<HTMLDivElement>(null)
+
+  React.useEffect(() => {
+    const updateActiveTabPosition = () => {
+      if (!listRef.current) return
+
+      const activeTab = listRef.current.querySelector(
+        '[data-state="active"]'
+      ) as HTMLElement
+      const list = listRef.current
+
+      if (activeTab && list) {
+        setActiveTabRect(activeTab.getBoundingClientRect())
+        setListRect(list.getBoundingClientRect())
+      }
+    }
+
+    // Initial position
+    updateActiveTabPosition()
+
+    // Update on tab changes
+    const observer = new MutationObserver(updateActiveTabPosition)
+    if (listRef.current) {
+      observer.observe(listRef.current, {
+        attributes: true,
+        subtree: true,
+        attributeFilter: ['data-state'],
+      })
+    }
+
+    // Update on resize
+    window.addEventListener('resize', updateActiveTabPosition)
+
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', updateActiveTabPosition)
+    }
+  }, [])
+
+  const indicatorStyle = React.useMemo(() => {
+    if (!activeTabRect || !listRect) return { opacity: 0 }
+
+    const left = activeTabRect.left - listRect.left
+    const width = activeTabRect.width
+
+    return {
+      left: `${left}px`,
+      width: `${width}px`,
+      opacity: 1,
+    }
+  }, [activeTabRect, listRect])
+
+  if (variant === 'underline') {
+    return (
+      <div className='relative'>
+        <TabsPrimitive.List
+          ref={(node) => {
+            if (typeof ref === 'function') ref(node)
+            else if (ref) ref.current = node
+            listRef.current = node
+          }}
+          className={cn(
+            'border-border text-muted-foreground inline-flex items-center justify-start border-b bg-transparent p-0',
+            className
+          )}
+          {...props}
+        />
+        <div
+          className='bg-primary absolute bottom-0 h-0.5 transition-all duration-300 ease-out'
+          style={indicatorStyle}
+        />
+      </div>
+    )
+  }
+
+  return (
+    <div className='relative'>
+      <TabsPrimitive.List
+        ref={(node) => {
+          if (typeof ref === 'function') ref(node)
+          else if (ref) ref.current = node
+          listRef.current = node
+        }}
+        className={cn(
+          'bg-muted text-muted-foreground inline-flex items-center justify-center rounded-xl p-1',
+          className
+        )}
+        {...props}
+      />
+      <div
+        className='bg-background absolute top-1 bottom-1 rounded-lg shadow-sm transition-all duration-300 ease-out'
+        style={indicatorStyle}
+      />
+    </div>
+  )
+})
+AnimatedTabsList.displayName = 'AnimatedTabsList'
+
+interface AnimatedTabsTriggerProps
+  extends React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger> {
+  variant?: 'default' | 'underline'
+}
+
+const AnimatedTabsTrigger = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.Trigger>,
+  AnimatedTabsTriggerProps
+>(({ className, variant = 'default', ...props }, ref) => {
+  if (variant === 'underline') {
+    return (
+      <TabsPrimitive.Trigger
+        ref={ref}
+        className={cn(
+          'focus-visible:ring-ring data-[state=active]:text-foreground relative z-10 inline-flex items-center justify-center px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50',
+          className
+        )}
+        {...props}
+      />
+    )
+  }
+
+  return (
+    <TabsPrimitive.Trigger
+      ref={ref}
+      className={cn(
+        'focus-visible:ring-ring data-[state=active]:text-foreground relative z-10 inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50',
+        className
+      )}
+      {...props}
+    />
+  )
+})
+AnimatedTabsTrigger.displayName = 'AnimatedTabsTrigger'
+
 const TabsContent = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
@@ -50,4 +195,11 @@ const TabsContent = React.forwardRef<
 ))
 TabsContent.displayName = TabsPrimitive.Content.displayName
 
-export { Tabs, TabsList, TabsTrigger, TabsContent }
+export {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+  AnimatedTabsList,
+  AnimatedTabsTrigger,
+}
