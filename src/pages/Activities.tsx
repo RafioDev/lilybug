@@ -392,12 +392,9 @@ const ActivitiesContent: React.FC = () => {
           onValueChange={handleTabChange}
           className='w-full'
         >
-          <AnimatedTabsList
-            variant='default'
-            className='grid w-full grid-cols-2'
-          >
+          <AnimatedTabsList variant='underline' className='w-full'>
             <AnimatedTabsTrigger
-              variant='default'
+              variant='underline'
               value='activities'
               className='flex items-center gap-2'
             >
@@ -405,7 +402,7 @@ const ActivitiesContent: React.FC = () => {
               Activities
             </AnimatedTabsTrigger>
             <AnimatedTabsTrigger
-              variant='default'
+              variant='underline'
               value='insights'
               className='flex items-center gap-2'
             >

@@ -109,13 +109,21 @@ const AnimatedTabsList = React.forwardRef<
             listRef.current = node
           }}
           className={cn(
-            'border-border text-muted-foreground inline-flex items-center justify-start border-b bg-transparent p-0',
+            'relative inline-flex items-center justify-start bg-transparent p-0',
             className
           )}
           {...props}
         />
+        {/* Background underline */}
+        <div className='bg-border absolute right-0 bottom-0 left-0 h-px' />
+        {/* Active tab background - rounded top only */}
         <div
-          className='bg-primary absolute bottom-0 h-0.5 transition-all duration-300 ease-out'
+          className='bg-background border-border/50 absolute top-1 bottom-1 rounded-t-xl border shadow-sm transition-all duration-300 ease-out'
+          style={indicatorStyle}
+        />
+        {/* Active underline - thicker and more prominent with gradient */}
+        <div
+          className='absolute bottom-0 h-1 bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-300 ease-out'
           style={indicatorStyle}
         />
       </div>
@@ -159,7 +167,7 @@ const AnimatedTabsTrigger = React.forwardRef<
       <TabsPrimitive.Trigger
         ref={ref}
         className={cn(
-          'focus-visible:ring-ring data-[state=active]:text-foreground relative z-10 inline-flex items-center justify-center px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50',
+          'focus-visible:ring-ring text-muted-foreground data-[state=active]:text-primary hover:bg-muted/50 relative z-10 inline-flex cursor-pointer items-center justify-center px-6 py-3 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=active]:font-semibold data-[state=active]:hover:bg-transparent',
           className
         )}
         {...props}
@@ -171,7 +179,7 @@ const AnimatedTabsTrigger = React.forwardRef<
     <TabsPrimitive.Trigger
       ref={ref}
       className={cn(
-        'focus-visible:ring-ring data-[state=active]:text-foreground relative z-10 inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50',
+        'focus-visible:ring-ring data-[state=active]:text-foreground hover:bg-muted/30 relative z-10 inline-flex min-h-[44px] flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=active]:hover:bg-transparent',
         className
       )}
       {...props}

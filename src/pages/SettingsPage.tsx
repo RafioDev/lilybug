@@ -40,12 +40,9 @@ const SettingsContent: React.FC = () => {
             onValueChange={handleTabChange}
             className='w-full'
           >
-            <AnimatedTabsList
-              variant='default'
-              className='mb-8 grid w-full grid-cols-2'
-            >
+            <AnimatedTabsList variant='underline' className='w-full'>
               <AnimatedTabsTrigger
-                variant='default'
+                variant='underline'
                 value='general'
                 className='flex items-center gap-2'
               >
@@ -53,7 +50,7 @@ const SettingsContent: React.FC = () => {
                 General
               </AnimatedTabsTrigger>
               <AnimatedTabsTrigger
-                variant='default'
+                variant='underline'
                 value='babies'
                 className='flex items-center gap-2'
               >
