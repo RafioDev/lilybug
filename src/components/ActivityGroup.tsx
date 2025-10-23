@@ -111,7 +111,11 @@ export const ActivityGroup: React.FC<ActivityGroupProps> = ({
           {dateGroup.entries.map((entry) => (
             <div
               key={entry.id}
-              className='relative flex items-start justify-between rounded-lg bg-gray-50 p-4 dark:bg-gray-700'
+              className={`relative flex items-start justify-between rounded-lg p-4 ${
+                activityUtils.isInProgress(entry)
+                  ? 'border border-blue-200 bg-blue-50 dark:border-blue-800/50 dark:bg-blue-900/20'
+                  : 'bg-gray-50 dark:bg-gray-700'
+              }`}
             >
               <div className='flex min-w-0 flex-1 items-start gap-3'>
                 <span className='mt-1 flex-shrink-0 text-2xl'>
@@ -145,14 +149,36 @@ export const ActivityGroup: React.FC<ActivityGroupProps> = ({
                       "{entry.notes}"
                     </p>
                   )}
+
+                  {/* Mobile: I'm Done button under text content */}
+                  {activityUtils.isInProgress(entry) && onStopActivity && (
+                    <div
+                      className='mt-3 lg:hidden'
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Button
+                        onClick={() => onStopActivity(entry)}
+                        variant='outline'
+                        size='sm'
+                        leftIcon={<CheckCircle size={16} />}
+                        aria-label={`Complete ${entry.entry_type} activity`}
+                        className='border-orange-500 px-3 py-2 text-orange-600 hover:border-orange-600 hover:bg-orange-50 hover:text-orange-700 dark:border-orange-400 dark:text-orange-400 dark:hover:border-orange-300 dark:hover:bg-orange-900/20 dark:hover:text-orange-300'
+                      >
+                        Mark Complete
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
 
               {/* Action buttons */}
               <div className='ml-3 flex flex-shrink-0 items-center gap-2'>
-                {/* Done button for in-progress feeding and sleep activities */}
+                {/* Desktop: I'm Done button in action area */}
                 {activityUtils.isInProgress(entry) && onStopActivity && (
-                  <div onClick={(e) => e.stopPropagation()}>
+                  <div
+                    className='hidden lg:block'
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <Button
                       onClick={() => onStopActivity(entry)}
                       variant='outline'
@@ -161,7 +187,7 @@ export const ActivityGroup: React.FC<ActivityGroupProps> = ({
                       aria-label={`Complete ${entry.entry_type} activity`}
                       className='border-orange-500 px-3 py-2 text-orange-600 hover:border-orange-600 hover:bg-orange-50 hover:text-orange-700 dark:border-orange-400 dark:text-orange-400 dark:hover:border-orange-300 dark:hover:bg-orange-900/20 dark:hover:text-orange-300'
                     >
-                      I'm Done
+                      Mark Complete
                     </Button>
                   </div>
                 )}
