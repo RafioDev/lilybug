@@ -167,7 +167,7 @@ const AnimatedTabsTrigger = React.forwardRef<
       <TabsPrimitive.Trigger
         ref={ref}
         className={cn(
-          'focus-visible:ring-ring text-muted-foreground data-[state=active]:text-primary hover:bg-muted/50 relative z-10 inline-flex cursor-pointer items-center justify-center px-6 py-3 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=active]:font-semibold data-[state=active]:hover:bg-transparent',
+          'focus-visible:ring-ring text-muted-foreground data-[state=active]:text-primary hover:text-foreground relative z-10 inline-flex cursor-pointer items-center justify-center px-6 py-3 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=active]:font-semibold',
           className
         )}
         {...props}
@@ -179,7 +179,7 @@ const AnimatedTabsTrigger = React.forwardRef<
     <TabsPrimitive.Trigger
       ref={ref}
       className={cn(
-        'focus-visible:ring-ring data-[state=active]:text-foreground hover:bg-muted/30 relative z-10 inline-flex min-h-[44px] flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=active]:hover:bg-transparent',
+        'focus-visible:ring-ring data-[state=active]:text-foreground hover:text-foreground relative z-10 inline-flex min-h-[44px] flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50',
         className
       )}
       {...props}
