@@ -131,16 +131,18 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({
       {/* Safe area padding and proper spacing */}
       <div className='pb-safe-area-inset-bottom px-4 pt-4 pb-4'>
         <div className='mx-auto flex max-w-md gap-3'>
-          {/* Voice Assistant Button - Primary action */}
+          {/* Voice Assistant Button - Purple outline */}
           <Button
             onClick={onVoiceClick}
-            variant={isListening ? 'danger' : 'primary'}
+            variant='outline'
             size='lg'
             fullWidth
             disabled={isProcessing}
             className={cn(
-              'flex h-14 items-center justify-center gap-2 font-medium',
-              isListening && 'animate-pulse'
+              'flex h-14 transform items-center justify-center gap-2 border-2 font-medium shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl',
+              isListening
+                ? 'animate-pulse border-red-500 text-red-600 hover:border-red-600 hover:bg-red-50'
+                : 'border-purple-500 text-purple-600 hover:border-purple-600 hover:bg-purple-50'
             )}
             aria-label={
               isListening
@@ -164,18 +166,18 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({
             </span>
           </Button>
 
-          {/* Manual Entry Button - Secondary action */}
+          {/* New Entry Button - Blue outline */}
           <Button
             onClick={onManualEntry}
             variant='outline'
             size='lg'
             fullWidth
             disabled={isListening || isProcessing}
-            className='flex h-14 items-center justify-center gap-2 font-medium'
+            className='flex h-14 transform items-center justify-center gap-2 border-2 border-blue-500 font-medium text-blue-600 shadow-lg transition-all duration-200 hover:scale-105 hover:border-blue-600 hover:bg-blue-50 hover:shadow-xl'
             aria-label='Open manual entry form'
           >
             <Plus className='h-5 w-5' />
-            <span className='font-medium'>Manual</span>
+            <span className='font-medium'>New</span>
           </Button>
         </div>
       </div>
@@ -198,18 +200,20 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
   const { isListening, isProcessing } = voiceState
 
   return (
-    <div className='fixed right-0 bottom-6 left-64 z-40 flex justify-center'>
+    <div className='fixed right-0 bottom-6 left-0 z-40 flex justify-center'>
       <div className='flex gap-4'>
-        {/* Voice Assistant Button - Primary action on the left */}
+        {/* Voice Assistant Button - Purple outline */}
         <Button
           onClick={onVoiceClick}
-          variant={isListening ? 'danger' : 'primary'}
+          variant='outline'
           size='lg'
           disabled={isProcessing}
           className={cn(
-            'group flex h-14 items-center justify-center gap-3 px-6 shadow-lg transition-all duration-200',
+            'group flex h-14 items-center justify-center gap-3 border-2 px-6 shadow-lg transition-all duration-200',
             'hover:scale-105 hover:shadow-xl focus:scale-105 focus:shadow-xl',
-            isListening && 'animate-pulse ring-2 ring-red-500 ring-offset-2'
+            isListening
+              ? 'animate-pulse border-red-500 text-red-600 ring-2 ring-red-500 ring-offset-2 hover:border-red-600 hover:bg-red-50'
+              : 'border-purple-500 text-purple-600 hover:border-purple-600 hover:bg-purple-50'
           )}
           aria-label={
             isListening
@@ -237,21 +241,21 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
           </span>
         </Button>
 
-        {/* Manual Entry Button - Secondary action on the right */}
+        {/* New Entry Button - Blue outline */}
         <Button
           onClick={onManualEntry}
           variant='outline'
           size='lg'
           disabled={isListening || isProcessing}
           className={cn(
-            'group flex h-14 items-center justify-center gap-3 px-6 shadow-lg transition-all duration-200',
-            'hover:scale-105 hover:shadow-xl focus:scale-105 focus:shadow-xl',
+            'group flex h-14 items-center justify-center gap-3 border-2 border-blue-500 px-6 text-blue-600 shadow-lg transition-all duration-200',
+            'hover:scale-105 hover:border-blue-600 hover:bg-blue-50 hover:shadow-xl focus:scale-105 focus:shadow-xl',
             'disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-lg'
           )}
           aria-label='Open manual entry form'
         >
           <Plus className='h-5 w-5 transition-transform group-hover:scale-110' />
-          <span className='font-medium'>Manual Entry</span>
+          <span className='font-medium'>New Entry</span>
         </Button>
       </div>
     </div>

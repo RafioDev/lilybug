@@ -159,9 +159,9 @@ export const ActivityGroup: React.FC<ActivityGroupProps> = ({
                       size='sm'
                       leftIcon={<CheckCircle size={16} />}
                       aria-label={`Complete ${entry.entry_type} activity`}
-                      className='border-green-500 px-3 py-2 text-green-600 hover:text-green-700 dark:border-green-600 dark:text-green-400 dark:hover:text-green-300'
+                      className='border-orange-500 px-3 py-2 text-orange-600 hover:border-orange-600 hover:bg-orange-50 hover:text-orange-700 dark:border-orange-400 dark:text-orange-400 dark:hover:border-orange-300 dark:hover:bg-orange-900/20 dark:hover:text-orange-300'
                     >
-                      Done
+                      I'm Done
                     </Button>
                   </div>
                 )}
