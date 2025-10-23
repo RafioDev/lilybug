@@ -3,7 +3,6 @@ import { AuthPage } from './pages/AuthPage'
 import { OnboardingPage } from './pages/OnboardingPage'
 import { Activities } from './pages/Activities'
 
-import { DashboardPage } from './pages/DashboardPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { AppLayout } from './components/AppLayout'
 
@@ -28,10 +27,7 @@ export const router = createBrowserRouter([
         path: 'activities',
         element: <Navigate to='/' replace />,
       },
-      {
-        path: 'insights',
-        element: <DashboardPage />,
-      },
+
       {
         path: 'babies',
         element: <Navigate to='/settings' replace />,
