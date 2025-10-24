@@ -71,12 +71,12 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
             <ChevronLeft size={24} />
           </Link>
         )}
-        <Link to='/' className='flex items-center gap-2'>
-          {/* Mobile logo - only show on small screens */}
-          <div className='flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-r from-blue-500 to-purple-600'>
-            <Sparkles size={16} className='text-white' />
-          </div>
-          <h1 className='font-semibold'>Lilybug</h1>
+        <Link to='/' className='flex items-center'>
+          <img
+            src='/src/images/Lilybug.svg'
+            alt='Lilybug'
+            className='h-8 w-auto'
+          />
         </Link>
       </div>
 
