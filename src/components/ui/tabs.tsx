@@ -12,7 +12,7 @@ const TabsList = React.forwardRef<
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      'inline-flex items-center justify-center rounded-xl bg-gray-100 p-1 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+      'inline-flex items-center justify-center rounded-xl bg-gray-100 p-1 text-gray-600 dark:bg-gray-600 dark:text-gray-400',
       className
     )}
     {...props}
@@ -27,7 +27,7 @@ const TabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      'inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:focus-visible:ring-offset-gray-800 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-gray-100',
+      'inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:focus-visible:ring-offset-gray-800 dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-gray-100',
       className
     )}
     {...props}
@@ -118,7 +118,7 @@ const AnimatedTabsList = React.forwardRef<
         <div className='bg-border absolute right-0 bottom-0 left-0 h-px' />
         {/* Active tab background - rounded top only */}
         <div
-          className='bg-background border-border/50 absolute top-1 bottom-1 rounded-t-xl border shadow-sm transition-all duration-300 ease-out'
+          className='bg-background border-border/50 absolute top-1 bottom-1 rounded-t-xl border shadow-sm transition-all duration-300 ease-out dark:bg-gray-700'
           style={indicatorStyle}
         />
         {/* Active underline - thicker and more prominent with gradient */}

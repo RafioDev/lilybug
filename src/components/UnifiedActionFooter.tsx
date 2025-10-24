@@ -150,8 +150,8 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({
               className={cn(
                 'flex h-14 transform items-center justify-center gap-2 border-2 font-medium shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl',
                 isListening
-                  ? 'animate-pulse border-red-500 text-red-600 hover:border-red-600 hover:bg-red-50'
-                  : 'border-purple-500 text-purple-600 hover:border-purple-600 hover:bg-purple-50'
+                  ? 'animate-pulse border-red-500 text-red-600 hover:border-red-600 hover:bg-red-50 dark:hover:bg-red-950'
+                  : 'border-purple-500 text-purple-600 hover:border-purple-600 hover:bg-purple-50 dark:border-purple-400 dark:text-purple-400 dark:hover:border-purple-300 dark:hover:bg-purple-950'
               )}
               aria-label={
                 isListening
@@ -203,7 +203,7 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({
                 size='lg'
                 fullWidth
                 leftIcon={<CheckCircle className='h-5 w-5' />}
-                className='h-14 border-2 border-orange-500 bg-white font-medium text-orange-600 shadow-lg transition-all duration-200 hover:scale-105 hover:border-orange-600 hover:bg-orange-50 hover:shadow-xl dark:bg-gray-800'
+                className='h-14 border-2 border-orange-500 bg-white font-medium text-orange-600 shadow-lg transition-all duration-200 hover:scale-105 hover:border-orange-600 hover:bg-orange-50 hover:shadow-xl dark:border-orange-400 dark:bg-gray-800 dark:text-orange-400 dark:hover:border-orange-300 dark:hover:bg-orange-950'
                 aria-label={`Complete ${inProgressActivity.entry_type} activity`}
               >
                 Mark Complete
@@ -254,8 +254,8 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
               'group flex h-14 items-center justify-center gap-3 border-2 px-6 shadow-lg transition-all duration-200',
               'hover:scale-105 hover:shadow-xl focus:scale-105 focus:shadow-xl',
               isListening
-                ? 'animate-pulse border-red-500 text-red-600 ring-2 ring-red-500 ring-offset-2 hover:border-red-600 hover:bg-red-50'
-                : 'border-purple-500 text-purple-600 hover:border-purple-600 hover:bg-purple-50'
+                ? 'animate-pulse border-red-500 text-red-600 ring-2 ring-red-500 ring-offset-2 hover:border-red-600 hover:bg-red-50 dark:hover:bg-red-950'
+                : 'border-purple-500 text-purple-600 hover:border-purple-600 hover:bg-purple-50 dark:border-purple-400 dark:text-purple-400 dark:hover:border-purple-300 dark:hover:bg-purple-950'
             )}
             aria-label={
               isListening
@@ -309,7 +309,7 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
               variant='outline'
               size='lg'
               leftIcon={<CheckCircle className='h-5 w-5' />}
-              className='h-14 border-2 border-orange-500 bg-white px-6 text-orange-600 shadow-lg transition-all duration-200 hover:scale-105 hover:border-orange-600 hover:bg-orange-50 hover:shadow-xl focus:scale-105 focus:shadow-xl dark:bg-gray-800'
+              className='h-14 border-2 border-orange-500 bg-white px-6 text-orange-600 shadow-lg transition-all duration-200 hover:scale-105 hover:border-orange-600 hover:bg-orange-50 hover:shadow-xl focus:scale-105 focus:shadow-xl dark:border-orange-400 dark:bg-gray-800 dark:text-orange-400 dark:hover:border-orange-300 dark:hover:bg-orange-950'
               aria-label={`Complete ${inProgressActivity.entry_type} activity`}
             >
               Mark Complete

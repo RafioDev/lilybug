@@ -2,29 +2,17 @@ import React from 'react'
 import { Baby as BabyIcon, Sparkles } from 'lucide-react'
 import { dateUtils } from '../utils/dateUtils'
 import { useActiveBaby } from '../hooks/queries/useBabyQueries'
-import { useHeader } from '../contexts/HeaderContext'
 import { useUserProfile } from '../hooks/queries/useProfileQueries'
 import { UserDropdown } from './UserDropdown'
-import { Breadcrumbs } from './Breadcrumbs'
+import { Link } from 'react-router-dom'
 
 interface HeaderProps {
-  subtitle?: string
-  actions?: React.ReactNode
   className?: string
 }
 
-export const Header: React.FC<HeaderProps> = ({
-  subtitle: propSubtitle,
-  actions: propActions,
-  className = '',
-}) => {
+export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
   const { data: activeBaby, isLoading } = useActiveBaby()
   const { data: profileData, isLoading: profileLoading } = useUserProfile()
-  const { subtitle: contextSubtitle, actions: contextActions } = useHeader()
-
-  // Use context values if available, otherwise fall back to props
-  const subtitle = contextSubtitle || propSubtitle
-  const actions = contextActions || propActions
 
   const renderBabyInfo = () => {
     if (isLoading) {
@@ -50,9 +38,9 @@ export const Header: React.FC<HeaderProps> = ({
 
     return (
       <div className='flex items-center gap-1.5 sm:gap-2'>
-        <BabyIcon className='h-3 w-3 text-blue-600 sm:h-4 sm:w-4 dark:text-blue-400' />
+        <BabyIcon className='dark:text-white-400 h-3 w-3 text-gray-300 sm:h-4 sm:w-4' />
         <div className='flex items-center gap-1 sm:gap-2'>
-          <span className='max-w-16 truncate text-xs font-medium text-gray-900 sm:max-w-none sm:text-sm dark:text-gray-100'>
+          <span className='max-w-16 truncate text-sm font-semibold text-gray-900 sm:max-w-none sm:text-sm dark:text-gray-100'>
             {activeBaby.name}
           </span>
           <span className='text-xs whitespace-nowrap text-gray-600 sm:text-sm dark:text-gray-400'>
@@ -68,29 +56,13 @@ export const Header: React.FC<HeaderProps> = ({
       className={`sticky top-0 z-30 flex h-14 items-center justify-between border-b border-gray-200 bg-white px-3 sm:h-16 sm:px-6 dark:border-gray-700 dark:bg-gray-800 ${className}`}
     >
       {/* Left side - Logo (mobile) and Page title */}
-      <div className='flex items-center gap-2'>
+      <Link to='/' className='flex items-center gap-2'>
         {/* Mobile logo - only show on small screens */}
-        <div className='flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 sm:hidden'>
+        <div className='flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-r from-blue-500 to-purple-600'>
           <Sparkles size={16} className='text-white' />
         </div>
-
-        <div className='flex items-center'>
-          <div>
-            {/* Breadcrumbs handle both navigation and page title display */}
-            <Breadcrumbs />
-            {subtitle && (
-              <p className='text-xs text-gray-600 sm:text-sm dark:text-gray-400'>
-                {subtitle}
-              </p>
-            )}
-          </div>
-          {actions && (
-            <div className='ml-2 flex items-center gap-2 sm:ml-4'>
-              {actions}
-            </div>
-          )}
-        </div>
-      </div>
+        <h1 className='font-semibold'>Lilybug</h1>
+      </Link>
 
       {/* Right side - Baby info and User Dropdown */}
       <div className='flex items-center gap-2 sm:gap-3'>
