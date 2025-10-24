@@ -222,7 +222,7 @@ export const ActivityForm: React.FC<ActivityFormProps> = memo(
             values.feedingType !== 'bottle')) &&
           (!quickEntryMode || showAdvancedOptions) && (
             <Input
-              label={isEditMode ? 'End Time' : 'End Time (optional)'}
+              label='End Time'
               type='datetime-local'
               value={values.endTime}
               onChange={(val) => onChange('endTime', val)}
@@ -234,7 +234,7 @@ export const ActivityForm: React.FC<ActivityFormProps> = memo(
         {/* Notes - Hidden in quick entry mode unless advanced options shown */}
         {(!quickEntryMode || showAdvancedOptions) && (
           <Input
-            label={isEditMode ? 'Notes' : 'Notes (optional)'}
+            label='Notes'
             type='textarea'
             value={values.notes}
             onChange={(val) => onChange('notes', val)}

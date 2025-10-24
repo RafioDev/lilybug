@@ -47,8 +47,8 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
           ? dateUtils.toLocalDateTimeString(entry.end_time)
           : '',
         quantity: entry.quantity?.toString() || '',
-        feedingType: entry.feeding_type || ('bottle' as FeedingType),
-        diaperType: entry.diaper_type || ('wet' as DiaperType),
+        feedingType: entry.feeding_type || (null as FeedingType | null),
+        diaperType: entry.diaper_type || (null as DiaperType | null),
         notes: entry.notes || '',
       }
     }
@@ -57,14 +57,35 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
       startTime: dateUtils.getCurrentLocalDateTime(),
       endTime: '',
       quantity: '',
-      feedingType: 'bottle' as FeedingType,
-      diaperType: 'wet' as DiaperType,
+      feedingType: null as FeedingType | null,
+      diaperType: null as DiaperType | null,
       notes: '',
     }
   }, [entry])
 
   const [formData, setFormData] = useState(() => getInitialFormData())
   const advancedOptionsRef = useRef<HTMLDivElement>(null)
+
+  // Validation function
+  const isFormValid = () => {
+    // For feeding activities, feeding type must be selected
+    if (formData.entryType === 'feeding' && !formData.feedingType) {
+      return false
+    }
+    // For bottle feeding, quantity must be provided
+    if (
+      formData.entryType === 'feeding' &&
+      formData.feedingType === 'bottle' &&
+      !formData.quantity.trim()
+    ) {
+      return false
+    }
+    // For diaper activities, diaper type must be selected
+    if (formData.entryType === 'diaper' && !formData.diaperType) {
+      return false
+    }
+    return true
+  }
 
   // Update form data when entry prop changes
   React.useEffect(() => {
@@ -191,6 +212,11 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
               <label className='mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300'>
                 Feeding Type
               </label>
+              {!formData.feedingType && (
+                <p className='mb-2 text-sm text-gray-500 dark:text-gray-400'>
+                  Please select a feeding type to continue
+                </p>
+              )}
               <div className='grid grid-cols-2 gap-2'>
                 {(
                   ['breast_left', 'breast_right', 'bottle'] as FeedingType[]
@@ -216,14 +242,23 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
           {/* Essential fields for bottle feeding */}
           {formData.entryType === 'feeding' &&
             formData.feedingType === 'bottle' && (
-              <Input
-                label='Amount (oz)'
-                type='number'
-                step='0.5'
-                value={formData.quantity}
-                onChange={(val) => setFormData({ ...formData, quantity: val })}
-                placeholder='e.g., 4'
-              />
+              <div>
+                <Input
+                  label='Amount (oz) *'
+                  type='number'
+                  step='0.5'
+                  value={formData.quantity}
+                  onChange={(val) =>
+                    setFormData({ ...formData, quantity: val })
+                  }
+                  placeholder='e.g., 4'
+                />
+                {!formData.quantity.trim() && (
+                  <p className='mt-1 text-sm text-gray-500 dark:text-gray-400'>
+                    Amount is required for bottle feeding
+                  </p>
+                )}
+              </div>
             )}
 
           {/* Essential fields for pumping */}
@@ -244,6 +279,11 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
               <label className='mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300'>
                 Diaper Type
               </label>
+              {!formData.diaperType && (
+                <p className='mb-2 text-sm text-gray-500 dark:text-gray-400'>
+                  Please select a diaper type to continue
+                </p>
+              )}
               <div className='grid grid-cols-3 gap-2'>
                 {(['wet', 'dirty', 'both'] as DiaperType[]).map((type) => (
                   <button
@@ -294,7 +334,7 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
                 (formData.entryType === 'feeding' &&
                   formData.feedingType !== 'bottle')) && (
                 <Input
-                  label='End Time (optional)'
+                  label='End Time'
                   type='datetime-local'
                   value={formData.endTime}
                   onChange={(val) => setFormData({ ...formData, endTime: val })}
@@ -302,7 +342,7 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
               )}
 
               <Input
-                label='Notes (optional)'
+                label='Notes'
                 type='textarea'
                 value={formData.notes}
                 onChange={(val) => setFormData({ ...formData, notes: val })}
@@ -328,7 +368,7 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
           >
             Cancel
           </Button>
-          <Button onClick={handleSubmit} fullWidth>
+          <Button onClick={handleSubmit} fullWidth disabled={!isFormValid()}>
             {isEditMode ? 'Update' : 'Save'} Activity
           </Button>
         </div>

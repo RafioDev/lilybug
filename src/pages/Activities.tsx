@@ -578,7 +578,7 @@ const ActivitiesContent: React.FC = () => {
             (formData.entryType === 'feeding' &&
               formData.feedingType !== 'bottle')) && (
             <Input
-              label='End Time (optional)'
+              label='End Time'
               type='datetime-local'
               value={formData.endTime}
               onChange={(val) => setFormData({ ...formData, endTime: val })}
@@ -664,7 +664,7 @@ const ActivitiesContent: React.FC = () => {
           )}
 
           <Input
-            label='Notes (optional)'
+            label='Notes'
             type='textarea'
             value={formData.notes}
             onChange={(val) => setFormData({ ...formData, notes: val })}
