@@ -8,11 +8,7 @@ import {
   CheckCircle,
 } from 'lucide-react'
 import { IconButton, Button } from './Button'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { activityUtils } from '../utils/activityUtils'
 import type { DateGroup } from '../utils/activityUtils'
 import type { TrackerEntry } from '../types'
@@ -211,7 +207,7 @@ export const ActivityGroup: React.FC<ActivityGroupProps> = ({
                         size='sm'
                         icon={<MoreHorizontal />}
                         aria-label='Activity options'
-                        className='border-gray-300 text-gray-600 hover:border-gray-400 hover:text-gray-700 dark:border-gray-600 dark:text-gray-400 dark:hover:border-gray-500 dark:hover:text-gray-300'
+                        className='border-gray-300 text-gray-600 hover:border-blue-300 hover:text-blue-600 dark:border-gray-600 dark:text-gray-400 dark:hover:border-blue-500 dark:hover:text-blue-400'
                       />
                     </PopoverTrigger>
                     <PopoverContent className='w-32 p-0' align='end'>

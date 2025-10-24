@@ -109,7 +109,11 @@ export const Input: React.FC<InputProps> = ({
           min={min}
           max={max}
           step={step}
-          className={inputStyles}
+          className={cn(
+            inputStyles,
+            // Fix calendar icon color in dark mode for datetime-local inputs
+            type === 'datetime-local' && 'dark:[color-scheme:dark]'
+          )}
         />
       )}
       {error && (

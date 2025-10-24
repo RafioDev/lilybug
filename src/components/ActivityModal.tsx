@@ -38,7 +38,7 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
   const [hasUserModifiedTime, setHasUserModifiedTime] = useState(isEditMode)
 
   // Initialize form data based on entry prop
-  const getInitialFormData = () => {
+  const getInitialFormData = React.useCallback(() => {
     if (entry) {
       return {
         entryType: entry.entry_type,
@@ -61,10 +61,19 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
       diaperType: 'wet' as DiaperType,
       notes: '',
     }
-  }
+  }, [entry])
 
-  const [formData, setFormData] = useState(getInitialFormData)
+  const [formData, setFormData] = useState(() => getInitialFormData())
   const advancedOptionsRef = useRef<HTMLDivElement>(null)
+
+  // Update form data when entry prop changes
+  React.useEffect(() => {
+    if (isOpen) {
+      setFormData(getInitialFormData())
+      setHasUserModifiedTime(isEditMode)
+      setShowAdvancedOptions(isEditMode)
+    }
+  }, [entry, isOpen, isEditMode, getInitialFormData])
 
   // For edit mode, always show advanced options
   const shouldShowAdvanced = isEditMode || showAdvancedOptions
