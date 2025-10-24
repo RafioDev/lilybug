@@ -1,10 +1,11 @@
 import React from 'react'
-import { Baby as BabyIcon, Sparkles, ChevronLeft } from 'lucide-react'
+import { Baby as BabyIcon, ChevronLeft } from 'lucide-react'
 import { dateUtils } from '../utils/dateUtils'
 import { useActiveBaby } from '../hooks/queries/useBabyQueries'
 import { useUserProfile } from '../hooks/queries/useProfileQueries'
 import { UserDropdown } from './UserDropdown'
 import { Link, useLocation } from 'react-router-dom'
+import { LilybugLogo } from './LilybugLogo'
 
 interface HeaderProps {
   className?: string
@@ -72,11 +73,7 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
           </Link>
         )}
         <Link to='/' className='flex items-center'>
-          <img
-            src='/src/images/Lilybug.svg'
-            alt='Lilybug'
-            className='h-8 w-auto'
-          />
+          <LilybugLogo className='h-14' />
         </Link>
       </div>
 
