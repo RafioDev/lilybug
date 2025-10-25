@@ -12,16 +12,30 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({ className }) => {
     isActive,
     currentStep,
     steps,
-    nextStep,
-    prevStep,
     skipTour,
     markTourCompleted,
     endTour,
+    setCurrentStep,
   } = useTour()
+
+  // Create custom configuration with correct step numbering
+  const customConfig = {
+    ...DEFAULT_TOUR_CONFIG,
+    locale: {
+      ...DEFAULT_TOUR_CONFIG.locale,
+      next: `Next (Step ${currentStep + 2} of ${steps.length})`,
+      last: 'Finish',
+    },
+  }
 
   const handleJoyrideCallback = useCallback(
     (data: CallBackProps) => {
       const { status, type, index } = data
+
+      // Update current step index for display purposes only
+      if (typeof index === 'number') {
+        setCurrentStep(index)
+      }
 
       // Handle tour completion
       if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
@@ -33,23 +47,12 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({ className }) => {
         return
       }
 
-      // Handle step navigation
-      if (type === EVENTS.STEP_AFTER) {
-        if (index < steps.length - 1) {
-          nextStep()
-        } else {
-          markTourCompleted()
-        }
-      } else if (type === EVENTS.STEP_BEFORE && index > 0) {
-        prevStep()
-      }
-
       // Handle tour close
       if (type === EVENTS.TOUR_END) {
         endTour()
       }
     },
-    [steps.length, nextStep, prevStep, skipTour, markTourCompleted, endTour]
+    [skipTour, markTourCompleted, endTour, setCurrentStep]
   )
 
   if (!isActive || steps.length === 0) {
@@ -60,17 +63,19 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({ className }) => {
     <div className={className}>
       <Joyride
         steps={steps}
-        stepIndex={currentStep}
         run={isActive}
-        continuous={DEFAULT_TOUR_CONFIG.continuous}
-        showProgress={DEFAULT_TOUR_CONFIG.showProgress}
-        showSkipButton={DEFAULT_TOUR_CONFIG.showSkipButton}
-        spotlightClicks={DEFAULT_TOUR_CONFIG.spotlightClicks}
-        disableOverlayClose={DEFAULT_TOUR_CONFIG.disableOverlayClose}
-        disableScrollParentFix={DEFAULT_TOUR_CONFIG.disableScrollParentFix}
-        hideBackButton={DEFAULT_TOUR_CONFIG.hideBackButton}
-        styles={DEFAULT_TOUR_CONFIG.styles}
-        locale={DEFAULT_TOUR_CONFIG.locale}
+        continuous={customConfig.continuous}
+        showProgress={customConfig.showProgress}
+        scrollToFirstStep={customConfig.scrollToFirstStep}
+        scrollOffset={customConfig.scrollOffset}
+        floaterProps={customConfig.floaterProps}
+        showSkipButton={customConfig.showSkipButton}
+        spotlightClicks={customConfig.spotlightClicks}
+        disableOverlayClose={customConfig.disableOverlayClose}
+        disableScrollParentFix={customConfig.disableScrollParentFix}
+        hideBackButton={customConfig.hideBackButton}
+        styles={customConfig.styles}
+        locale={customConfig.locale}
         callback={handleJoyrideCallback}
       />
     </div>

@@ -63,7 +63,14 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
   }
 
   const handleStartTour = () => {
+    // Don't start tour if profile data is still loading
+    if (profileLoading || !profileData) {
+      console.warn('Cannot start tour: Profile data not loaded yet')
+      return
+    }
+
     const steps = convertToJoyrideSteps(ONBOARDING_TOUR_STEPS)
+
     startTour(steps)
   }
 

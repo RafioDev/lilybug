@@ -25,13 +25,12 @@ interface TourContextValue {
   steps: TourStep[]
   startTour: (steps?: TourStep[]) => void
   endTour: () => void
-  nextStep: () => void
-  prevStep: () => void
   skipTour: () => void
   hasCompletedInitialTour: boolean
   markTourCompleted: () => void
   preferences: TourPreferences
   updatePreferences: (preferences: Partial<TourPreferences>) => void
+  setCurrentStep: (step: number) => void
 }
 
 const TourContext = createContext<TourContextValue | undefined>(undefined)
@@ -94,14 +93,6 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
     setCurrentStep(0)
   }, [])
 
-  const nextStep = useCallback(() => {
-    setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1))
-  }, [steps.length])
-
-  const prevStep = useCallback(() => {
-    setCurrentStep((prev) => Math.max(prev - 1, 0))
-  }, [])
-
   const skipTour = useCallback(() => {
     const newPreferences = {
       ...preferences,
@@ -139,13 +130,12 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
     steps,
     startTour,
     endTour,
-    nextStep,
-    prevStep,
     skipTour,
     hasCompletedInitialTour: preferences.hasCompletedInitialTour,
     markTourCompleted,
     preferences,
     updatePreferences,
+    setCurrentStep,
   }
 
   return <TourContext.Provider value={value}>{children}</TourContext.Provider>

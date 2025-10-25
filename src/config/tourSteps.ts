@@ -47,19 +47,19 @@ export const ONBOARDING_TOUR_STEPS: TourStepData[] = [
   {
     id: 'user-menu',
     target: '[data-tour="user-dropdown"]',
-    title: 'User Menu',
+    title: 'User Menu & Settings',
     content:
-      'Access your account settings, manage babies, and sign out from this menu.',
+      'Click here to access your account settings, manage babies, customize app preferences, and sign out.',
     placement: 'bottom',
     order: 4,
     isOptional: false,
   },
   {
     id: 'activity-tracking',
-    target: '[data-tour="activity-footer"]',
+    target: '[data-tour="activity-buttons"]',
     title: 'Quick Activity Tracking',
     content:
-      'Use these buttons to quickly log feeding, diaper changes, sleep, and other activities.',
+      'Use these buttons to quickly log feeding, diaper changes, sleep, and other activities. Try the Voice Assistant for hands-free logging or New Entry for manual input.',
     placement: 'top',
     order: 5,
     isOptional: false,
@@ -72,16 +72,6 @@ export const ONBOARDING_TOUR_STEPS: TourStepData[] = [
       "View and manage all your baby's recorded activities here. You can edit or delete entries as needed.",
     placement: 'top',
     order: 6,
-    isOptional: false,
-  },
-  {
-    id: 'settings-access',
-    target: '[data-tour="settings-link"]',
-    title: 'Settings & Preferences',
-    content:
-      'Customize your experience, manage babies, and adjust app preferences in the settings.',
-    placement: 'left',
-    order: 7,
     isOptional: false,
   },
 ]
@@ -122,12 +112,14 @@ export const getAvailableTourSteps = (
 // Default tour configuration
 export const DEFAULT_TOUR_CONFIG = {
   continuous: true,
-  showProgress: true,
+  showProgress: false, // Disable built-in progress to use custom
   showSkipButton: true,
   spotlightClicks: true,
   disableOverlayClose: false,
   disableScrollParentFix: false,
   hideBackButton: false,
+  scrollToFirstStep: true,
+  scrollOffset: 20,
   styles: {
     options: {
       primaryColor: '#3b82f6', // Blue-500 to match Lilybug theme
@@ -171,6 +163,10 @@ export const DEFAULT_TOUR_CONFIG = {
       color: '#6b7280',
       fontSize: '14px',
     },
+    // Override progress display to use 1-based indexing
+    tooltipFooter: {
+      marginTop: '16px',
+    },
   },
   locale: {
     back: 'Back',
@@ -178,6 +174,9 @@ export const DEFAULT_TOUR_CONFIG = {
     last: 'Finish',
     next: 'Next',
     skip: 'Skip tour',
+  },
+  floaterProps: {
+    disableAnimation: false,
   },
 }
 
