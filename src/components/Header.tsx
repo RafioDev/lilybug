@@ -70,6 +70,10 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
     }
 
     const steps = convertToJoyrideSteps(ONBOARDING_TOUR_STEPS)
+    console.log(
+      'Starting tour with steps:',
+      steps.map((s, i) => `${i + 1}. ${s.title} (${s.target})`)
+    )
 
     startTour(steps)
   }
@@ -110,20 +114,18 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
 
         <div data-tour='baby-info'>{renderBabyInfo()}</div>
         {!profileLoading && profileData && (
-          <UserDropdown
-            userName={profileData.displayName}
-            variant='mobile'
-            className='sm:hidden'
-            data-tour='user-dropdown'
-          />
-        )}
-        {!profileLoading && profileData && (
-          <UserDropdown
-            userName={profileData.displayName}
-            variant='desktop'
-            className='hidden sm:block'
-            data-tour='user-dropdown'
-          />
+          <div data-tour='user-dropdown'>
+            <UserDropdown
+              userName={profileData.displayName}
+              variant='mobile'
+              className='sm:hidden'
+            />
+            <UserDropdown
+              userName={profileData.displayName}
+              variant='desktop'
+              className='hidden sm:block'
+            />
+          </div>
         )}
       </div>
     </header>
