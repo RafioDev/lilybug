@@ -75,7 +75,6 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({
           boxShadow: isDarkMode
             ? '0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2)'
             : '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-          border: isDarkMode ? '1px solid #374151' : '1px solid #e5e7eb', // Gray-700 : Gray-200
           backgroundColor: isDarkMode ? '#1f2937' : '#ffffff', // Gray-800 : White
         },
         tooltipContainer: {
