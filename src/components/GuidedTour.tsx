@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo } from 'react'
 import Joyride, { CallBackProps, STATUS, EVENTS, Step } from 'react-joyride'
 import { useTour } from '../contexts/TourContext'
+import { useTheme } from '../contexts/ThemeContext'
 import { DEFAULT_TOUR_CONFIG } from '../config/tourSteps'
 
 interface GuidedTourProps {
@@ -26,10 +27,18 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({
     setCurrentStep,
   } = useTour()
 
+  const { theme } = useTheme()
+
   // Use prop steps if provided, otherwise use context steps
   const steps = propSteps || contextSteps
 
-  // Enhanced configuration with Lilybug design system integration
+  // Determine if we're in dark mode
+  const isDarkMode =
+    theme === 'dark' ||
+    (theme === 'system' &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches)
+
+  // Enhanced configuration with Lilybug design system integration and dark mode support
   const tourConfig = useMemo(
     () => ({
       ...DEFAULT_TOUR_CONFIG,
@@ -48,23 +57,29 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({
         ...DEFAULT_TOUR_CONFIG.styles,
         options: {
           ...DEFAULT_TOUR_CONFIG.styles.options,
-          // Enhanced styling for Lilybug design system
+          // Theme-aware styling
           primaryColor: '#3b82f6', // Blue-500
-          textColor: '#1f2937', // Gray-800
-          backgroundColor: '#ffffff',
-          overlayColor: 'rgba(0, 0, 0, 0.4)',
-          spotlightShadow: '0 0 20px rgba(59, 130, 246, 0.3)',
+          textColor: isDarkMode ? '#f9fafb' : '#1f2937', // Gray-50 : Gray-800
+          backgroundColor: isDarkMode ? '#1f2937' : '#ffffff', // Gray-800 : White
+          overlayColor: isDarkMode
+            ? 'rgba(0, 0, 0, 0.6)'
+            : 'rgba(0, 0, 0, 0.4)',
+          spotlightShadow: isDarkMode
+            ? '0 0 20px rgba(59, 130, 246, 0.4)'
+            : '0 0 20px rgba(59, 130, 246, 0.3)',
           width: 380,
           zIndex: 10000,
-          arrowColor: '#ffffff',
+          arrowColor: isDarkMode ? '#1f2937' : '#ffffff', // Match background
         },
         tooltip: {
           ...DEFAULT_TOUR_CONFIG.styles.tooltip,
           borderRadius: '12px',
           padding: '20px',
-          boxShadow:
-            '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-          border: '1px solid #e5e7eb',
+          boxShadow: isDarkMode
+            ? '0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2)'
+            : '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+          border: isDarkMode ? '1px solid #374151' : '1px solid #e5e7eb', // Gray-700 : Gray-200
+          backgroundColor: isDarkMode ? '#1f2937' : '#ffffff', // Gray-800 : White
         },
         tooltipContainer: {
           textAlign: 'left' as const,
@@ -73,13 +88,13 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({
           fontSize: '20px',
           fontWeight: '600',
           marginBottom: '12px',
-          color: '#1f2937',
+          color: isDarkMode ? '#f9fafb' : '#1f2937', // Gray-50 : Gray-800
           lineHeight: '1.3',
         },
         tooltipContent: {
           fontSize: '15px',
           lineHeight: '1.6',
-          color: '#4b5563',
+          color: isDarkMode ? '#d1d5db' : '#4b5563', // Gray-300 : Gray-600
           marginBottom: '16px',
         },
         tooltipFooter: {
@@ -100,9 +115,9 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({
           transition: 'background-color 0.2s ease',
         },
         buttonBack: {
-          color: '#6b7280',
+          color: isDarkMode ? '#9ca3af' : '#6b7280', // Gray-400 : Gray-500
           backgroundColor: 'transparent',
-          border: '1px solid #d1d5db',
+          border: isDarkMode ? '1px solid #4b5563' : '1px solid #d1d5db', // Gray-600 : Gray-300
           borderRadius: '8px',
           padding: '10px 16px',
           fontSize: '14px',
@@ -112,7 +127,7 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({
           transition: 'all 0.2s ease',
         },
         buttonSkip: {
-          color: '#6b7280',
+          color: isDarkMode ? '#9ca3af' : '#6b7280', // Gray-400 : Gray-500
           backgroundColor: 'transparent',
           border: 'none',
           fontSize: '14px',
@@ -124,9 +139,13 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({
         spotlight: {
           borderRadius: '8px',
         },
+        // Fix arrow border issue by ensuring seamless connection
+        arrow: {
+          color: isDarkMode ? '#1f2937' : '#ffffff', // Match tooltip background
+        },
       },
     }),
-    [currentStep, steps.length]
+    [currentStep, steps.length, isDarkMode]
   )
 
   const handleJoyrideCallback = useCallback(
@@ -189,6 +208,51 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({
 
   return (
     <div className={className} role='dialog' aria-label='Guided tour'>
+      {/* Custom styles to fix arrow border issues */}
+      <style>
+        {`
+          /* Remove border from Joyride arrow to ensure seamless connection */
+          .__floater__arrow polygon {
+            fill: ${isDarkMode ? '#1f2937' : '#ffffff'} !important;
+            stroke: none !important;
+            stroke-width: 0 !important;
+          }
+
+          /* Ensure arrow matches tooltip background exactly */
+          .__floater__arrow {
+            color: ${isDarkMode ? '#1f2937' : '#ffffff'} !important;
+          }
+
+          /* Remove any potential border artifacts */
+          .react-joyride__tooltip {
+            filter: drop-shadow(${
+              isDarkMode
+                ? '0 10px 25px rgba(0, 0, 0, 0.4)'
+                : '0 10px 25px rgba(0, 0, 0, 0.1)'
+            });
+          }
+
+          /* Enhanced button hover states */
+          .react-joyride__tooltip button[data-action="primary"]:hover {
+            background-color: #2563eb !important;
+            transform: translateY(-1px);
+          }
+
+          .react-joyride__tooltip button[data-action="back"]:hover {
+            background-color: ${isDarkMode ? '#374151' : '#f9fafb'} !important;
+            border-color: ${isDarkMode ? '#6b7280' : '#9ca3af'} !important;
+          }
+
+          .react-joyride__tooltip button[data-action="skip"]:hover {
+            color: ${isDarkMode ? '#d1d5db' : '#374151'} !important;
+          }
+
+          /* Smooth transitions for all buttons */
+          .react-joyride__tooltip button {
+            transition: all 0.2s ease !important;
+          }
+        `}
+      </style>
       <Joyride
         steps={steps}
         run={isActive}
