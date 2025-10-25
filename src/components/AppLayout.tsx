@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Outlet, Navigate } from 'react-router-dom'
+import { Outlet, Navigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { migrateBabyData } from '../utils/migrateBabyData'
 
@@ -10,6 +10,7 @@ import { GuidedTour } from './GuidedTour'
 import { AppLoadingScreen } from './AppLoadingScreen'
 import { HeaderProvider } from '../contexts/HeaderContext'
 import { ComponentErrorBoundary } from './ComponentErrorBoundary'
+import { useTour } from '../contexts/TourContext'
 import { useUserProfile } from '../hooks/queries/useProfileQueries'
 import { useActiveBaby } from '../hooks/queries/useBabyQueries'
 import { useEntries, useUpdateEntry } from '../hooks/queries/useTrackerQueries'
@@ -19,6 +20,8 @@ import type { User } from '@supabase/supabase-js'
 import type { TrackerEntry } from '../types'
 
 export const AppLayout: React.FC = () => {
+  const location = useLocation()
+  const { isActive: isTourActive, endTour } = useTour()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [isManualEntryModalOpen, setIsManualEntryModalOpen] = useState(false)
@@ -72,6 +75,15 @@ export const AppLayout: React.FC = () => {
       migrateBabyData.runMigrationIfNeeded().catch(console.error)
     }
   }, [profileData?.profile])
+
+  // Handle tour state across route changes
+  useEffect(() => {
+    // If tour is active and user navigates away from main page, end the tour
+    // This prevents tour from showing on wrong pages
+    if (isTourActive && location.pathname !== '/') {
+      endTour()
+    }
+  }, [location.pathname, isTourActive, endTour])
 
   if (loading || profileLoading) {
     const loadingMessage = loading
