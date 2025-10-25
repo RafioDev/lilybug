@@ -7,6 +7,7 @@ import { Header } from './Header'
 import { UnifiedActionFooter } from './UnifiedActionFooter'
 import { ActivityModal } from './ActivityModal'
 import { GuidedTour } from './GuidedTour'
+import { AppLoadingScreen } from './AppLoadingScreen'
 import { HeaderProvider } from '../contexts/HeaderContext'
 import { ComponentErrorBoundary } from './ComponentErrorBoundary'
 import { useUserProfile } from '../hooks/queries/useProfileQueries'
@@ -73,16 +74,10 @@ export const AppLayout: React.FC = () => {
   }, [profileData?.profile])
 
   if (loading || profileLoading) {
-    return (
-      <div className='flex min-h-screen items-center justify-center bg-gradient-to-b from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900'>
-        <div className='text-center'>
-          <div className='animate-pulse space-y-4'>
-            <div className='mx-auto h-16 w-16 rounded-full bg-blue-200 dark:bg-blue-800'></div>
-            <p className='text-gray-500 dark:text-gray-400'>Loading...</p>
-          </div>
-        </div>
-      </div>
-    )
+    const loadingMessage = loading
+      ? 'Authenticating...'
+      : 'Loading your profile...'
+    return <AppLoadingScreen message={loadingMessage} />
   }
 
   if (!user) {

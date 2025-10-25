@@ -1,11 +1,13 @@
 import { RouterProvider } from 'react-router-dom'
 import { QueryClientProvider } from '@tanstack/react-query'
+import { Suspense } from 'react'
 
 import { router } from './router'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { TourProvider } from './contexts/TourContext'
 import { queryClient } from './lib/queryClient'
 import { AppErrorBoundary } from './components/AppErrorBoundary'
+import { AppLoadingScreen } from './components/AppLoadingScreen'
 
 function App() {
   return (
@@ -15,7 +17,11 @@ function App() {
           <ThemeProvider>
             <TourProvider>
               <AppErrorBoundary level='app' name='Router'>
-                <RouterProvider router={router} />
+                <Suspense
+                  fallback={<AppLoadingScreen message='Starting Lilybug...' />}
+                >
+                  <RouterProvider router={router} />
+                </Suspense>
               </AppErrorBoundary>
             </TourProvider>
           </ThemeProvider>
