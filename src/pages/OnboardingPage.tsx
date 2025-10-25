@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Baby } from 'lucide-react'
 import { Card } from '../components/Card'
 import { Button } from '../components/Button'
 import { Input } from '../components/Input'
@@ -9,6 +8,7 @@ import { SectionErrorBoundary } from '../components/SectionErrorBoundary'
 import { profileService } from '../services/profileService'
 import { babyService } from '../services/babyService'
 import { useTour } from '../contexts/TourContext'
+import { LilybugLogo } from '@/components/LilybugLogo'
 
 const OnboardingContent: React.FC = () => {
   const navigate = useNavigate()
@@ -53,18 +53,7 @@ const OnboardingContent: React.FC = () => {
   return (
     <div className='flex min-h-screen items-center justify-center bg-gradient-to-b from-blue-50 via-white to-blue-50 p-4 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900'>
       <div className='w-full max-w-md'>
-        <div className='mb-8 text-center'>
-          <div className='mb-4 inline-flex rounded-full bg-blue-500 p-4'>
-            <Baby size={48} className='text-white' />
-          </div>
-          <h1 className='mb-2 text-3xl font-bold text-gray-800 dark:text-white'>
-            Welcome to Lilybug
-          </h1>
-          <p className='text-gray-600 dark:text-gray-300'>
-            Your companion through the first year
-          </p>
-        </div>
-
+        <LilybugLogo className='mb-4 text-center' />
         <SectionErrorBoundary sectionName={`Onboarding Step ${step}`}>
           <Card padding='lg'>
             {step === 1 && (

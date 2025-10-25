@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Baby, Mail, Lock } from 'lucide-react'
+import { Mail, Lock, CheckCircle } from 'lucide-react'
 import { Card } from '../components/Card'
 import { Button } from '../components/Button'
 import { PageErrorBoundary } from '../components/PageErrorBoundary'
 import { SectionErrorBoundary } from '../components/SectionErrorBoundary'
 import { supabase } from '../lib/supabase'
+import { LilybugLogo } from '@/components/LilybugLogo'
 
 const AuthContent: React.FC = () => {
   const navigate = useNavigate()
@@ -14,6 +15,8 @@ const AuthContent: React.FC = () => {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showEmailVerification, setShowEmailVerification] = useState(false)
+  const [signUpEmail, setSignUpEmail] = useState('')
 
   useEffect(() => {
     // Check if user is already authenticated
@@ -51,6 +54,10 @@ const AuthContent: React.FC = () => {
           password,
         })
         if (error) throw error
+
+        // Show email verification screen
+        setSignUpEmail(email)
+        setShowEmailVerification(true)
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
@@ -65,21 +72,118 @@ const AuthContent: React.FC = () => {
     }
   }
 
+  // Email verification view
+  if (showEmailVerification) {
+    return (
+      <div className='flex min-h-screen items-center justify-center bg-gradient-to-b from-blue-50 via-white to-blue-50 p-4 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900'>
+        <div className='w-full max-w-md'>
+          <LilybugLogo className='mb-4 text-center' />
+          <SectionErrorBoundary sectionName='Email Verification'>
+            <Card padding='lg'>
+              <div className='space-y-6 text-center'>
+                <div className='flex justify-center'>
+                  <div className='rounded-full bg-green-100 p-3 dark:bg-green-900/20'>
+                    <CheckCircle
+                      size={32}
+                      className='text-green-600 dark:text-green-400'
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <h2 className='mb-2 text-xl font-semibold text-gray-800 dark:text-white'>
+                    Check Your Email
+                  </h2>
+                  <p className='text-sm text-gray-600 dark:text-gray-300'>
+                    We've sent a verification link to
+                  </p>
+                  <p className='mt-1 text-sm font-medium text-blue-600 dark:text-blue-400'>
+                    {signUpEmail}
+                  </p>
+                </div>
+
+                <div className='rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20'>
+                  <div className='flex items-start space-x-3'>
+                    <Mail
+                      size={20}
+                      className='mt-0.5 flex-shrink-0 text-blue-600 dark:text-blue-400'
+                    />
+                    <div className='text-left'>
+                      <p className='text-sm font-medium text-blue-800 dark:text-blue-300'>
+                        Click the link in your email
+                      </p>
+                      <p className='mt-1 text-xs text-blue-700 dark:text-blue-400'>
+                        Follow the link in the email we just sent to confirm
+                        your account and complete your signup.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className='space-y-3'>
+                  <Button
+                    type='button'
+                    fullWidth
+                    onClick={() => {
+                      setShowEmailVerification(false)
+                      setIsSignUp(false)
+                      setEmail('')
+                      setPassword('')
+                      setError('')
+                    }}
+                  >
+                    Back to Sign In
+                  </Button>
+
+                  <button
+                    type='button'
+                    onClick={() => {
+                      setShowEmailVerification(false)
+                      setEmail(signUpEmail)
+                      setPassword('')
+                      setError('')
+                    }}
+                    className='w-full text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300'
+                  >
+                    Try a different email address
+                  </button>
+                </div>
+
+                <div className='text-xs text-gray-500 dark:text-gray-400'>
+                  <p>Didn't receive the email? Check your spam folder or</p>
+                  <button
+                    type='button'
+                    onClick={async () => {
+                      setLoading(true)
+                      try {
+                        await supabase.auth.resend({
+                          type: 'signup',
+                          email: signUpEmail,
+                        })
+                      } catch {
+                        setError('Failed to resend email')
+                      } finally {
+                        setLoading(false)
+                      }
+                    }}
+                    disabled={loading}
+                    className='font-medium text-blue-600 hover:text-blue-700 disabled:opacity-50 dark:text-blue-400 dark:hover:text-blue-300'
+                  >
+                    {loading ? 'Sending...' : 'resend the verification email'}
+                  </button>
+                </div>
+              </div>
+            </Card>
+          </SectionErrorBoundary>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className='flex min-h-screen items-center justify-center bg-gradient-to-b from-blue-50 via-white to-blue-50 p-4 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900'>
       <div className='w-full max-w-md'>
-        <div className='mb-8 text-center'>
-          <div className='mb-4 inline-flex rounded-full bg-gradient-to-r from-blue-500 to-blue-600 p-4 shadow-lg'>
-            <Baby size={48} className='text-white' />
-          </div>
-          <h1 className='mb-2 text-3xl font-bold text-gray-800 dark:text-white'>
-            Lilybug
-          </h1>
-          <p className='text-gray-600 dark:text-gray-300'>
-            Your companion through the first year
-          </p>
-        </div>
-
+        <LilybugLogo className='mb-4 text-center' />
         <SectionErrorBoundary sectionName='Authentication Form'>
           <Card padding='lg'>
             <form onSubmit={handleAuth} className='space-y-5'>
