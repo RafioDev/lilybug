@@ -40,7 +40,11 @@ const SettingsContent: React.FC = () => {
             onValueChange={handleTabChange}
             className='w-full'
           >
-            <AnimatedTabsList variant='underline' className='w-full'>
+            <AnimatedTabsList
+              variant='underline'
+              className='w-full'
+              data-tour='settings-tabs'
+            >
               <AnimatedTabsTrigger
                 variant='underline'
                 value='general'
@@ -53,6 +57,7 @@ const SettingsContent: React.FC = () => {
                 variant='underline'
                 value='babies'
                 className='flex items-center gap-2'
+                data-tour='baby-management'
               >
                 <BabyIcon className='h-4 w-4' />
                 Babies

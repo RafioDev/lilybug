@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Baby } from 'lucide-react'
 import { Card } from '../components/Card'
 import { Button } from '../components/Button'
@@ -7,12 +8,11 @@ import { PageErrorBoundary } from '../components/PageErrorBoundary'
 import { SectionErrorBoundary } from '../components/SectionErrorBoundary'
 import { profileService } from '../services/profileService'
 import { babyService } from '../services/babyService'
+import { useTour } from '../contexts/TourContext'
 
-interface OnboardingPageProps {
-  onComplete: () => void
-}
-
-const OnboardingContent: React.FC<OnboardingPageProps> = ({ onComplete }) => {
+const OnboardingContent: React.FC = () => {
+  const navigate = useNavigate()
+  const { startTour, hasCompletedInitialTour } = useTour()
   const [step, setStep] = useState(1)
   const [formData, setFormData] = useState({
     babyName: '',
@@ -36,7 +36,15 @@ const OnboardingContent: React.FC<OnboardingPageProps> = ({ onComplete }) => {
         is_active: true,
       })
 
-      onComplete()
+      // Navigate to main app
+      navigate('/')
+
+      // Start the guided tour for new users after a short delay to ensure components are ready
+      if (!hasCompletedInitialTour) {
+        setTimeout(() => {
+          startTour()
+        }, 500)
+      }
     } catch (error) {
       console.error('Error saving profile:', error)
     }
@@ -160,12 +168,10 @@ const OnboardingContent: React.FC<OnboardingPageProps> = ({ onComplete }) => {
   )
 }
 
-export const OnboardingPage: React.FC<OnboardingPageProps> = ({
-  onComplete,
-}) => {
+export const OnboardingPage: React.FC = () => {
   return (
     <PageErrorBoundary pageName='Onboarding' contextData={{}}>
-      <OnboardingContent onComplete={onComplete} />
+      <OnboardingContent />
     </PageErrorBoundary>
   )
 }

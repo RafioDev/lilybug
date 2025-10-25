@@ -122,6 +122,7 @@ interface MobileLayoutProps {
   onManualEntry?: () => void
   onStopActivity?: (entry: TrackerEntry) => void
   inProgressActivity?: TrackerEntry | null
+  isSupported: boolean
 }
 
 const MobileLayout: React.FC<MobileLayoutProps> = ({
@@ -130,6 +131,7 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({
   onManualEntry,
   onStopActivity,
   inProgressActivity,
+  isSupported,
 }) => {
   const { isListening, isProcessing } = voiceState
 
@@ -139,14 +141,15 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({
       <div className='pb-safe-area-inset-bottom px-4 pt-4 pb-4'>
         <div className='relative mx-auto max-w-md'>
           {/* Normal buttons - always rendered */}
-          <div className='flex gap-3'>
+          <div className='flex gap-3' data-tour='activity-buttons'>
             {/* Voice Assistant Button - Purple outline */}
             <Button
               onClick={onVoiceClick}
               variant='outline'
               size='lg'
               fullWidth
-              disabled={isProcessing}
+              disabled={isProcessing || !isSupported}
+              data-tour='voice-button'
               className={cn(
                 'flex h-14 transform items-center justify-center gap-2 border-2 font-medium shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl',
                 isListening
@@ -186,6 +189,7 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({
               size='lg'
               fullWidth
               disabled={isListening || isProcessing}
+              data-tour='new-entry-button'
               className='flex h-14 transform items-center justify-center gap-2 border-2 border-blue-500 font-medium text-blue-600 shadow-lg transition-all duration-200 hover:scale-105 hover:border-blue-600 hover:bg-blue-50 hover:shadow-xl'
               aria-label='Open manual entry form'
             >
@@ -223,6 +227,7 @@ interface DesktopLayoutProps {
   onManualEntry?: () => void
   onStopActivity?: (entry: TrackerEntry) => void
   inProgressActivity?: TrackerEntry | null
+  isSupported: boolean
 }
 
 const DesktopLayout: React.FC<DesktopLayoutProps> = ({
@@ -231,6 +236,7 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
   onManualEntry,
   onStopActivity,
   inProgressActivity,
+  isSupported,
 }) => {
   const { isListening, isProcessing } = voiceState
 
@@ -243,13 +249,15 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
             'flex gap-4',
             inProgressActivity && onStopActivity && 'hidden'
           )}
+          data-tour='activity-buttons'
         >
           {/* Voice Assistant Button - Purple outline */}
           <Button
             onClick={onVoiceClick}
             variant='outline'
             size='lg'
-            disabled={isProcessing}
+            disabled={isProcessing || !isSupported}
+            data-tour='voice-button'
             className={cn(
               'group flex h-14 items-center justify-center gap-3 border-2 px-6 shadow-lg transition-all duration-200',
               'hover:scale-105 hover:shadow-xl focus:scale-105 focus:shadow-xl',
@@ -289,6 +297,7 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
             variant='outline'
             size='lg'
             disabled={isListening || isProcessing}
+            data-tour='new-entry-button'
             className={cn(
               'group flex h-14 items-center justify-center gap-3 border-2 border-blue-500 px-6 text-blue-600 shadow-lg transition-all duration-200',
               'hover:scale-105 hover:border-blue-600 hover:bg-blue-50 hover:shadow-xl focus:scale-105 focus:shadow-xl',
@@ -347,17 +356,15 @@ export const UnifiedActionFooter: React.FC<UnifiedActionFooterProps> = ({
     }
   }
 
-  // Don't render if speech recognition is not supported
-  if (!isSupported) {
-    return null
-  }
+  // Note: We still render the footer even if speech recognition is not supported
+  // The voice button will be disabled, but the New Entry button should still work
 
   return (
     <ComponentErrorBoundary
       componentName='UnifiedActionFooter'
       contextData={{}}
     >
-      <div className={cn('relative', className)}>
+      <div className={cn('relative', className)} data-tour='activity-footer'>
         {/* Feedback overlay */}
         <FeedbackOverlay voiceState={voiceState} layout={layout} />
 
@@ -369,6 +376,7 @@ export const UnifiedActionFooter: React.FC<UnifiedActionFooterProps> = ({
             onManualEntry={onManualEntry}
             onStopActivity={onStopActivity}
             inProgressActivity={inProgressActivity}
+            isSupported={isSupported}
           />
         ) : (
           <DesktopLayout
@@ -377,6 +385,7 @@ export const UnifiedActionFooter: React.FC<UnifiedActionFooterProps> = ({
             onManualEntry={onManualEntry}
             onStopActivity={onStopActivity}
             inProgressActivity={inProgressActivity}
+            isSupported={isSupported}
           />
         )}
       </div>

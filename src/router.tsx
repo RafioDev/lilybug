@@ -12,7 +12,7 @@ export const router = createBrowserRouter([
   },
   {
     path: '/onboarding',
-    element: <OnboardingPage onComplete={() => (window.location.href = '/')} />,
+    element: <OnboardingPage />,
   },
   {
     path: '/',

@@ -3,6 +3,7 @@ import { Baby as BabyIcon, ChevronLeft } from 'lucide-react'
 import { dateUtils } from '../utils/dateUtils'
 import { useActiveBaby } from '../hooks/queries/useBabyQueries'
 import { useUserProfile } from '../hooks/queries/useProfileQueries'
+
 import { UserDropdown } from './UserDropdown'
 import { Link, useLocation } from 'react-router-dom'
 import { LilybugLogo } from './LilybugLogo'
@@ -14,6 +15,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
   const { data: activeBaby, isLoading } = useActiveBaby()
   const { data: profileData, isLoading: profileLoading } = useUserProfile()
+
   const location = useLocation()
 
   // Check if we're on the home page
@@ -58,6 +60,7 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
 
   return (
     <header
+      data-tour='app-header'
       className={`sticky top-0 z-30 flex h-14 items-center justify-between border-b border-gray-200 bg-white px-3 sm:h-16 sm:px-6 dark:border-gray-700 dark:bg-gray-800 ${className}`}
     >
       {/* Left side - Logo and Page title with back button */}
@@ -72,27 +75,27 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
             <ChevronLeft size={24} />
           </Link>
         )}
-        <Link to='/' className='flex items-center'>
+        <Link to='/' className='flex items-center' data-tour='app-logo'>
           <LilybugLogo className='h-14' />
         </Link>
       </div>
 
       {/* Right side - Baby info and User Dropdown */}
       <div className='flex items-center gap-2 sm:gap-3'>
-        {renderBabyInfo()}
+        <div data-tour='baby-info'>{renderBabyInfo()}</div>
         {!profileLoading && profileData && (
-          <UserDropdown
-            userName={profileData.displayName}
-            variant='mobile'
-            className='sm:hidden'
-          />
-        )}
-        {!profileLoading && profileData && (
-          <UserDropdown
-            userName={profileData.displayName}
-            variant='desktop'
-            className='hidden sm:block'
-          />
+          <div data-tour='user-dropdown'>
+            <UserDropdown
+              userName={profileData.displayName}
+              variant='mobile'
+              className='sm:hidden'
+            />
+            <UserDropdown
+              userName={profileData.displayName}
+              variant='desktop'
+              className='hidden sm:block'
+            />
+          </div>
         )}
       </div>
     </header>

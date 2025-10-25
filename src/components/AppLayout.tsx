@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react'
-import { Outlet, Navigate } from 'react-router-dom'
+import { Outlet, Navigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { migrateBabyData } from '../utils/migrateBabyData'
 
 import { Header } from './Header'
 import { UnifiedActionFooter } from './UnifiedActionFooter'
 import { ActivityModal } from './ActivityModal'
+import { GuidedTour } from './GuidedTour'
+import { AppLoadingScreen } from './AppLoadingScreen'
 import { HeaderProvider } from '../contexts/HeaderContext'
 import { ComponentErrorBoundary } from './ComponentErrorBoundary'
+import { useTour } from '../contexts/TourContext'
 import { useUserProfile } from '../hooks/queries/useProfileQueries'
 import { useActiveBaby } from '../hooks/queries/useBabyQueries'
 import { useEntries, useUpdateEntry } from '../hooks/queries/useTrackerQueries'
@@ -17,6 +20,8 @@ import type { User } from '@supabase/supabase-js'
 import type { TrackerEntry } from '../types'
 
 export const AppLayout: React.FC = () => {
+  const location = useLocation()
+  const { isActive: isTourActive, endTour } = useTour()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [isManualEntryModalOpen, setIsManualEntryModalOpen] = useState(false)
@@ -71,17 +76,20 @@ export const AppLayout: React.FC = () => {
     }
   }, [profileData?.profile])
 
+  // Handle tour state across route changes
+  useEffect(() => {
+    // If tour is active and user navigates away from main page, end the tour
+    // This prevents tour from showing on wrong pages
+    if (isTourActive && location.pathname !== '/') {
+      endTour()
+    }
+  }, [location.pathname, isTourActive, endTour])
+
   if (loading || profileLoading) {
-    return (
-      <div className='flex min-h-screen items-center justify-center bg-gradient-to-b from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900'>
-        <div className='text-center'>
-          <div className='animate-pulse space-y-4'>
-            <div className='mx-auto h-16 w-16 rounded-full bg-blue-200 dark:bg-blue-800'></div>
-            <p className='text-gray-500 dark:text-gray-400'>Loading...</p>
-          </div>
-        </div>
-      </div>
-    )
+    const loadingMessage = loading
+      ? 'Authenticating...'
+      : 'Loading your profile...'
+    return <AppLoadingScreen message={loadingMessage} />
   }
 
   if (!user) {
@@ -135,6 +143,11 @@ export const AppLayout: React.FC = () => {
             />
           </ComponentErrorBoundary>
         )}
+
+        {/* Guided Tour Component */}
+        <ComponentErrorBoundary componentName='GuidedTour'>
+          <GuidedTour />
+        </ComponentErrorBoundary>
       </HeaderProvider>
     </ComponentErrorBoundary>
   )

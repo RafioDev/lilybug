@@ -38,6 +38,42 @@
     animation: slide-up 0.3s ease-out;
   }
 
+  /* Loading screen animations */
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes pulse-slow {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.8;
+      transform: scale(1.05);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.6s ease-out;
+  }
+
+  .animate-fade-in-delay {
+    animation: fade-in 0.8s ease-out 0.2s both;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 2s ease-in-out infinite;
+  }
+
   /* Date input calendar icon dark mode styling */
   input[type='date']::-webkit-calendar-picker-indicator {
     filter: invert(0);

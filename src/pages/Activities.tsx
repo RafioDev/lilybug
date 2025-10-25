@@ -259,16 +259,18 @@ const ActivitiesTab: React.FC<{
             </div>
           </div>
 
-          <GroupedActivitiesList
-            entries={entries} // Show all entries with lazy loading
-            onEditEntry={onEditEntry}
-            onDeleteEntry={onDeleteEntry}
-            onStopActivity={onStopActivity}
-            isLoading={entriesLoading}
-            virtualScrolling={true} // Enable performance optimizations
-            maxInitialGroups={5} // Show more days initially for better mobile experience
-            className='max-h-[60vh] overflow-y-auto' // Scrollable activities list
-          />
+          <div data-tour='activity-list'>
+            <GroupedActivitiesList
+              entries={entries} // Show all entries with lazy loading
+              onEditEntry={onEditEntry}
+              onDeleteEntry={onDeleteEntry}
+              onStopActivity={onStopActivity}
+              isLoading={entriesLoading}
+              virtualScrolling={true} // Enable performance optimizations
+              maxInitialGroups={5} // Show more days initially for better mobile experience
+              className='max-h-[60vh] overflow-y-auto' // Scrollable activities list
+            />
+          </div>
         </Card>
       </SectionErrorBoundary>
     </div>

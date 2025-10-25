@@ -19,18 +19,10 @@ interface ActivityFormProps {
   onChange: (field: keyof ActivityFormData, value: unknown) => void
   disabled?: boolean
   quickEntryMode?: boolean
-  isEditMode?: boolean
 }
 
 export const ActivityForm: React.FC<ActivityFormProps> = memo(
-  ({
-    values,
-    errors,
-    onChange,
-    disabled = false,
-    quickEntryMode = false,
-    isEditMode = false,
-  }) => {
+  ({ values, errors, onChange, disabled = false, quickEntryMode = false }) => {
     const [showAdvancedOptions, setShowAdvancedOptions] = useState(false)
 
     const getFeedingTypeLabel = (type: FeedingType) => {
