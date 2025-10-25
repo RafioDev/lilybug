@@ -71,6 +71,7 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
                   <button
                     onClick={handleSettings}
                     className='flex w-full cursor-pointer items-center gap-2 px-4 py-3 text-sm text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 dark:active:bg-gray-600'
+                    data-tour='settings-link'
                   >
                     <Settings className='pointer-events-none h-4 w-4' />
                     <span className='pointer-events-none'>Settings</span>
@@ -119,6 +120,7 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
                 <button
                   onClick={handleSettings}
                   className='flex w-full cursor-pointer items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'
+                  data-tour='settings-link'
                 >
                   <Settings className='pointer-events-none h-4 w-4' />
                   <span className='pointer-events-none'>Settings</span>

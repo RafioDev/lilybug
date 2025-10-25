@@ -357,7 +357,7 @@ export const UnifiedActionFooter: React.FC<UnifiedActionFooterProps> = ({
       componentName='UnifiedActionFooter'
       contextData={{}}
     >
-      <div className={cn('relative', className)}>
+      <div className={cn('relative', className)} data-tour='activity-footer'>
         {/* Feedback overlay */}
         <FeedbackOverlay voiceState={voiceState} layout={layout} />
 

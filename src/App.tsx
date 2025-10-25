@@ -3,6 +3,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 
 import { router } from './router'
 import { ThemeProvider } from './contexts/ThemeContext'
+import { TourProvider } from './contexts/TourContext'
 import { queryClient } from './lib/queryClient'
 import { AppErrorBoundary } from './components/AppErrorBoundary'
 
@@ -12,9 +13,11 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <AppErrorBoundary level='app' name='Query Provider'>
           <ThemeProvider>
-            <AppErrorBoundary level='app' name='Router'>
-              <RouterProvider router={router} />
-            </AppErrorBoundary>
+            <TourProvider>
+              <AppErrorBoundary level='app' name='Router'>
+                <RouterProvider router={router} />
+              </AppErrorBoundary>
+            </TourProvider>
           </ThemeProvider>
         </AppErrorBoundary>
       </QueryClientProvider>

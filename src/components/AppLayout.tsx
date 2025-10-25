@@ -6,6 +6,7 @@ import { migrateBabyData } from '../utils/migrateBabyData'
 import { Header } from './Header'
 import { UnifiedActionFooter } from './UnifiedActionFooter'
 import { ActivityModal } from './ActivityModal'
+import { GuidedTour } from './GuidedTour'
 import { HeaderProvider } from '../contexts/HeaderContext'
 import { ComponentErrorBoundary } from './ComponentErrorBoundary'
 import { useUserProfile } from '../hooks/queries/useProfileQueries'
@@ -135,6 +136,11 @@ export const AppLayout: React.FC = () => {
             />
           </ComponentErrorBoundary>
         )}
+
+        {/* Guided Tour Component */}
+        <ComponentErrorBoundary componentName='GuidedTour'>
+          <GuidedTour />
+        </ComponentErrorBoundary>
       </HeaderProvider>
     </ComponentErrorBoundary>
   )
