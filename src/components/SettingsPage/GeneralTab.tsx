@@ -10,10 +10,8 @@ import {
 } from '../../config/tourSteps'
 
 export const GeneralTab: React.FC = () => {
-  const { startTour, hasCompletedInitialTour, endTour, getTourAnalytics } =
-    useTour()
+  const { startTour, hasCompletedInitialTour, endTour } = useTour()
   const navigate = useNavigate()
-  const tourAnalytics = getTourAnalytics()
 
   const handleReplayTour = () => {
     // End any existing tour first to ensure clean state
@@ -119,43 +117,6 @@ export const GeneralTab: React.FC = () => {
             {hasCompletedInitialTour ? 'Replay Tour' : 'Start Tour'}
           </Button>
         </div>
-
-        {/* Tour Analytics */}
-        {hasCompletedInitialTour && tourAnalytics.totalToursStarted > 0 && (
-          <div className='border-t border-gray-200 pt-4 dark:border-gray-600'>
-            <h4 className='mb-3 text-sm font-medium text-gray-700 dark:text-gray-300'>
-              Tour Statistics
-            </h4>
-            <div className='grid grid-cols-2 gap-4 text-sm'>
-              <div>
-                <span className='text-gray-500 dark:text-gray-400'>
-                  Tours Started:
-                </span>
-                <span className='ml-2 font-medium text-gray-900 dark:text-gray-100'>
-                  {tourAnalytics.totalToursStarted}
-                </span>
-              </div>
-              <div>
-                <span className='text-gray-500 dark:text-gray-400'>
-                  Tours Completed:
-                </span>
-                <span className='ml-2 font-medium text-gray-900 dark:text-gray-100'>
-                  {tourAnalytics.totalToursCompleted}
-                </span>
-              </div>
-              {tourAnalytics.averageCompletionTime && (
-                <div className='col-span-2'>
-                  <span className='text-gray-500 dark:text-gray-400'>
-                    Average Time:
-                  </span>
-                  <span className='ml-2 font-medium text-gray-900 dark:text-gray-100'>
-                    {Math.round(tourAnalytics.averageCompletionTime / 1000)}s
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   )

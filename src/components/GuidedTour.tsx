@@ -44,10 +44,7 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({
       ...DEFAULT_TOUR_CONFIG,
       locale: {
         ...DEFAULT_TOUR_CONFIG.locale,
-        next:
-          steps.length > 1
-            ? `Next (${currentStep + 1} of ${steps.length})`
-            : 'Next',
+        next: 'Next',
         last: 'Finish Tour',
         skip: 'Skip Tour',
         back: 'Previous',
@@ -74,7 +71,7 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({
         tooltip: {
           ...DEFAULT_TOUR_CONFIG.styles.tooltip,
           borderRadius: '12px',
-          padding: '20px',
+          padding: '20px', // Restore default padding
           boxShadow: isDarkMode
             ? '0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2)'
             : '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
@@ -87,7 +84,6 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({
         tooltipTitle: {
           fontSize: '20px',
           fontWeight: '600',
-          marginBottom: '12px',
           color: isDarkMode ? '#f9fafb' : '#1f2937', // Gray-50 : Gray-800
           lineHeight: '1.3',
         },
@@ -95,10 +91,9 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({
           fontSize: '15px',
           lineHeight: '1.6',
           color: isDarkMode ? '#d1d5db' : '#4b5563', // Gray-300 : Gray-600
-          marginBottom: '16px',
+          padding: '20px 0',
         },
         tooltipFooter: {
-          marginTop: '20px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -145,7 +140,66 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({
         },
       },
     }),
-    [currentStep, steps.length, isDarkMode]
+    [isDarkMode]
+  )
+
+  // Generate dynamic CSS that depends on current step
+  const dynamicCSS = useMemo(
+    () => `
+    /* Fix arrow positioning and make it seamless with modal */
+    .__floater__arrow {
+      z-index: 10001 !important;
+    }
+
+    /* Make arrow seamless with modal background */
+    .__floater__arrow polygon {
+      fill: ${isDarkMode ? '#1f2937' : '#ffffff'} !important;
+      stroke: ${isDarkMode ? '#1f2937' : '#ffffff'} !important;
+      stroke-width: 0 !important;
+    }
+
+    /* Ensure tooltip has proper styling */
+    .react-joyride__tooltip {
+      filter: drop-shadow(${
+        isDarkMode
+          ? '0 10px 25px rgba(0, 0, 0, 0.4)'
+          : '0 10px 25px rgba(0, 0, 0, 0.1)'
+      });
+    }
+
+    /* Add progress indicator after title */
+    .react-joyride__tooltip h1:after {
+      content: "STEP ${currentStep + 1} OF ${steps.length}";
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: ${isDarkMode ? '#9ca3af' : '#6b7280'};
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Enhanced button hover states */
+    .react-joyride__tooltip button[data-action="primary"]:hover {
+      background-color: #2563eb !important;
+      transform: translateY(-1px);
+    }
+
+    .react-joyride__tooltip button[data-action="back"]:hover {
+      background-color: ${isDarkMode ? '#374151' : '#f9fafb'} !important;
+      border-color: ${isDarkMode ? '#6b7280' : '#9ca3af'} !important;
+    }
+
+    .react-joyride__tooltip button[data-action="skip"]:hover {
+      color: ${isDarkMode ? '#d1d5db' : '#374151'} !important;
+    }
+
+    /* Smooth transitions for all buttons */
+    .react-joyride__tooltip button {
+      transition: all 0.2s ease !important;
+    }
+  `,
+    [isDarkMode, currentStep, steps.length]
   )
 
   const handleJoyrideCallback = useCallback(
@@ -209,50 +263,7 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({
   return (
     <div className={className} role='dialog' aria-label='Guided tour'>
       {/* Custom styles to fix arrow border issues */}
-      <style>
-        {`
-          /* Remove border from Joyride arrow to ensure seamless connection */
-          .__floater__arrow polygon {
-            fill: ${isDarkMode ? '#1f2937' : '#ffffff'} !important;
-            stroke: none !important;
-            stroke-width: 0 !important;
-          }
-
-          /* Ensure arrow matches tooltip background exactly */
-          .__floater__arrow {
-            color: ${isDarkMode ? '#1f2937' : '#ffffff'} !important;
-          }
-
-          /* Remove any potential border artifacts */
-          .react-joyride__tooltip {
-            filter: drop-shadow(${
-              isDarkMode
-                ? '0 10px 25px rgba(0, 0, 0, 0.4)'
-                : '0 10px 25px rgba(0, 0, 0, 0.1)'
-            });
-          }
-
-          /* Enhanced button hover states */
-          .react-joyride__tooltip button[data-action="primary"]:hover {
-            background-color: #2563eb !important;
-            transform: translateY(-1px);
-          }
-
-          .react-joyride__tooltip button[data-action="back"]:hover {
-            background-color: ${isDarkMode ? '#374151' : '#f9fafb'} !important;
-            border-color: ${isDarkMode ? '#6b7280' : '#9ca3af'} !important;
-          }
-
-          .react-joyride__tooltip button[data-action="skip"]:hover {
-            color: ${isDarkMode ? '#d1d5db' : '#374151'} !important;
-          }
-
-          /* Smooth transitions for all buttons */
-          .react-joyride__tooltip button {
-            transition: all 0.2s ease !important;
-          }
-        `}
-      </style>
+      <style>{dynamicCSS}</style>
       <Joyride
         steps={steps}
         run={isActive}
