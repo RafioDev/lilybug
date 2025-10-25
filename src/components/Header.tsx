@@ -1,13 +1,9 @@
 import React from 'react'
-import { Baby as BabyIcon, ChevronLeft, Play } from 'lucide-react'
+import { Baby as BabyIcon, ChevronLeft } from 'lucide-react'
 import { dateUtils } from '../utils/dateUtils'
 import { useActiveBaby } from '../hooks/queries/useBabyQueries'
 import { useUserProfile } from '../hooks/queries/useProfileQueries'
-import { useTour } from '../contexts/TourContext'
-import {
-  ONBOARDING_TOUR_STEPS,
-  convertToJoyrideSteps,
-} from '../config/tourSteps'
+
 import { UserDropdown } from './UserDropdown'
 import { Link, useLocation } from 'react-router-dom'
 import { LilybugLogo } from './LilybugLogo'
@@ -19,7 +15,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
   const { data: activeBaby, isLoading } = useActiveBaby()
   const { data: profileData, isLoading: profileLoading } = useUserProfile()
-  const { startTour } = useTour()
+
   const location = useLocation()
 
   // Check if we're on the home page
@@ -62,22 +58,6 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
     )
   }
 
-  const handleStartTour = () => {
-    // Don't start tour if profile data is still loading
-    if (profileLoading || !profileData) {
-      console.warn('Cannot start tour: Profile data not loaded yet')
-      return
-    }
-
-    const steps = convertToJoyrideSteps(ONBOARDING_TOUR_STEPS)
-    console.log(
-      'Starting tour with steps:',
-      steps.map((s, i) => `${i + 1}. ${s.title} (${s.target})`)
-    )
-
-    startTour(steps)
-  }
-
   return (
     <header
       data-tour='app-header'
@@ -102,16 +82,6 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
 
       {/* Right side - Baby info and User Dropdown */}
       <div className='flex items-center gap-2 sm:gap-3'>
-        {/* Test Tour Button - Remove this after testing */}
-        <button
-          onClick={handleStartTour}
-          className='flex items-center gap-1 rounded-md bg-blue-500 px-2 py-1 text-xs text-white hover:bg-blue-600'
-          title='Start Tour (Test)'
-        >
-          <Play size={12} />
-          <span className='hidden sm:inline'>Tour</span>
-        </button>
-
         <div data-tour='baby-info'>{renderBabyInfo()}</div>
         {!profileLoading && profileData && (
           <div data-tour='user-dropdown'>

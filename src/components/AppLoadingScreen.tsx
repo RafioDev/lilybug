@@ -49,11 +49,8 @@ export const AppLoadingScreen: React.FC<AppLoadingScreenProps> = ({
           <div className='relative'>
             {/* Logo with pulse animation */}
             <div className='animate-pulse-slow'>
-              <LilybugLogo className='h-20 w-auto sm:h-24 md:h-28' />
+              <LilybugLogo className='h-28 w-auto' />
             </div>
-
-            {/* Subtle glow effect */}
-            <div className='animate-pulse-slow absolute inset-0 -z-10 rounded-full bg-blue-400 opacity-20 blur-xl dark:bg-blue-600' />
           </div>
         </div>
 
