@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react'
 import { Modal } from './Modal'
 import { Button } from './Button'
 import { Input } from './Input'
+import { DateInput } from './DateInput'
 import { activityUtils } from '../utils/activityUtils'
 import { dateUtils } from '../utils/dateUtils'
 import {
@@ -320,7 +321,7 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
               ref={advancedOptionsRef}
               className='space-y-4 border-t border-gray-200 pt-4 dark:border-gray-600'
             >
-              <Input
+              <DateInput
                 label='Start Time'
                 type='datetime-local'
                 value={formData.startTime}
@@ -333,7 +334,7 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
               {(formData.entryType === 'sleep' ||
                 (formData.entryType === 'feeding' &&
                   formData.feedingType !== 'bottle')) && (
-                <Input
+                <DateInput
                   label='End Time'
                   type='datetime-local'
                   value={formData.endTime}

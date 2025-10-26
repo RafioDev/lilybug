@@ -1,5 +1,6 @@
 import React, { memo, useState } from 'react'
 import { Input } from './Input'
+import { DateInput } from './DateInput'
 import type { EntryType, FeedingType, DiaperType } from '../types'
 
 export interface ActivityFormData {
@@ -193,7 +194,7 @@ export const ActivityForm: React.FC<ActivityFormProps> = memo(
 
         {/* Start Time - Hidden in quick entry mode unless advanced options shown */}
         {(!quickEntryMode || showAdvancedOptions) && (
-          <Input
+          <DateInput
             label={
               values.entryType === 'feeding' || values.entryType === 'sleep'
                 ? 'Start Time'
@@ -213,7 +214,7 @@ export const ActivityForm: React.FC<ActivityFormProps> = memo(
           (values.entryType === 'feeding' &&
             values.feedingType !== 'bottle')) &&
           (!quickEntryMode || showAdvancedOptions) && (
-            <Input
+            <DateInput
               label='End Time'
               type='datetime-local'
               value={values.endTime}

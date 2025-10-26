@@ -51,3 +51,16 @@ export const useCreateOrUpdateProfile = () => {
     },
   })
 }
+
+export const useUpdateProfile = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (updates: Partial<Profile>) =>
+      profileService.updateProfile(updates),
+    onSuccess: () => {
+      // Invalidate and refetch profile data
+      queryClient.invalidateQueries({ queryKey: queryKeys.profile })
+    },
+  })
+}

@@ -5,6 +5,7 @@ import { Suspense } from 'react'
 import { router } from './router'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { TourProvider } from './contexts/TourContext'
+import { TimeFormatProvider } from './contexts/TimeFormatContext'
 import { queryClient } from './lib/queryClient'
 import { AppErrorBoundary } from './components/AppErrorBoundary'
 import { AppLoadingScreen } from './components/AppLoadingScreen'
@@ -15,15 +16,19 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <AppErrorBoundary level='app' name='Query Provider'>
           <ThemeProvider>
-            <TourProvider>
-              <AppErrorBoundary level='app' name='Router'>
-                <Suspense
-                  fallback={<AppLoadingScreen message='Starting Lilybug...' />}
-                >
-                  <RouterProvider router={router} />
-                </Suspense>
-              </AppErrorBoundary>
-            </TourProvider>
+            <TimeFormatProvider>
+              <TourProvider>
+                <AppErrorBoundary level='app' name='Router'>
+                  <Suspense
+                    fallback={
+                      <AppLoadingScreen message='Starting Lilybug...' />
+                    }
+                  >
+                    <RouterProvider router={router} />
+                  </Suspense>
+                </AppErrorBoundary>
+              </TourProvider>
+            </TimeFormatProvider>
           </ThemeProvider>
         </AppErrorBoundary>
       </QueryClientProvider>

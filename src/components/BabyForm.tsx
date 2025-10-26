@@ -1,5 +1,6 @@
 import React, { memo } from 'react'
 import { Input } from './Input'
+import { DateInput } from './DateInput'
 
 /**
  * Form data structure for baby information
@@ -68,15 +69,14 @@ export const BabyForm: React.FC<BabyFormProps> = memo(
           variant='default'
         />
 
-        <Input
+        <DateInput
           label='Birth Date'
-          type='date'
           value={values.birthdate}
           onChange={(value) => onChange('birthdate', value)}
           required
           disabled={disabled}
           error={errors.birthdate}
-          variant='default'
+          max={new Date().toISOString().split('T')[0]}
         />
       </div>
     )

@@ -5,6 +5,10 @@ import { ThemeToggle } from '../ThemeToggle'
 import { Button } from '../Button'
 import { useTour } from '../../contexts/TourContext'
 import {
+  useUserProfile,
+  useUpdateProfile,
+} from '../../hooks/queries/useProfileQueries'
+import {
   ONBOARDING_TOUR_STEPS,
   getAvailableTourSteps,
 } from '../../config/tourSteps'
@@ -12,6 +16,8 @@ import {
 export const GeneralTab: React.FC = () => {
   const { startTour, hasCompletedInitialTour, endTour } = useTour()
   const navigate = useNavigate()
+  const { data: profile } = useUserProfile()
+  const updateProfileMutation = useUpdateProfile()
 
   const handleReplayTour = () => {
     // End any existing tour first to ensure clean state
@@ -39,6 +45,18 @@ export const GeneralTab: React.FC = () => {
         startTour(fallbackSteps)
       }
     }, 500)
+  }
+
+  const handleTimeFormatChange = async (format: '12h' | '24h') => {
+    if (!profile?.profile) return
+
+    try {
+      await updateProfileMutation.mutateAsync({
+        time_format: format,
+      })
+    } catch (error) {
+      console.error('Failed to update time format:', error)
+    }
   }
 
   return (
@@ -74,6 +92,53 @@ export const GeneralTab: React.FC = () => {
             </p>
           </div>
           <ThemeToggle />
+        </div>
+      </div>
+
+      {/* Time Format Settings */}
+      <div className='mb-8 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800'>
+        <div className='mb-4'>
+          <h3 className='mb-2 text-lg font-medium text-gray-900 dark:text-gray-100'>
+            Time Format
+          </h3>
+          <p className='text-sm text-gray-600 dark:text-gray-400'>
+            Choose how time is displayed throughout the app.
+          </p>
+        </div>
+        <div className='flex items-center justify-between'>
+          <div>
+            <label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
+              Time Display
+            </label>
+            <p className='text-xs text-gray-500 dark:text-gray-400'>
+              Select 12-hour or 24-hour format
+            </p>
+          </div>
+          <div className='flex gap-2'>
+            <Button
+              onClick={() => handleTimeFormatChange('12h')}
+              variant={
+                profile?.profile?.time_format === '12h' ||
+                !profile?.profile?.time_format
+                  ? 'primary'
+                  : 'outline'
+              }
+              size='sm'
+              disabled={updateProfileMutation.isPending}
+            >
+              12 Hour
+            </Button>
+            <Button
+              onClick={() => handleTimeFormatChange('24h')}
+              variant={
+                profile?.profile?.time_format === '24h' ? 'primary' : 'outline'
+              }
+              size='sm'
+              disabled={updateProfileMutation.isPending}
+            >
+              24 Hour
+            </Button>
+          </div>
         </div>
       </div>
 

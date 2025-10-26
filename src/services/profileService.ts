@@ -37,4 +37,24 @@ export const profileService = {
     if (error) throw error
     return data
   },
+
+  async updateProfile(updates: Partial<Profile>): Promise<Profile> {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) throw new Error('Not authenticated')
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', user.id)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
 }

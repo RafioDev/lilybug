@@ -3,6 +3,7 @@ export interface Profile {
   parent1_name: string
   parent2_name?: string | null
   active_baby_id?: string | null
+  time_format?: '12h' | '24h' | null
   created_at: string
   updated_at: string
 }
