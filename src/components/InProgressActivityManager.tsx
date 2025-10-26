@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { trackerService } from '../services/trackerService'
 import { queryKeys } from '../lib/queryKeys'
-import type { TrackerEntry, InProgressActivity } from '../types'
+import type { InProgressActivity } from '../types'
 
 // Hook for managing in-progress activities
 export const useInProgressActivityManager = (babyId: string) => {
@@ -16,6 +16,7 @@ export const useInProgressActivityManager = (babyId: string) => {
     queryKey: queryKeys.entriesForBaby(babyId, 100),
     queryFn: () => trackerService.getEntries(100, babyId),
     refetchInterval: 30000, // Refetch every 30 seconds to stay updated
+    enabled: !!babyId, // Only run query if babyId is provided
   })
 
   // Mutation to stop an in-progress activity
@@ -51,34 +52,32 @@ export const useInProgressActivityManager = (babyId: string) => {
     return `${minutes} min`
   }, [])
 
-  // Function to identify in-progress activities from entries
-  const identifyInProgressActivities = useCallback(
-    (entries: TrackerEntry[]): InProgressActivity[] => {
-      return entries
-        .filter(
-          (entry) =>
-            (entry.entry_type === 'sleep' ||
-              (entry.entry_type === 'feeding' &&
-                entry.feeding_type !== 'bottle')) &&
-            !entry.end_time &&
-            entry.baby_id === babyId
-        )
-        .map((entry) => ({
-          id: entry.id,
-          entry_type: entry.entry_type as 'feeding' | 'sleep',
-          start_time: entry.start_time,
-          baby_id: entry.baby_id,
-          elapsed_duration: calculateElapsedDuration(entry.start_time),
-        }))
-    },
-    [babyId, calculateElapsedDuration]
-  )
+  // Memoize in-progress activities calculation to prevent infinite re-renders
+  const inProgressActivitiesFromEntries = useMemo(() => {
+    if (!babyId || !entries.length) return []
+
+    return entries
+      .filter(
+        (entry) =>
+          (entry.entry_type === 'sleep' ||
+            (entry.entry_type === 'feeding' &&
+              entry.feeding_type !== 'bottle')) &&
+          !entry.end_time &&
+          entry.baby_id === babyId
+      )
+      .map((entry) => ({
+        id: entry.id,
+        entry_type: entry.entry_type as 'feeding' | 'sleep',
+        start_time: entry.start_time,
+        baby_id: entry.baby_id,
+        elapsed_duration: calculateElapsedDuration(entry.start_time),
+      }))
+  }, [entries, babyId, calculateElapsedDuration])
 
   // Update in-progress activities when entries change
   useEffect(() => {
-    const newInProgressActivities = identifyInProgressActivities(entries)
-    setInProgressActivities(newInProgressActivities)
-  }, [entries, identifyInProgressActivities])
+    setInProgressActivities(inProgressActivitiesFromEntries)
+  }, [inProgressActivitiesFromEntries])
 
   // Update durations every minute for in-progress activities
   useEffect(() => {

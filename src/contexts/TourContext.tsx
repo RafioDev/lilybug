@@ -84,16 +84,26 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
     getInitialPreferences
   )
 
-  const startTour = useCallback((tourSteps?: TourStep[]) => {
-    const stepsToUse =
-      tourSteps || getAvailableTourSteps(ONBOARDING_TOUR_STEPS, [], false)
+  const startTour = useCallback(
+    (tourSteps?: TourStep[]) => {
+      const stepsToUse =
+        tourSteps || getAvailableTourSteps(ONBOARDING_TOUR_STEPS, [], false)
 
-    setSteps(stepsToUse)
-    setCurrentStep(0)
-    setIsActive(true)
-  }, [])
+      console.log('Starting tour with steps:', stepsToUse.length)
+      console.log(
+        'Has completed initial tour:',
+        preferences.hasCompletedInitialTour
+      )
+
+      setSteps(stepsToUse)
+      setCurrentStep(0)
+      setIsActive(true)
+    },
+    [preferences.hasCompletedInitialTour]
+  )
 
   const endTour = useCallback(() => {
+    console.log('Ending tour')
     setIsActive(false)
     setCurrentStep(0)
   }, [])

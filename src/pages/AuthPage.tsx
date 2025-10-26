@@ -250,7 +250,7 @@ const AuthContent: React.FC = () => {
                     setIsSignUp(!isSignUp)
                     setError('')
                   }}
-                  className='text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300'
+                  className='cursor-pointer text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300'
                 >
                   {isSignUp
                     ? 'Already have an account? Sign in'
