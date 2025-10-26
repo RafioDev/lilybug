@@ -26,13 +26,13 @@ export const AppLayout: React.FC = () => {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [isManualEntryModalOpen, setIsManualEntryModalOpen] = useState(false)
-  const [forceProfileLoading, setForceProfileLoading] = useState(true)
 
   // Use React Query for profile data
   const {
     data: profileData,
     isLoading: profileLoading,
     error: profileError,
+    isSuccess: profileSuccess,
   } = useUserProfile()
   const { data: activeBaby } = useActiveBaby()
   const { data: entries = [] } = useEntries(50, activeBaby?.id) // Get recent entries to check for in-progress activities
@@ -82,27 +82,12 @@ export const AppLayout: React.FC = () => {
     return () => subscription.unsubscribe()
   }, [])
 
-  // Add a minimum loading time to prevent race conditions with profile loading
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setForceProfileLoading(false)
-    }, 3000) // Give profile query 3 seconds to load
-
-    return () => clearTimeout(timer)
-  }, [])
-
   // Run migration when profile is available
   useEffect(() => {
     if (profileData?.profile) {
       migrateBabyData.runMigrationIfNeeded().catch(console.error)
     }
   }, [profileData?.profile])
-
-  /////////////////////
-  useEffect(() => {
-    console.log(profileData)
-  }, [profileData])
-  /////////////////////
 
   // Handle tour state across route changes
   useEffect(() => {
@@ -113,7 +98,7 @@ export const AppLayout: React.FC = () => {
     }
   }, [location.pathname, isTourActive, endTour])
 
-  if (loading || profileLoading || forceProfileLoading) {
+  if (loading || profileLoading) {
     const loadingMessage = loading
       ? 'Authenticating...'
       : 'Loading your profile...'
@@ -125,13 +110,19 @@ export const AppLayout: React.FC = () => {
   }
 
   if (!profileData?.profile) {
-    // If there's a profile loading error, log it but don't redirect immediately
     if (profileError) {
       console.error('Profile loading error:', profileError)
-      // Only redirect to onboarding if it's clearly a "no profile" situation
-      // For other errors, show loading or try to continue
+      // If there's an error, stay in loading to avoid redirect loop
+      return <AppLoadingScreen message='Checking your profile...' />
     }
-    return <Navigate to='/onboarding' replace />
+
+    // Only redirect to onboarding if we successfully loaded data but profile is null
+    if (profileSuccess && profileData && !profileData.profile) {
+      return <Navigate to='/onboarding' replace />
+    }
+
+    // Still loading or no data yet
+    return <AppLoadingScreen message='Loading your profile...' />
   }
 
   return (

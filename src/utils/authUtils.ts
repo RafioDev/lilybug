@@ -90,10 +90,6 @@ export const checkUserProfile = async (
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      console.log(
-        `🔍 Profile check attempt ${attempt}/${maxRetries} for user ${userId}`
-      )
-
       // Wait a bit longer on subsequent attempts to let auth context settle
       if (attempt > 1) {
         await new Promise((resolve) => setTimeout(resolve, attempt * 200))
@@ -105,11 +101,6 @@ export const checkUserProfile = async (
         .eq('id', userId)
         .maybeSingle()
 
-      console.log(`📊 Profile check result (attempt ${attempt}):`, {
-        profile,
-        error,
-      })
-
       if (error) {
         // If it's a "not found" or "no rows" error, that means no profile exists
         if (
@@ -117,7 +108,6 @@ export const checkUserProfile = async (
           error.message.includes('no rows') ||
           error.message.includes('not found')
         ) {
-          console.log('📝 No profile found (confirmed)')
           return false
         }
 
@@ -128,13 +118,11 @@ export const checkUserProfile = async (
             error.code === '401') &&
           attempt < maxRetries
         ) {
-          console.log(`⏳ Auth error on attempt ${attempt}, retrying...`)
           continue
         }
 
         // For other errors on final attempt, throw
         if (attempt === maxRetries) {
-          console.error('❌ Profile check failed after all retries:', error)
           throw error
         }
 
@@ -142,14 +130,8 @@ export const checkUserProfile = async (
       }
 
       // Success - profile found or confirmed not found
-      const hasProfile = !!profile
-      console.log(
-        `✅ Profile check complete: ${hasProfile ? 'found' : 'not found'}`
-      )
-      return hasProfile
+      return !!profile
     } catch (error) {
-      console.error(`❌ Profile check attempt ${attempt} failed:`, error)
-
       if (attempt === maxRetries) {
         throw error
       }

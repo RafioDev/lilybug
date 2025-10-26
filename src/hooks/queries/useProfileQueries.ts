@@ -15,11 +15,7 @@ export const useUserProfile = () => {
       const user = session?.user
 
       if (!user) {
-        return {
-          profile: null,
-          userEmail: '',
-          displayName: 'User',
-        }
+        throw new Error('No authenticated user')
       }
 
       const profile = await profileService.getProfile()
@@ -34,6 +30,14 @@ export const useUserProfile = () => {
       }
     },
     enabled: true,
+    retry: (failureCount, error) => {
+      // Retry if it's an auth error (session not ready yet)
+      if (error?.message === 'No authenticated user' && failureCount < 3) {
+        return true
+      }
+      return false
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000),
     // Cache for longer since profile data doesn't change often
     staleTime: 10 * 60 * 1000, // 10 minutes
   })
