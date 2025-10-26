@@ -1,7 +1,7 @@
 import React from 'react'
 import { Baby as BabyIcon, ChevronLeft } from 'lucide-react'
 import { dateUtils } from '../utils/dateUtils'
-import { useActiveBaby } from '../hooks/queries/useBabyQueries'
+import { useActiveBaby, useBabies } from '../hooks/queries/useBabyQueries'
 import { useUserProfile } from '../hooks/queries/useProfileQueries'
 
 import { UserDropdown } from './UserDropdown'
@@ -14,6 +14,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
   const { data: activeBaby, isLoading } = useActiveBaby()
+  const { data: babies = [], isLoading: babiesLoading } = useBabies()
   const { data: profileData, isLoading: profileLoading } = useUserProfile()
 
   const location = useLocation()
@@ -22,7 +23,7 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
   const isHomePage = location.pathname === '/'
 
   const renderBabyInfo = () => {
-    if (isLoading) {
+    if (isLoading || babiesLoading) {
       return (
         <div className='flex items-center gap-1.5 sm:gap-2'>
           <div className='h-3 w-3 animate-pulse rounded bg-gray-200 sm:h-4 sm:w-4 dark:bg-gray-600'></div>
@@ -43,7 +44,8 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
       )
     }
 
-    return (
+    const hasMultipleBabies = babies.length > 1
+    const babyInfoContent = (
       <div className='flex items-center gap-1.5 sm:gap-2'>
         <BabyIcon className='h-4 w-4 text-gray-600 sm:h-4 sm:w-4 dark:text-gray-400' />
         <div className='flex items-center gap-1 sm:gap-2'>
@@ -56,6 +58,21 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
         </div>
       </div>
     )
+
+    // If there are multiple babies, make it clickable
+    if (hasMultipleBabies) {
+      return (
+        <Link
+          to='/settings?tab=babies'
+          className='block cursor-pointer rounded-lg px-2 py-1 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700'
+          title='Switch baby or manage babies'
+        >
+          {babyInfoContent}
+        </Link>
+      )
+    }
+
+    return babyInfoContent
   }
 
   return (
