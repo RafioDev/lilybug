@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Outlet, Navigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { migrateBabyData } from '../utils/migrateBabyData'
+import { clearAuthStorage } from '../utils/authUtils'
 
 import { Header } from './Header'
 import { UnifiedActionFooter } from './UnifiedActionFooter'
@@ -25,9 +26,14 @@ export const AppLayout: React.FC = () => {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [isManualEntryModalOpen, setIsManualEntryModalOpen] = useState(false)
+  const [forceProfileLoading, setForceProfileLoading] = useState(true)
 
   // Use React Query for profile data
-  const { data: profileData, isLoading: profileLoading } = useUserProfile()
+  const {
+    data: profileData,
+    isLoading: profileLoading,
+    error: profileError,
+  } = useUserProfile()
   const { data: activeBaby } = useActiveBaby()
   const { data: entries = [] } = useEntries(50, activeBaby?.id) // Get recent entries to check for in-progress activities
   const updateEntryMutation = useUpdateEntry()
@@ -61,12 +67,28 @@ export const AppLayout: React.FC = () => {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      // Handle different auth events
+      if (event === 'SIGNED_OUT') {
+        setUser(null)
+        // Clear any cached data on sign out
+        clearAuthStorage()
+      } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        setUser(session?.user ?? null)
+      }
       setLoading(false)
     })
 
     return () => subscription.unsubscribe()
+  }, [])
+
+  // Add a minimum loading time to prevent race conditions with profile loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setForceProfileLoading(false)
+    }, 3000) // Give profile query 3 seconds to load
+
+    return () => clearTimeout(timer)
   }, [])
 
   // Run migration when profile is available
@@ -75,6 +97,12 @@ export const AppLayout: React.FC = () => {
       migrateBabyData.runMigrationIfNeeded().catch(console.error)
     }
   }, [profileData?.profile])
+
+  /////////////////////
+  useEffect(() => {
+    console.log(profileData)
+  }, [profileData])
+  /////////////////////
 
   // Handle tour state across route changes
   useEffect(() => {
@@ -85,7 +113,7 @@ export const AppLayout: React.FC = () => {
     }
   }, [location.pathname, isTourActive, endTour])
 
-  if (loading || profileLoading) {
+  if (loading || profileLoading || forceProfileLoading) {
     const loadingMessage = loading
       ? 'Authenticating...'
       : 'Loading your profile...'
@@ -97,6 +125,12 @@ export const AppLayout: React.FC = () => {
   }
 
   if (!profileData?.profile) {
+    // If there's a profile loading error, log it but don't redirect immediately
+    if (profileError) {
+      console.error('Profile loading error:', profileError)
+      // Only redirect to onboarding if it's clearly a "no profile" situation
+      // For other errors, show loading or try to continue
+    }
     return <Navigate to='/onboarding' replace />
   }
 

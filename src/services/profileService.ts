@@ -14,7 +14,18 @@ export const profileService = {
       .eq('id', user.id)
       .maybeSingle()
 
-    if (error) throw error
+    if (error) {
+      // If it's a "not found" error, return null (no profile exists)
+      if (
+        error.code === 'PGRST116' ||
+        error.message.includes('no rows') ||
+        error.message.includes('not found')
+      ) {
+        return null
+      }
+      // For other errors, throw to let the caller handle
+      throw error
+    }
     return data
   },
 

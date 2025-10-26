@@ -7,6 +7,7 @@ import { PageErrorBoundary } from '../components/PageErrorBoundary'
 import { SectionErrorBoundary } from '../components/SectionErrorBoundary'
 import { supabase } from '../lib/supabase'
 import { LilybugLogo } from '@/components/LilybugLogo'
+import { clearAuthStorage } from '../utils/authUtils'
 
 const AuthContent: React.FC = () => {
   const navigate = useNavigate()
@@ -19,7 +20,6 @@ const AuthContent: React.FC = () => {
   const [signUpEmail, setSignUpEmail] = useState('')
 
   useEffect(() => {
-    // Check if user is already authenticated
     const checkAuth = async () => {
       const {
         data: { session },
@@ -30,12 +30,13 @@ const AuthContent: React.FC = () => {
     }
     checkAuth()
 
-    // Listen for auth state changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session?.user) {
         navigate('/', { replace: true })
+      } else if (event === 'SIGNED_OUT') {
+        clearAuthStorage()
       }
     })
 
@@ -54,8 +55,6 @@ const AuthContent: React.FC = () => {
           password,
         })
         if (error) throw error
-
-        // Show email verification screen
         setSignUpEmail(email)
         setShowEmailVerification(true)
       } else {
@@ -64,6 +63,7 @@ const AuthContent: React.FC = () => {
           password,
         })
         if (error) throw error
+        navigate('/', { replace: true })
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')

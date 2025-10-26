@@ -3,6 +3,7 @@ import { User, LogOut, Settings } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { ComponentErrorBoundary } from './ComponentErrorBoundary'
 import { supabase } from '../lib/supabase'
+import { forceAuthReset } from '../utils/authUtils'
 
 interface UserDropdownProps {
   userName: string
@@ -34,8 +35,19 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
   }, [])
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    setIsOpen(false)
+    try {
+      // Sign out from Supabase and clear all sessions
+      await supabase.auth.signOut({ scope: 'global' })
+
+      // Force a complete auth reset
+      forceAuthReset()
+    } catch (error) {
+      console.error('Sign out error:', error)
+      // Force reset on error to clear everything
+      forceAuthReset()
+    } finally {
+      setIsOpen(false)
+    }
   }
 
   const handleSettings = () => {
