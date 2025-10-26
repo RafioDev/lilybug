@@ -31,7 +31,6 @@ export const chatActionService = {
 
         // Use AI result if confidence is high enough
         if (aiResult.confidence > 0.6) {
-          console.log('AI parsing:', aiResult.reasoning)
           return aiResult.action
         }
       } catch (error) {

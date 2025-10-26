@@ -46,7 +46,6 @@ export const migrateBabyData = {
         .single()
 
       if (profileError || !profile || !profile.baby_name) {
-        console.log('No old baby data found to migrate')
         return false
       }
 

@@ -83,8 +83,6 @@ class ErrorHandler {
     if (process.env.NODE_ENV === 'development') {
       console.group('🚨 Error Captured')
       console.error('Error:', error)
-      console.log('Context:', context)
-      console.log('Report:', errorReport)
       console.groupEnd()
     }
   }

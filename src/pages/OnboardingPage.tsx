@@ -80,17 +80,13 @@ const OnboardingContent: React.FC = () => {
     setSubmitError('')
 
     try {
-      console.log('Starting onboarding submission...')
-
       // Create the profile
-      console.log('Creating profile...')
       await createOrUpdateProfileMutation.mutateAsync({
         parent1_name: formData.parent1Name,
         parent2_name: formData.parent2Name || null,
       })
 
       // Create all babies
-      console.log('Creating babies...', babies.length)
       for (let i = 0; i < babies.length; i++) {
         const baby = babies[i]
         await createBabyMutation.mutateAsync({
@@ -100,14 +96,10 @@ const OnboardingContent: React.FC = () => {
         })
       }
 
-      console.log('Onboarding data saved successfully')
-
       // Ensure there's an active baby (in case something went wrong)
-      console.log('Ensuring active baby is set...')
       await babyService.ensureActiveBaby()
 
       // Manually invalidate all relevant queries to ensure fresh data
-      console.log('Invalidating queries...')
       await queryClient.invalidateQueries({ queryKey: queryKeys.profile })
       await queryClient.invalidateQueries({ queryKey: queryKeys.babies })
       await queryClient.invalidateQueries({ queryKey: queryKeys.activeBaby })
@@ -116,14 +108,11 @@ const OnboardingContent: React.FC = () => {
       updatePreferences({ hasCompletedInitialTour: false })
 
       // Navigate to main app with a delay to allow React Query to refetch profile data
-      console.log('Navigating to main app...')
       setTimeout(() => {
-        console.log('Navigation delay complete, navigating now...')
         navigate('/', { replace: true })
 
         // Start the tour after navigation completes
         setTimeout(() => {
-          console.log('Starting tour after successful onboarding')
           startTour()
         }, 1000)
       }, 500)

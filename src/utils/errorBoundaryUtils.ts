@@ -86,10 +86,6 @@ export class ErrorBoundaryReporter {
         `🚨 Error Boundary [${report.level}${report.componentName ? ` - ${report.componentName}` : ''}]`
       )
       console.error('Error:', report.error.message)
-      console.log('Stack:', report.error.stack)
-      console.log('Component Stack:', report.errorInfo.componentStack)
-      console.log('Context:', report.context)
-      console.log('Retry Count:', report.retryCount)
       console.groupEnd()
     } else if (isProduction) {
       // Minimal logging in production

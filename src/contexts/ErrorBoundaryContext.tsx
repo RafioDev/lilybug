@@ -135,8 +135,6 @@ export const ErrorBoundaryProvider: React.FC<ErrorBoundaryProviderProps> = ({
       if (process.env.NODE_ENV === 'development') {
         console.group(`🚨 Error Boundary Report [${context.level}]`)
         console.error('Error:', error)
-        console.log('Context:', context)
-        console.log('Report ID:', errorId)
         console.groupEnd()
       }
 

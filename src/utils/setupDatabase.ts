@@ -19,9 +19,6 @@ export const setupDatabase = {
           .limit(1)
 
         if (sqlError) {
-          console.log(
-            'Cannot execute SQL directly, table creation needs to be done manually'
-          )
           return false
         }
       }

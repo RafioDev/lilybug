@@ -154,55 +154,43 @@ const InsightsTab: React.FC<{
         <Card className='p-2'>
           <div className='grid grid-cols-3 gap-2'>
             {/* Feeding Stats */}
-            <button
-              className='group min-h-[44px] rounded-lg p-2 text-center transition-all duration-200 hover:bg-blue-50 active:scale-95 dark:hover:bg-blue-900/20'
-              onClick={() => {
-                // Future: Could open detailed feeding stats modal
-                console.log('Feeding stats tapped')
-              }}
+            <div
+              className='group min-h-[44px] rounded-lg p-2 text-center'
               aria-label={`${todayStats.feedings} feedings today. Tap for details.`}
             >
-              <div className='text-lg font-bold text-blue-600 group-hover:text-blue-700 sm:text-xl'>
+              <div className='text-lg font-bold text-blue-600 sm:text-xl'>
                 {todayStats.feedings}
               </div>
               <div className='text-xs font-medium text-gray-600 dark:text-gray-300'>
                 Feedings
               </div>
-            </button>
+            </div>
 
             {/* Sleep Stats */}
-            <button
-              className='group min-h-[44px] rounded-lg p-2 text-center transition-all duration-200 hover:bg-cyan-50 active:scale-95 dark:hover:bg-cyan-900/20'
-              onClick={() => {
-                // Future: Could open detailed sleep stats modal
-                console.log('Sleep stats tapped')
-              }}
+            <div
+              className='group min-h-[44px] rounded-lg p-2 text-center'
               aria-label={`${todayStats.sleepHours.toFixed(1)} hours of sleep today. Tap for details.`}
             >
-              <div className='text-lg font-bold text-cyan-600 group-hover:text-cyan-700 sm:text-xl'>
+              <div className='text-lg font-bold text-cyan-600 sm:text-xl'>
                 {`${todayStats.sleepHours.toFixed(1)}h`}
               </div>
               <div className='text-xs font-medium text-gray-600 dark:text-gray-300'>
                 Sleep
               </div>
-            </button>
+            </div>
 
             {/* Diaper Stats */}
-            <button
-              className='group min-h-[44px] rounded-lg p-2 text-center transition-all duration-200 hover:bg-emerald-50 active:scale-95 dark:hover:bg-emerald-900/20'
-              onClick={() => {
-                // Future: Could open detailed diaper stats modal
-                console.log('Diaper stats tapped')
-              }}
+            <div
+              className='group min-h-[44px] rounded-lg p-2 text-center'
               aria-label={`${todayStats.diapers} diaper changes today. Tap for details.`}
             >
-              <div className='text-lg font-bold text-emerald-600 group-hover:text-emerald-700 sm:text-xl'>
+              <div className='text-lg font-bold text-emerald-600 sm:text-xl'>
                 {todayStats.diapers}
               </div>
               <div className='text-xs font-medium text-gray-600 dark:text-gray-300'>
                 Diapers
               </div>
-            </button>
+            </div>
           </div>
         </Card>
       </SectionErrorBoundary>

@@ -81,7 +81,6 @@ export const AppLayout: React.FC = () => {
     // If tour is active and user navigates to settings page, end the tour
     // This prevents tour from showing on wrong pages, but allows it on main activities page
     if (isTourActive && location.pathname === '/settings') {
-      console.log('Ending tour due to navigation to settings')
       endTour()
     }
   }, [location.pathname, isTourActive, endTour])
@@ -98,18 +97,8 @@ export const AppLayout: React.FC = () => {
   }
 
   if (!profileData?.profile) {
-    console.log('AppLayout: No profile found, redirecting to onboarding', {
-      profileData,
-      profileLoading,
-      user: user?.id,
-    })
     return <Navigate to='/onboarding' replace />
   }
-
-  console.log('AppLayout: Profile found, rendering app', {
-    profile: profileData.profile,
-    user: user?.id,
-  })
 
   return (
     <ComponentErrorBoundary
