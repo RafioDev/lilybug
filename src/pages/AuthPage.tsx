@@ -261,6 +261,24 @@ const AuthContent: React.FC = () => {
           </Card>
         </SectionErrorBoundary>
 
+        <div className='mt-4'>
+          <Card className='border-2 border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20'>
+            <div className='text-center'>
+              <p className='mb-2 text-sm font-medium text-amber-900 dark:text-amber-100'>
+                Want to try before signing up?
+              </p>
+              <Button
+                type='button'
+                variant='outline'
+                onClick={() => navigate('/demo')}
+                className='border-amber-300 text-amber-700 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-300 dark:hover:bg-amber-900/40'
+              >
+                View Demo
+              </Button>
+            </div>
+          </Card>
+        </div>
+
         <div className='mt-6 text-center'>
           <p className='mx-auto max-w-sm text-xs leading-relaxed text-gray-500 dark:text-gray-400'>
             By continuing, you agree to our Terms of Service and Privacy Policy.

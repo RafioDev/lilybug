@@ -4,6 +4,9 @@ import { OnboardingPage } from './pages/OnboardingPage'
 import { Activities } from './pages/Activities'
 import { SettingsPage } from './pages/SettingsPage'
 import { AppLayout } from './components/AppLayout'
+import { DemoLayout } from './components/DemoLayout'
+import { DemoActivities } from './pages/DemoActivities'
+import { DemoLanding } from './pages/DemoLanding'
 
 export const router = createBrowserRouter([
   {
@@ -13,6 +16,28 @@ export const router = createBrowserRouter([
   {
     path: '/onboarding',
     element: <OnboardingPage />,
+  },
+  {
+    path: '/demo-welcome',
+    element: <DemoLanding />,
+  },
+  {
+    path: '/demo',
+    element: <DemoLayout />,
+    children: [
+      {
+        index: true,
+        element: <DemoActivities />,
+      },
+      {
+        path: 'activities',
+        element: <Navigate to='/demo' replace />,
+      },
+      {
+        path: 'settings',
+        element: <SettingsPage />,
+      },
+    ],
   },
   {
     path: '/',
