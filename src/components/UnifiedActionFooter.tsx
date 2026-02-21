@@ -207,7 +207,7 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({
                 size='lg'
                 fullWidth
                 leftIcon={<CheckCircle className='h-5 w-5' />}
-                className='h-14 border-2 border-orange-500 bg-white font-medium text-orange-600 shadow-lg transition-all duration-200 hover:scale-105 hover:border-orange-600 hover:bg-orange-50 hover:shadow-xl dark:border-orange-400 dark:bg-gray-800 dark:text-orange-400 dark:hover:border-orange-300 dark:hover:bg-orange-950'
+                className='h-14 border-2 border-violet-500 bg-white font-medium text-violet-600 shadow-lg transition-all duration-200 hover:scale-105 hover:border-violet-600 hover:bg-violet-50 hover:shadow-xl dark:border-violet-400 dark:bg-gray-800 dark:text-violet-400 dark:hover:border-violet-300 dark:hover:bg-violet-950'
                 aria-label={`Complete ${inProgressActivity.entry_type} activity`}
               >
                 Mark Complete
@@ -318,7 +318,7 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
               variant='outline'
               size='lg'
               leftIcon={<CheckCircle className='h-5 w-5' />}
-              className='h-14 border-2 border-orange-500 bg-white px-6 text-orange-600 shadow-lg transition-all duration-200 hover:scale-105 hover:border-orange-600 hover:bg-orange-50 hover:shadow-xl focus:scale-105 focus:shadow-xl dark:border-orange-400 dark:bg-gray-800 dark:text-orange-400 dark:hover:border-orange-300 dark:hover:bg-orange-950'
+              className='h-14 border-2 border-violet-500 bg-white px-6 text-violet-600 shadow-lg transition-all duration-200 hover:scale-105 hover:border-violet-600 hover:bg-violet-50 hover:shadow-xl focus:scale-105 focus:shadow-xl dark:border-violet-400 dark:bg-gray-800 dark:text-violet-400 dark:hover:border-violet-300 dark:hover:bg-violet-950'
               aria-label={`Complete ${inProgressActivity.entry_type} activity`}
             >
               Mark Complete
