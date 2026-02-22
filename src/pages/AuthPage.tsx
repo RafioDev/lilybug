@@ -262,16 +262,16 @@ const AuthContent: React.FC = () => {
         </SectionErrorBoundary>
 
         <div className='mt-4'>
-          <Card className='border-2 border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20'>
+          <Card className='border-2 border-violet-200 bg-violet-50 dark:border-violet-800 dark:bg-violet-900/20'>
             <div className='text-center'>
-              <p className='mb-2 text-sm font-medium text-amber-900 dark:text-amber-100'>
+              <p className='mb-2 text-sm font-medium text-violet-900 dark:text-violet-100'>
                 Want to try before signing up?
               </p>
               <Button
                 type='button'
                 variant='outline'
                 onClick={() => navigate('/demo')}
-                className='border-amber-300 text-amber-700 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-300 dark:hover:bg-amber-900/40'
+                className='border-violet-300 text-violet-700 hover:bg-violet-100 dark:border-violet-700 dark:text-violet-300 dark:hover:bg-violet-900/40'
               >
                 View Demo
               </Button>
